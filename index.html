@@ -317,7 +317,7 @@
   <div class="relative flex items-center justify-center mb-6">
     <div class="absolute w-28 h-28 rounded-full bg-sky-500/20 loader-ring-pulse"></div>
     <div class="w-24 h-24 rounded-full border-4 border-slate-800 border-t-sky-400 border-r-emerald-400 loader-spin-border"></div>
-    <div class="absolute w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
+    <div id="startup-loader-logo-box" class="absolute w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30 overflow-hidden">
       <i data-lucide="layers" class="w-8 h-8 text-white"></i>
     </div>
   </div>
@@ -606,6 +606,7 @@ const firebaseConfig = {
       accentColor: 'sky',
       themeMode: 'light',
       logoDataUrl: '',
+      loadingLogoDataUrl: '',
       sidebarBannerDataUrl: ''
     } : {
       title: 'Portal Microsite Proyek',
@@ -615,6 +616,7 @@ const firebaseConfig = {
       accentColor: 'sky',
       themeMode: 'light',
       logoDataUrl: '',
+      loadingLogoDataUrl: '',
       sidebarBannerDataUrl: ''
     },
     // Maksimal 2 data dummy HANYA saat IS_PREVIEW === true
@@ -756,23 +758,42 @@ const firebaseConfig = {
     showChangeSuccessPopup('Logo Direset!', 'Logo dikembalikan ke ikon bawaan.');
   };
 
-  window.handleSidebarBannerUpload = async (input) => {
+  window.handleLoadingLogoUpload = async (input) => {
     const file = input.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 640);
-      document.getElementById('set-sidebar-banner-data').value = dataUrl;
-      state.portalSettings.sidebarBannerDataUrl = dataUrl;
-      const preview = document.getElementById('set-sidebar-banner-preview');
+      const dataUrl = await compressImageFile(file, 320);
+      document.getElementById('set-loading-logo-data').value = dataUrl;
+      state.portalSettings.loadingLogoDataUrl = dataUrl;
+      const preview = document.getElementById('set-loading-logo-preview');
       if (preview) {
-        preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
+        preview.innerHTML = `<img src="${dataUrl}" alt="Logo Loading Preview" class="w-full h-full object-cover" />`;
       }
-      renderSidebarBanner();
+      const loaderBox = document.getElementById('startup-loader-logo-box');
+      if (loaderBox) {
+        loaderBox.innerHTML = `<img src="${dataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
+      }
       refreshIconsFast();
-      showChangeSuccessPopup('Banner Terpasang!', 'Foto banner portrait berhasil ditampilkan secara live.');
+      showChangeSuccessPopup('Logo Loading Diubah!', 'Logo layar loading awal berhasil diperbarui secara live.');
     } catch (err) {
-      showToast('Gagal memproses foto banner.', 'error');
+      showToast('Gagal memproses logo loading.', 'error');
     }
+  };
+
+  window.clearLoadingLogo = () => {
+    const hiddenInput = document.getElementById('set-loading-logo-data');
+    if (hiddenInput) hiddenInput.value = '';
+    state.portalSettings.loadingLogoDataUrl = '';
+    const preview = document.getElementById('set-loading-logo-preview');
+    if (preview) {
+      preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
+    }
+    const loaderBox = document.getElementById('startup-loader-logo-box');
+    if (loaderBox) {
+      loaderBox.innerHTML = `<i data-lucide="layers" class="w-8 h-8 text-white"></i>`;
+    }
+    refreshIconsFast();
+    showChangeSuccessPopup('Logo Loading Direset!', 'Logo loading dikembalikan ke ikon bawaan.');
   };
 
   window.clearSidebarBanner = () => {
@@ -1200,8 +1221,13 @@ const firebaseConfig = {
           accentColor: d.accentColor || 'sky',
           themeMode: d.themeMode || 'light',
           logoDataUrl: d.logoDataUrl || '',
+          loadingLogoDataUrl: d.loadingLogoDataUrl || '',
           sidebarBannerDataUrl: d.sidebarBannerDataUrl || ''
         };
+        const loaderBox = document.getElementById('startup-loader-logo-box');
+        if (loaderBox && d.loadingLogoDataUrl) {
+          loaderBox.innerHTML = `<img src="${d.loadingLogoDataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
+        }
         applyThemeAndColors();
         renderAll();
       }
@@ -1319,23 +1345,24 @@ const firebaseConfig = {
     const footerText = document.getElementById('set-footer').value.trim();
     const runningText = document.getElementById('set-running-text')?.value.trim() || 'Selamat datang di Portal Microsite Proyek!';
     const logoDataUrl = document.getElementById('set-logo-data').value || '';
+    const loadingLogoDataUrl = document.getElementById('set-loading-logo-data')?.value || '';
     const sidebarBannerDataUrl = document.getElementById('set-sidebar-banner-data')?.value || '';
     const accentColor = state.portalSettings.accentColor || 'sky';
     const themeMode = state.portalSettings.themeMode || 'light';
 
     if (IS_PREVIEW) {
-      state.portalSettings = { title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, sidebarBannerDataUrl };
+      state.portalSettings = { title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl };
       applyThemeAndColors();
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, teks berjalan, banner & tema portal telah diperbarui.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo loading, teks berjalan, banner & tema portal telah diperbarui.');
       return;
     }
 
     try {
       await setDoc(doc(db, 'portal_settings', 'main'), {
-        title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
+        title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
       }, { merge: true });
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, teks berjalan, banner & tema portal berhasil disimpan.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo loading, teks berjalan, banner & tema portal berhasil disimpan.');
     } catch (err) {
       showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
     }
@@ -2086,6 +2113,10 @@ const firebaseConfig = {
       ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo Portal" class="w-full h-full object-cover" />`
       : `<i data-lucide="layers" class="w-7 h-7"></i>`;
 
+    const loadingLogoPreview = state.portalSettings.loadingLogoDataUrl
+      ? `<img src="${state.portalSettings.loadingLogoDataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`
+      : `<i data-lucide="layers" class="w-7 h-7"></i>`;
+
     const sidebarBannerPreview = state.portalSettings.sidebarBannerDataUrl
       ? `<img src="${state.portalSettings.sidebarBannerDataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`
       : `
@@ -2121,6 +2152,30 @@ const firebaseConfig = {
                   </button>
                 </div>
                 <p class="text-[11px] theme-text-muted">Format PNG/JPG/WebP otomatis dioptimalkan agar ringan dimuat.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Upload Logo Layar Loading Awal dari Desktop -->
+          <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
+            <label class="block text-xs font-bold theme-text-primary mb-2">Logo Layar Loading Awal Masuk Web (Live Upload Desktop)</label>
+            <div class="flex flex-wrap items-center gap-4">
+              <div id="set-loading-logo-preview" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center overflow-hidden shadow-md shrink-0">
+                ${loadingLogoPreview}
+              </div>
+              <div class="space-y-2">
+                <input type="hidden" id="set-loading-logo-data" value="${state.portalSettings.loadingLogoDataUrl || ''}" />
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="image-plus" class="w-3.5 h-3.5"></i>
+                    <span>Upload Logo Loading dari Komputer</span>
+                    <input type="file" accept="image/*" onchange="handleLoadingLogoUpload(this)" class="hidden" />
+                  </label>
+                  <button type="button" onclick="clearLoadingLogo()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                    Reset Default
+                  </button>
+                </div>
+                <p class="text-[11px] theme-text-muted">Logo ini akan tampil di tengah lingkaran animasi loading saat pengunjung membuka web.</p>
               </div>
             </div>
           </div>
@@ -2226,9 +2281,14 @@ const firebaseConfig = {
     const percentEl = document.getElementById('startup-loader-percent');
     const barEl = document.getElementById('startup-loader-bar');
     const statusEl = document.getElementById('startup-loader-status');
+    const loaderBox = document.getElementById('startup-loader-logo-box');
     const appWrapper = document.getElementById('app-wrapper');
 
     if (!overlay || !appWrapper) return;
+
+    if (loaderBox && state.portalSettings.loadingLogoDataUrl) {
+      loaderBox.innerHTML = `<img src="${state.portalSettings.loadingLogoDataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
+    }
 
     // Blokir seluruh keyboard & klik selama proses loading berlangsung
     const blockInputHandler = (e) => {
