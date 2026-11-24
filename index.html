@@ -283,11 +283,65 @@
     .animate-success-bounce {
       animation: successPopBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
+
+    /* Initial Fullscreen Startup Loader Overlay */
+    @keyframes loaderPulseRing {
+      0% { transform: scale(0.92); opacity: 0.7; }
+      50% { transform: scale(1.08); opacity: 0.25; }
+      100% { transform: scale(0.92); opacity: 0.7; }
+    }
+    @keyframes loaderSpinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loader-ring-pulse {
+      animation: loaderPulseRing 1.8s ease-in-out infinite;
+    }
+    .loader-spin-border {
+      animation: loaderSpinSlow 1.2s linear infinite;
+    }
+    #startup-loader-overlay {
+      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s ease;
+    }
+    #startup-loader-overlay.loader-done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
-<div id="app-wrapper" data-theme="light" data-accent="sky">
+<!-- INITIAL STARTUP LOADING OVERLAY (MENGHITUNG & MENGUNCI INPUT SAMPAI SIAP) -->
+<div id="startup-loader-overlay" role="dialog" aria-modal="true" aria-label="Memuat Portal" class="fixed inset-0 z-[200000] bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-white select-none cursor-wait">
+  <div class="relative flex items-center justify-center mb-6">
+    <div class="absolute w-28 h-28 rounded-full bg-sky-500/20 loader-ring-pulse"></div>
+    <div class="w-24 h-24 rounded-full border-4 border-slate-800 border-t-sky-400 border-r-emerald-400 loader-spin-border"></div>
+    <div class="absolute w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
+      <i data-lucide="layers" class="w-8 h-8 text-white"></i>
+    </div>
+  </div>
+
+  <div class="text-center max-w-xs w-full space-y-3">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-bold tracking-wider uppercase text-sky-300">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+      <span id="startup-loader-status">Menyiapkan Portal...</span>
+    </div>
+
+    <div class="text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums bg-gradient-to-r from-white via-sky-200 to-emerald-200 bg-clip-text text-transparent">
+      <span id="startup-loader-percent">0</span>%
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full h-2.5 bg-slate-800/90 rounded-full overflow-hidden p-0.5 border border-white/10">
+      <div id="startup-loader-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 transition-all duration-150 ease-out" style="width: 0%;"></div>
+    </div>
+
+    <p class="text-xs text-slate-400 font-medium">Mohon tunggu sebentar, sistem sedang memuat seluruh proyek...</p>
+  </div>
+</div>
+
+<div id="app-wrapper" data-theme="light" data-accent="sky" inert>
   <!-- Banner Mode Preview (Hanya tampil jika IS_PREVIEW === true) -->
   <div id="preview-banner" class="hidden bg-amber-500/95 text-white text-xs font-semibold px-4 py-2 text-center shadow-sm backdrop-blur-md sticky top-0 z-50 flex items-center justify-center gap-2">
     <i data-lucide="flask-conical" class="w-4 h-4"></i>
@@ -329,31 +383,34 @@
   </nav>
 
   <!-- MAIN CONTENT AREA -->
-  <main id="main-content-area" class="flex-1 px-4 sm:px-8 pt-6 max-w-6xl w-full mx-auto">
+  <main id="main-content-area" class="flex-1 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-full">
     <!-- Teks Berjalan Lurus dari Kanan ke Kiri (Responsif Desktop & HP) -->
-    <div class="glass-panel rounded-2xl px-3.5 py-2 mb-4 flex items-center gap-2.5 overflow-hidden border border-slate-200/70">
-      <span class="px-2.5 py-0.5 rounded-lg btn-accent text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1 shadow-sm">
-        <i data-lucide="megaphone" class="w-3 h-3"></i>
+    <div class="glass-panel rounded-2xl px-4 py-2.5 mb-4 flex items-center gap-3 overflow-hidden border border-slate-200/70">
+      <span class="px-3 py-1 rounded-lg btn-accent text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-sm">
+        <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
         <span>Info</span>
       </span>
       <div class="marquee-track flex-1">
-        <span id="dashboard-running-text" class="marquee-text text-xs sm:text-sm font-semibold theme-text-primary">
+        <span id="dashboard-running-text" class="marquee-text text-sm sm:text-base font-bold theme-text-primary">
           Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!
         </span>
       </div>
     </div>
 
     <!-- Mobile Top Bar -->
-    <div class="md:hidden flex items-center justify-between mb-5 glass-panel px-4 py-3 rounded-2xl">
-      <div class="flex items-center gap-2.5">
-        <div id="mobile-brand-icon" class="w-9 h-9 rounded-xl btn-accent flex items-center justify-center text-white overflow-hidden shrink-0">
-          <i data-lucide="layers" class="w-5 h-5"></i>
+    <div class="md:hidden flex items-center justify-between mb-4 glass-panel px-4 py-3.5 rounded-3xl">
+      <div class="flex items-center gap-3 min-w-0">
+        <div id="mobile-brand-icon" class="w-11 h-11 rounded-2xl btn-accent flex items-center justify-center text-white overflow-hidden shrink-0 shadow-sm">
+          <i data-lucide="layers" class="w-6 h-6"></i>
         </div>
-        <span id="mobile-portal-title" class="font-bold text-sm theme-text-primary truncate max-w-[155px]">Portal Proyek</span>
+        <div class="min-w-0">
+          <span id="mobile-portal-title" class="font-extrabold text-base theme-text-primary truncate block">Portal Proyek</span>
+          <span class="text-xs theme-text-muted font-medium block">Microsite Hub 1-Klik</span>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="toggleVisitorTheme()" title="Ganti Tema Terang/Gelap" class="p-2 rounded-xl theme-surface-subtle theme-text-primary border border-slate-200/60 hover:opacity-80 transition">
-          <i id="mobile-theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="toggleVisitorTheme()" title="Ganti Tema Terang/Gelap" class="p-2.5 rounded-2xl theme-surface-subtle theme-text-primary border border-slate-200/60 hover:opacity-80 transition">
+          <i id="mobile-theme-icon" data-lucide="moon" class="w-5 h-5"></i>
         </button>
         <div id="mobile-top-auth">
           <!-- Tombol login/logout mobile -->
@@ -361,8 +418,11 @@
       </div>
     </div>
 
+    <!-- Mobile Banner Portrait Slot (Agar Banner Dashboard Tetap Terlihat di HP) -->
+    <div id="mobile-banner-slot" class="md:hidden mb-4"></div>
+
     <!-- Dynamic View Container -->
-    <div id="view-container"></div>
+    <div id="view-container" class="w-full"></div>
   </main>
 
   <!-- MODAL LOGIN HYBRID (ADMIN & USER) -->
@@ -1107,8 +1167,18 @@ const firebaseConfig = {
   // =========================================================================
   // 6. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
   // =========================================================================
+  let initialFirebaseReady = IS_PREVIEW;
+
   function initProductionRealtimeSync() {
     if (IS_PREVIEW || !db) return;
+
+    let settingsLoaded = false;
+    let projectsLoaded = false;
+    const checkAllReady = () => {
+      if (settingsLoaded && projectsLoaded) {
+        initialFirebaseReady = true;
+      }
+    };
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -1135,6 +1205,11 @@ const firebaseConfig = {
         applyThemeAndColors();
         renderAll();
       }
+      settingsLoaded = true;
+      checkAllReady();
+    }, () => {
+      settingsLoaded = true;
+      checkAllReady();
     });
 
     const qProjects = query(collection(db, 'projects'), orderBy('order', 'asc'));
@@ -1144,6 +1219,11 @@ const firebaseConfig = {
         ...docItem.data()
       }));
       renderAll();
+      projectsLoaded = true;
+      checkAllReady();
+    }, () => {
+      projectsLoaded = true;
+      checkAllReady();
     });
 
     onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -1403,11 +1483,11 @@ const firebaseConfig = {
     mobileNav.innerHTML = menus.map(m => {
       const active = state.activeMenu === m.id;
       return `
-        <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition ${
-          active ? 'badge-accent font-bold' : 'theme-text-muted'
+        <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 ${
+          active ? 'badge-accent font-extrabold' : 'theme-text-muted font-semibold'
         }">
-          <i data-lucide="${m.icon}" class="w-5 h-5 mb-0.5"></i>
-          <span class="text-[10px]">${m.label.split(' ')[0]}</span>
+          <i data-lucide="${m.icon}" class="w-5 h-5 mb-1"></i>
+          <span class="text-xs leading-tight text-center">${m.label.split(' ')[0]}</span>
         </button>
       `;
     }).join('');
@@ -1431,8 +1511,8 @@ const firebaseConfig = {
         </button>
       `;
       mobileTopAuth.innerHTML = `
-        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold">
-          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-red-500/10 text-red-500 text-xs sm:text-sm font-bold">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Keluar</span>
         </button>
       `;
@@ -1444,8 +1524,8 @@ const firebaseConfig = {
         </button>
       `;
       mobileTopAuth.innerHTML = `
-        <button onclick="openLoginModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl btn-accent text-white text-xs font-bold shadow-sm">
-          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+        <button onclick="openLoginModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold shadow-sm">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Masuk</span>
         </button>
       `;
@@ -1470,35 +1550,68 @@ const firebaseConfig = {
 
   function renderSidebarBanner() {
     const slot = document.getElementById('sidebar-banner-slot');
-    if (!slot) return;
+    const mobileSlot = document.getElementById('mobile-banner-slot');
     const bannerUrl = state.portalSettings.sidebarBannerDataUrl;
     const isAdmin = state.currentUser?.role === 'admin';
 
-    if (bannerUrl) {
-      slot.innerHTML = `
-        <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[3/4] w-full group">
-          <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none"></div>
-          ${isAdmin ? `
-            <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 hover:bg-slate-900 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-md">
-              <i data-lucide="camera" class="w-3 h-3"></i>
-              <span>Ganti</span>
-            </button>
-          ` : ''}
-        </div>
-      `;
-    } else if (isAdmin) {
-      slot.innerHTML = `
-        <button type="button" onclick="setMenu('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex flex-col items-center justify-center p-4 text-center transition group">
-          <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2.5 group-hover:scale-110 transition">
-            <i data-lucide="image-plus" class="w-5 h-5"></i>
+    if (slot) {
+      if (bannerUrl) {
+        slot.innerHTML = `
+          <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[3/4] w-full group">
+            <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none"></div>
+            ${isAdmin ? `
+              <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 hover:bg-slate-900 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-md">
+                <i data-lucide="camera" class="w-3 h-3"></i>
+                <span>Ganti</span>
+              </button>
+            ` : ''}
           </div>
-          <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
-          <span class="text-[10px] theme-text-muted mt-1 leading-relaxed">Klik untuk upload foto ukuran besar di bawah menu Beranda Portal</span>
-        </button>
-      `;
-    } else {
-      slot.innerHTML = '';
+        `;
+      } else if (isAdmin) {
+        slot.innerHTML = `
+          <button type="button" onclick="setMenu('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex flex-col items-center justify-center p-4 text-center transition group">
+            <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2.5 group-hover:scale-110 transition">
+              <i data-lucide="image-plus" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
+            <span class="text-[10px] theme-text-muted mt-1 leading-relaxed">Klik untuk upload foto ukuran besar di bawah menu Beranda Portal</span>
+          </button>
+        `;
+      } else {
+        slot.innerHTML = '';
+      }
+    }
+
+    if (mobileSlot) {
+      if (bannerUrl) {
+        mobileSlot.innerHTML = `
+          <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[4/3] sm:aspect-[16/9] w-full group">
+            <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-75 pointer-events-none"></div>
+            ${isAdmin ? `
+              <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-md">
+                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                <span>Ganti Banner</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      } else if (isAdmin) {
+        mobileSlot.innerHTML = `
+          <button type="button" onclick="setMenu('settings')" class="w-full rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex items-center gap-3.5 p-4 text-left transition">
+            <div class="w-12 h-12 rounded-2xl badge-accent flex items-center justify-center shrink-0">
+              <i data-lucide="image-plus" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="text-sm font-extrabold theme-text-primary block">Pasang Banner Portal</span>
+              <span class="text-xs theme-text-muted mt-0.5 block">Tap untuk upload foto banner dari perangkat</span>
+            </div>
+          </button>
+        `;
+      } else {
+        mobileSlot.innerHTML = '';
+      }
     }
   }
 
@@ -1506,35 +1619,35 @@ const firebaseConfig = {
     const isPrivate = p.visibility === 'private';
     const mediaHtml = p.logoDataUrl
       ? `<img src="${p.logoDataUrl}" alt="${p.title}" class="w-full h-full object-cover" />`
-      : `<span class="text-2xl">${p.icon || '🚀'}</span>`;
+      : `<span class="text-3xl sm:text-3xl">${p.icon || '🚀'}</span>`;
 
     return `
-      <div class="glass-card rounded-3xl p-5 flex flex-col justify-between relative group">
+      <div class="glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between relative group">
         <div>
-          <div class="flex items-start justify-between gap-3 mb-3.5">
-            <div class="w-12 h-12 rounded-2xl theme-surface-subtle border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl theme-surface-subtle border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
               ${mediaHtml}
             </div>
             <div class="flex items-center gap-1.5 flex-wrap justify-end">
-              ${p.isPinned ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 flex items-center gap-1"><i data-lucide="pin" class="w-3 h-3"></i>Pinned</span>` : ''}
-              ${isPrivate ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3"></i>Privat</span>` : ''}
+              ${p.isPinned ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 flex items-center gap-1"><i data-lucide="pin" class="w-3.5 h-3.5"></i>Pinned</span>` : ''}
+              ${isPrivate ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-400 flex items-center gap-1"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Privat</span>` : ''}
             </div>
           </div>
 
-          <h3 class="font-extrabold text-sm sm:text-base theme-text-primary leading-snug mb-1.5 group-hover:text-sky-500 transition-colors">
+          <h3 class="font-extrabold text-base sm:text-lg theme-text-primary leading-snug mb-2 group-hover:text-sky-500 transition-colors">
             ${p.title}
           </h3>
-          <p class="text-xs theme-text-secondary leading-relaxed line-clamp-2 mb-4">
+          <p class="text-sm theme-text-secondary leading-relaxed line-clamp-3 mb-5">
             ${p.description}
           </p>
         </div>
 
-        <div class="pt-3 border-t border-slate-200/50 flex items-center gap-2">
-          <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3.5 rounded-2xl btn-accent text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+        <div class="pt-3.5 border-t border-slate-200/50 flex items-center gap-2.5">
+          <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 rounded-2xl btn-accent text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
             <span>Buka Proyek</span>
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <i data-lucide="external-link" class="w-4 h-4"></i>
           </a>
-          <button type="button" onclick="copyProjectLink('${p.url}')" title="Salin Tautan" class="p-2.5 rounded-2xl theme-surface-subtle border border-slate-200/60 theme-text-secondary hover:theme-text-primary transition">
+          <button type="button" onclick="copyProjectLink('${p.url}')" title="Salin Tautan" class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 theme-text-secondary hover:theme-text-primary transition">
             <i data-lucide="copy" class="w-4 h-4"></i>
           </button>
         </div>
@@ -1603,26 +1716,26 @@ const firebaseConfig = {
       return `
         <div class="glass-panel rounded-3xl overflow-hidden border border-slate-200/70">
           <!-- Baris Judul Kategori Dropdown -->
-          <button type="button" onclick="toggleCategoryGroup('${catKey}')" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl badge-accent flex items-center justify-center shrink-0">
-                <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+          <button type="button" onclick="toggleCategoryGroup('${catKey}')" class="w-full px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center shrink-0">
+                <i data-lucide="folder-kanban" class="w-5 h-5"></i>
               </div>
               <div>
-                <h2 class="text-sm sm:text-base font-extrabold theme-text-primary">${catName}</h2>
-                <p class="text-[11px] theme-text-muted">${items.length} proyek tersedia</p>
+                <h2 class="text-base sm:text-lg font-extrabold theme-text-primary">${catName}</h2>
+                <p class="text-xs sm:text-sm theme-text-muted">${items.length} proyek tersedia</p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold px-2.5 py-1 rounded-full badge-accent">${items.length}</span>
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full badge-accent">${items.length}</span>
               <i id="cat-group-chevron-${catKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200"></i>
             </div>
           </button>
 
           <!-- Isi Kategori -->
-          <div id="cat-group-body-${catKey}" class="px-5 pb-5 pt-2 space-y-5 border-t border-slate-200/50">
+          <div id="cat-group-body-${catKey}" class="px-5 sm:px-6 pb-6 pt-3 space-y-5 border-t border-slate-200/50">
             ${directItems.length > 0 ? `
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                 ${directItems.map(p => renderProjectCard(p)).join('')}
               </div>
             ` : ''}
@@ -1631,16 +1744,16 @@ const firebaseConfig = {
               const subKey = `${catKey}-sub-${subIdx}`;
               return `
                 <div class="rounded-2xl theme-surface-subtle border border-slate-200/60 overflow-hidden">
-                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
+                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}')" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
                     <div class="flex items-center gap-2.5">
-                      <span class="w-2 h-2 rounded-full btn-accent"></span>
-                      <span class="text-xs sm:text-sm font-bold theme-text-primary">${subName}</span>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-accent">${subItems.length}</span>
+                      <span class="w-2.5 h-2.5 rounded-full btn-accent"></span>
+                      <span class="text-sm sm:text-base font-extrabold theme-text-primary">${subName}</span>
+                      <span class="text-xs font-bold px-2.5 py-0.5 rounded-full badge-accent">${subItems.length}</span>
                     </div>
-                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-4 h-4 theme-text-secondary transition-transform duration-200"></i>
+                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200"></i>
                   </button>
-                  <div id="subcat-group-body-${subKey}" class="p-4 pt-2 border-t border-slate-200/40">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div id="subcat-group-body-${subKey}" class="p-4 sm:p-5 pt-2.5 border-t border-slate-200/40">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                       ${subItems.map(p => renderProjectCard(p)).join('')}
                     </div>
                   </div>
@@ -1668,50 +1781,50 @@ const firebaseConfig = {
     requestAnimationFrame(() => renderPortalProjectsGrid());
 
     return `
-      <div class="space-y-6">
+      <div class="space-y-6 w-full">
         <!-- Hero Header Portal -->
-        <section class="glass-panel rounded-3xl p-6 sm:p-7 relative overflow-hidden">
+        <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-start sm:items-center gap-4">
-              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
                 ${heroLogo}
               </div>
               <div>
-                <h1 class="text-xl sm:text-2xl font-extrabold theme-text-primary tracking-tight">${state.portalSettings.title}</h1>
-                <p class="text-xs sm:text-sm theme-text-secondary mt-1 max-w-2xl leading-relaxed">${state.portalSettings.subtitle}</p>
+                <h1 class="text-xl sm:text-3xl font-extrabold theme-text-primary tracking-tight leading-snug">${state.portalSettings.title}</h1>
+                <p class="text-sm sm:text-base theme-text-secondary mt-1.5 max-w-3xl leading-relaxed">${state.portalSettings.subtitle}</p>
               </div>
             </div>
 
             <!-- Saklar Tema Terang / Gelap untuk Pengunjung -->
             <div class="hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl theme-surface-subtle border border-slate-200/60 self-start sm:self-center shrink-0">
-              <button type="button" onclick="selectThemeMode('light')" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
-                <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+              <button type="button" onclick="selectThemeMode('light')" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="sun" class="w-4 h-4"></i>
                 <span>Terang</span>
               </button>
-              <button type="button" onclick="selectThemeMode('dark')" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${mode === 'dark' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
-                <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+              <button type="button" onclick="selectThemeMode('dark')" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition ${mode === 'dark' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="moon" class="w-4 h-4"></i>
                 <span>Gelap</span>
               </button>
             </div>
           </div>
 
           <!-- Search & Category Filter Bar -->
-          <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <div class="mt-6 flex flex-col lg:flex-row gap-3">
             <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-4 top-1/2 -translate-y-1/2"></i>
               <input
                 type="text"
                 value="${state.searchQuery}"
                 oninput="handleSearchInput(this.value)"
                 placeholder="Cari nama proyek, kategori, atau sub-judul..."
-                class="w-full pl-10 pr-4 py-2.5 text-sm rounded-2xl theme-input border focus:outline-none focus:border-sky-500"
+                class="w-full pl-11 pr-4 py-3 text-sm sm:text-base rounded-2xl theme-input border focus:outline-none focus:border-sky-500"
               />
             </div>
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
               ${categories.map(cat => {
                 const isActive = state.selectedCategory === cat;
                 return `
-                  <button type="button" onclick="setCategory('${cat.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition ${
+                  <button type="button" onclick="setCategory('${cat.replace(/'/g, "\\'")}')" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition ${
                     isActive
                       ? 'btn-accent text-white shadow-sm'
                       : 'theme-surface-subtle theme-text-secondary border border-slate-200/60 hover:theme-text-primary'
@@ -1725,10 +1838,10 @@ const firebaseConfig = {
         </section>
 
         <!-- Daftar Kategori & Proyek (Dropdown Modern) -->
-        <section id="portal-projects-grid" class="space-y-4"></section>
+        <section id="portal-projects-grid" class="space-y-5"></section>
 
         <!-- Footer -->
-        <footer class="text-center py-4 text-xs theme-text-muted">
+        <footer class="text-center py-5 text-xs sm:text-sm theme-text-muted">
           ${state.portalSettings.footerText}
         </footer>
       </div>
@@ -2105,14 +2218,73 @@ const firebaseConfig = {
     refreshIconsFast();
   }
 
+  // =========================================================================
+  // 9. ANIMASI LOADING AWAL & PENGHITUNG PERSENTASE (BLOKIR INPUT HINGGA SIAP)
+  // =========================================================================
+  function runStartupLoader() {
+    const overlay = document.getElementById('startup-loader-overlay');
+    const percentEl = document.getElementById('startup-loader-percent');
+    const barEl = document.getElementById('startup-loader-bar');
+    const statusEl = document.getElementById('startup-loader-status');
+    const appWrapper = document.getElementById('app-wrapper');
+
+    if (!overlay || !appWrapper) return;
+
+    // Blokir seluruh keyboard & klik selama proses loading berlangsung
+    const blockInputHandler = (e) => {
+      if (!overlay.classList.contains('loader-done')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener('keydown', blockInputHandler, true);
+    window.addEventListener('keypress', blockInputHandler, true);
+    window.addEventListener('keyup', blockInputHandler, true);
+
+    let progress = 0;
+    const startTime = Date.now();
+
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const isDataReady = initialFirebaseReady || elapsed > 3500;
+
+      if (!isDataReady && progress >= 88) {
+        progress = Math.min(96, progress + 1);
+      } else {
+        const step = progress < 40 ? 9 : (progress < 80 ? 7 : 6);
+        progress = Math.min(100, progress + step);
+      }
+
+      if (percentEl) percentEl.textContent = String(progress);
+      if (barEl) barEl.style.width = `${progress}%`;
+
+      if (statusEl) {
+        if (progress < 35) statusEl.textContent = 'Memuat Antarmuka...';
+        else if (progress < 75) statusEl.textContent = 'Menyinkronkan Proyek...';
+        else if (progress < 100) statusEl.textContent = 'Hampir Siap...';
+        else statusEl.textContent = 'Portal Siap Digunakan!';
+      }
+
+      if (progress >= 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          overlay.classList.add('loader-done');
+          appWrapper.removeAttribute('inert');
+          window.removeEventListener('keydown', blockInputHandler, true);
+          window.removeEventListener('keypress', blockInputHandler, true);
+          window.removeEventListener('keyup', blockInputHandler, true);
+          setTimeout(() => overlay.remove(), 500);
+        }, 220);
+      }
+    }, 55);
+  }
+
   // Jalankan Aplikasi
   if (!IS_PREVIEW) {
     initProductionRealtimeSync();
   }
   renderAll();
+  runStartupLoader();
 </script>
 </body>
 </html>
-```
-
-Fungsi `renderPortalView()` dan `renderPortalProjectsGrid()` sudah dipulihkan sepenuhnya pada `index.html`, sehingga tampilan halaman utama beserta kategori dropdown, sub-kategori, pemilih tema Terang/Gelap pengunjung, dan slot banner portrait di bawah menu Beranda Portal kembali tampil normal.
