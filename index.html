@@ -1995,7 +1995,7 @@ const firebaseConfig = {
                     <button onclick="editProject('${p.id}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1">
                       <i data-lucide="edit-3" class="w-3.5 h-3.5"></i><span>Edit</span>
                     </button>
-                    ${state.currentUser?.role === 'admin' ? `
+                    ${state.currentUser ? `
                       <button onclick="deleteProject('${p.id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                       </button>
