@@ -3,107 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Project Hub — Portal Microsite Proyek</title>
-  
-  <!-- PWA Manifest via Data URI -->
-  <link rel="manifest" href='data:application/manifest+json;utf-8,{"name":"Project Hub Portal","short_name":"ProjectHub","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#0f172a","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f172a%27/><text x=%2750%27 y=%2766%27 font-size=%2750%27 text-anchor=%27middle%27 fill=%27white%27>🚀</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
   <meta name="theme-color" content="#0f172a" />
+  <title>Portal Microsite Proyek — Hub Aplikasi Satu Klik</title>
+
+  <!-- PWA Manifest via Data URI -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Portal%20Microsite%20Proyek%22%2C%22short_name%22%3A%22Microsite%20Hub%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2724%27%20fill%3D%27%25230f172a%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2766%27%20font-size%3D%2752%27%20text-anchor%3D%27middle%27%20fill%3D%27white%27%20font-family%3D%27sans-serif%27%253E%25E2%259A%25A1%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
   <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              900: '#0f172a',
-            }
-          }
-        }
-      }
-    }
-  </script>
 
-  <!-- Lucide Icons -->
+  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* CSS Variables untuk Tema Dinamis dengan Kontras Terjamin */
     :root {
-      --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
-      --glass-bg: rgba(255, 255, 255, 0.85);
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --bg-gradient: linear-gradient(135deg, rgba(248, 250, 252, 0.88) 0%, rgba(241, 245, 249, 0.84) 50%, rgba(224, 242, 254, 0.85) 100%);
+      --glass-bg: rgba(255, 255, 255, 0.86);
       --glass-card-bg: rgba(255, 255, 255, 0.92);
-      --glass-border: rgba(226, 232, 240, 0.9);
+      --glass-border: rgba(226, 232, 240, 0.95);
       --text-primary: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
-      --surface-subtle: #f1f5f9;
+      --surface-subtle: rgba(241, 245, 249, 0.9);
       --input-bg: #ffffff;
       --accent-color: #0ea5e9;
       --accent-hover: #0284c7;
       --accent-soft: rgba(14, 165, 233, 0.12);
+      --batik-stroke: rgba(15, 23, 42, 0.055);
     }
 
     [data-theme="dark"] {
-      --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 55%, #1e293b 100%);
+      --bg-gradient: linear-gradient(135deg, rgba(9, 13, 22, 0.92) 0%, rgba(15, 23, 42, 0.88) 55%, rgba(30, 41, 59, 0.88) 100%);
       --glass-bg: rgba(15, 23, 42, 0.86);
-      --glass-card-bg: rgba(30, 41, 59, 0.88);
+      --glass-card-bg: rgba(30, 41, 59, 0.9);
       --glass-border: rgba(51, 65, 85, 0.85);
       --text-primary: #f8fafc;
       --text-secondary: #cbd5e1;
       --text-muted: #94a3b8;
       --surface-subtle: rgba(30, 41, 59, 0.9);
       --input-bg: #0f172a;
+      --batik-stroke: rgba(248, 250, 252, 0.06);
     }
 
     [data-accent="emerald"] { --accent-color: #10b981; --accent-hover: #059669; --accent-soft: rgba(16, 185, 129, 0.14); }
-    [data-accent="violet"] { --accent-color: #8b5cf6; --accent-hover: #7c3aed; --accent-soft: rgba(139, 92, 246, 0.14); }
-    [data-accent="rose"] { --accent-color: #f43f5e; --accent-hover: #e11d48; --accent-soft: rgba(244, 63, 94, 0.14); }
-    [data-accent="amber"] { --accent-color: #f59e0b; --accent-hover: #d97706; --accent-soft: rgba(245, 158, 11, 0.14); }
-    [data-accent="slate"] { --accent-color: #334155; --accent-hover: #1e293b; --accent-soft: rgba(51, 65, 85, 0.14); }
+    [data-accent="indigo"]  { --accent-color: #6366f1; --accent-hover: #4f46e5; --accent-soft: rgba(99, 102, 241, 0.14); }
+    [data-accent="rose"]    { --accent-color: #f43f5e; --accent-hover: #e11d48; --accent-soft: rgba(244, 63, 94, 0.14); }
+    [data-accent="amber"]   { --accent-color: #f59e0b; --accent-hover: #d97706; --accent-soft: rgba(245, 158, 11, 0.15); }
+    [data-accent="slate"]   { --accent-color: #334155; --accent-hover: #1e293b; --accent-soft: rgba(51, 65, 85, 0.14); }
 
-    /* Full-page override untuk Blogger / CMS agar bersih tanpa elemen bawaan */
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 100% !important;
-      min-height: 100vh !important;
-      background-color: #f8fafc !important;
-      color: var(--text-primary);
-      overflow-x: hidden;
-      -webkit-tap-highlight-color: transparent;
+    * {
+      box-sizing: border-box;
+      font-family: var(--font-sans);
     }
 
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      background-color: #f8fafc;
+    }
+
+    /* Full-Page Overlay menutupi elemen bawaan Blogger jika disematkan di Blogger */
     #app-wrapper {
       position: fixed;
       inset: 0;
       z-index: 99999;
-      background: var(--bg-gradient);
+      background-color: #f1f5f9;
+      background-image:
+        var(--bg-gradient),
+        radial-gradient(circle at 30px 30px, transparent 21px, var(--batik-stroke) 22px, var(--batik-stroke) 24px, transparent 25px),
+        radial-gradient(circle at 0px 0px, transparent 21px, var(--batik-stroke) 22px, var(--batik-stroke) 24px, transparent 25px),
+        radial-gradient(circle at 60px 0px, transparent 21px, var(--batik-stroke) 22px, var(--batik-stroke) 24px, transparent 25px),
+        radial-gradient(circle at 0px 60px, transparent 21px, var(--batik-stroke) 22px, var(--batik-stroke) 24px, transparent 25px),
+        radial-gradient(circle at 60px 60px, transparent 21px, var(--batik-stroke) 22px, var(--batik-stroke) 24px, transparent 25px),
+        radial-gradient(circle at 30px 30px, var(--batik-stroke) 3px, transparent 4px);
+      background-size: 100% 100%, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px;
       color: var(--text-primary);
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      transition: background 0.35s ease, color 0.25s ease;
+      transition: color 0.2s ease;
+    }
+
+    [data-theme="dark"] #app-wrapper {
+      background-color: #090d16;
     }
 
     /* Glassmorphism & Adaptive Contrast Utilities */
     .glass-panel {
       background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
       color: var(--text-primary);
@@ -111,422 +109,313 @@
 
     .glass-card {
       background: var(--glass-card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--glass-border);
       color: var(--text-primary);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+      will-change: transform;
     }
 
     .glass-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: var(--accent-color);
-      box-shadow: 0 20px 35px -12px var(--accent-soft);
+      box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.14);
     }
 
-    /* Dark mode text & input contrast safeguards */
-    [data-theme="dark"] .text-slate-900,
-    [data-theme="dark"] .text-slate-800 { color: #f8fafc !important; }
-    [data-theme="dark"] .text-slate-700,
-    [data-theme="dark"] .text-slate-600 { color: #cbd5e1 !important; }
-    [data-theme="dark"] .text-slate-500,
-    [data-theme="dark"] .text-slate-400 { color: #94a3b8 !important; }
-    [data-theme="dark"] .bg-white,
-    [data-theme="dark"] .bg-white\/80,
-    [data-theme="dark"] .bg-white\/70 { background-color: rgba(30, 41, 59, 0.92) !important; }
-    [data-theme="dark"] .bg-slate-100,
-    [data-theme="dark"] .bg-slate-100\/80,
-    [data-theme="dark"] .bg-slate-50\/70 { background-color: rgba(15, 23, 42, 0.75) !important; }
-    [data-theme="dark"] .border-slate-200,
-    [data-theme="dark"] .border-slate-200\/80,
-    [data-theme="dark"] .border-slate-200\/70,
-    [data-theme="dark"] .border-slate-100 { border-color: rgba(51, 65, 85, 0.85) !important; }
-    [data-theme="dark"] input,
-    [data-theme="dark"] textarea,
-    [data-theme="dark"] select {
-      background-color: #0f172a !important;
-      color: #f8fafc !important;
-      border-color: #334155 !important;
+    .theme-text-primary { color: var(--text-primary); }
+    .theme-text-secondary { color: var(--text-secondary); }
+    .theme-text-muted { color: var(--text-muted); }
+    .theme-surface-subtle { background-color: var(--surface-subtle); }
+    .theme-input {
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+      border-color: var(--glass-border);
     }
+    .theme-input::placeholder { color: var(--text-muted); }
 
     .btn-accent {
-      background-color: var(--accent-color) !important;
-      color: #ffffff !important;
+      background-color: var(--accent-color);
+      color: #ffffff;
     }
     .btn-accent:hover {
-      background-color: var(--accent-hover) !important;
+      background-color: var(--accent-hover);
     }
     .badge-accent {
-      background-color: var(--accent-soft) !important;
-      color: var(--accent-color) !important;
-      border-color: var(--accent-color) !important;
-    }
-    .text-accent {
-      color: var(--accent-color) !important;
+      background-color: var(--accent-soft);
+      color: var(--accent-color);
     }
 
     /* Pop-up Modal Spring Animation */
     @keyframes popSpring {
-      0% { opacity: 0; transform: scale(0.86) translateY(14px); }
-      70% { opacity: 1; transform: scale(1.02) translateY(-2px); }
+      0% { opacity: 0; transform: scale(0.92) translateY(8px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .animate-pop-spring {
-      animation: popSpring 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation: popSpring 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Modern Sidebar Portrait Banner Effect */
+    @keyframes bannerShimmer {
+      0% { transform: translateX(-120%) skewX(-18deg); }
+      100% { transform: translateX(220%) skewX(-18deg); }
+    }
+    .sidebar-portrait-banner {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.3s ease;
+    }
+    .sidebar-portrait-banner:hover {
+      transform: translateY(-3px) scale(1.015);
+      box-shadow: 0 18px 34px -10px rgba(14, 165, 233, 0.28);
+      border-color: var(--accent-color);
+    }
+    .sidebar-portrait-banner img {
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sidebar-portrait-banner:hover img {
+      transform: scale(1.06);
+    }
+    .sidebar-portrait-banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      transform: translateX(-120%) skewX(-18deg);
+      pointer-events: none;
+    }
+    .sidebar-portrait-banner:hover::after {
+      animation: bannerShimmer 0.95s ease forwards;
+    }
+
+    /* Fast Response Touch & Click */
+    button, a, label {
+      touch-action: manipulation;
     }
 
     /* Responsive Layout: Desktop Sidebar vs Mobile Bottom Nav */
-    .desktop-sidebar {
-      display: flex;
-      flex-direction: column;
-      width: 270px;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 40;
-    }
-
-    .main-content-area {
-      margin-left: 270px;
-      flex: 1;
-      padding: 2rem 2.5rem 4rem 2.5rem;
-    }
-
-    .mobile-bottom-nav {
-      display: none;
-    }
-
-    @media (max-width: 900px) {
-      .desktop-sidebar {
+    @media (min-width: 768px) {
+      #desktop-sidebar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 270px;
+        z-index: 40;
+      }
+      #mobile-bottom-nav {
         display: none !important;
       }
-      .main-content-area {
-        margin-left: 0 !important;
-        padding: 1.25rem 1rem 6.5rem 1rem;
+      #main-content-area {
+        margin-left: 270px;
+        padding-bottom: 2.5rem;
       }
-      .mobile-bottom-nav {
-        display: flex !important;
+    }
+
+    @media (max-width: 767px) {
+      #desktop-sidebar {
+        display: none !important;
+      }
+      #mobile-bottom-nav {
+        display: flex;
         position: fixed;
         bottom: 14px;
         left: 14px;
         right: 14px;
         z-index: 50;
-        border-radius: 22px;
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-        box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.35);
-        padding: 8px 12px;
-        justify-content: space-around;
-        align-items: center;
+      }
+      #main-content-area {
+        margin-left: 0;
+        padding-bottom: 6.5rem;
       }
     }
 
     /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     /* Toast Notification Animation */
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(16px); }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .toast-enter {
-      animation: slideUp 0.25s ease-out forwards;
+      animation: slideUpFade 0.25s ease forwards;
     }
   </style>
 </head>
 <body>
 
-<div id="app-wrapper">
-  <!-- Banner Mode Preview (Hanya muncul jika IS_PREVIEW === true) -->
-  <div id="preview-banner" class="hidden bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center shadow-sm z-50 flex items-center justify-center gap-2">
+<div id="app-wrapper" data-theme="light" data-accent="sky">
+  <!-- Banner Mode Preview (Hanya tampil jika IS_PREVIEW === true) -->
+  <div id="preview-banner" class="hidden bg-amber-500/95 text-white text-xs font-semibold px-4 py-2 text-center shadow-sm backdrop-blur-md sticky top-0 z-50 flex items-center justify-center gap-2">
     <i data-lucide="flask-conical" class="w-4 h-4"></i>
-    <span>MODE PREVIEW AKTIF — Data berjalan di memori lokal (tidak terhubung ke Firebase). Ubah <code>IS_PREVIEW = false</code> saat deploy.</span>
+    <span>MODE PREVIEW AKTIF — Menggunakan data simulasi di memori. Ubah <code>IS_PREVIEW = false</code> saat deploy ke Firebase.</span>
   </div>
 
   <!-- DESKTOP FIXED SIDEBAR -->
-  <aside class="desktop-sidebar glass-panel border-r border-slate-200/80 p-6 justify-between">
-    <div>
-      <!-- Logo & Brand -->
-      <div class="flex items-center gap-3 mb-8 px-1">
-        <div id="sidebar-logo-box" class="w-11 h-11 rounded-2xl btn-accent flex items-center justify-center text-xl shadow-md overflow-hidden shrink-0">
-          🚀
+  <aside id="desktop-sidebar" class="glass-panel flex-col justify-between p-5 border-r border-slate-200/70 overflow-y-auto">
+    <div class="flex flex-col min-h-0">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 px-2 py-3 mb-5 shrink-0">
+        <div id="sidebar-brand-icon" class="w-11 h-11 rounded-2xl btn-accent flex items-center justify-center text-white shadow-md overflow-hidden shrink-0">
+          <i data-lucide="layers" class="w-6 h-6"></i>
         </div>
         <div class="overflow-hidden">
-          <h2 id="sidebar-brand-title" class="font-bold text-slate-900 text-base leading-tight truncate">Project Hub</h2>
-          <span class="text-xs text-slate-500 font-medium">Microsite Directory</span>
+          <h2 id="sidebar-portal-title" class="font-bold text-sm theme-text-primary truncate">Portal Proyek</h2>
+          <p class="text-[11px] theme-text-muted font-medium">Microsite Hub 1-Klik</p>
         </div>
       </div>
 
       <!-- Navigation Links -->
-      <nav class="space-y-1.5" id="desktop-nav-list">
-        <!-- Diisi dinamis oleh JS -->
+      <nav id="sidebar-nav-links" class="space-y-1.5 shrink-0">
+        <!-- Diisi secara dinamis oleh JS -->
       </nav>
+
+      <!-- Banner Foto Portrait Modern di Bawah Menu Beranda Portal -->
+      <div id="sidebar-banner-slot" class="mt-4"></div>
     </div>
 
     <!-- User / Auth Status Card -->
-    <div class="pt-4 border-t border-slate-200/80">
-      <div id="sidebar-auth-box" class="p-3.5 rounded-2xl bg-slate-100/80 border border-slate-200/60">
-        <!-- Diisi dinamis oleh JS -->
-      </div>
+    <div id="sidebar-auth-box" class="pt-4 mt-4 border-t border-slate-200/60 shrink-0">
+      <!-- Diisi secara dinamis oleh JS -->
     </div>
   </aside>
 
-  <!-- MOBILE FLOATING BOTTOM NAVIGATION -->
-  <nav class="mobile-bottom-nav" id="mobile-nav-list">
-    <!-- Diisi dinamis oleh JS -->
+  <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR -->
+  <nav id="mobile-bottom-nav" class="glass-panel rounded-2xl px-3 py-2 shadow-xl border border-slate-200/80 justify-around items-center">
+    <!-- Diisi secara dinamis oleh JS -->
   </nav>
 
   <!-- MAIN CONTENT AREA -->
-  <main class="main-content-area max-w-6xl w-full mx-auto">
-    <!-- Top Mobile Header (Hanya terlihat di layar kecil) -->
-    <div class="flex md:hidden items-center justify-between mb-5 bg-white/80 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/70 shadow-sm">
+  <main id="main-content-area" class="flex-1 px-4 sm:px-8 pt-6 max-w-6xl w-full mx-auto">
+    <!-- Mobile Top Bar -->
+    <div class="md:hidden flex items-center justify-between mb-5 glass-panel px-4 py-3 rounded-2xl">
       <div class="flex items-center gap-2.5">
-        <div id="mobile-logo-box" class="w-9 h-9 rounded-xl btn-accent flex items-center justify-center text-base overflow-hidden shrink-0">🚀</div>
-        <div>
-          <div id="mobile-brand-title" class="font-bold text-sm text-slate-900">Project Hub</div>
-          <div id="mobile-role-badge" class="text-[11px] text-slate-500">Pengunjung Publik</div>
+        <div id="mobile-brand-icon" class="w-9 h-9 rounded-xl btn-accent flex items-center justify-center text-white overflow-hidden shrink-0">
+          <i data-lucide="layers" class="w-5 h-5"></i>
         </div>
+        <span id="mobile-portal-title" class="font-bold text-sm theme-text-primary truncate max-w-[155px]">Portal Proyek</span>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="toggleVisitorTheme()" title="Ganti Tema Terang/Gelap" class="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+        <button onclick="toggleVisitorTheme()" title="Ganti Tema Terang/Gelap" class="p-2 rounded-xl theme-surface-subtle theme-text-primary border border-slate-200/60 hover:opacity-80 transition">
           <i id="mobile-theme-icon" data-lucide="moon" class="w-4 h-4"></i>
         </button>
-        <div id="mobile-top-action"></div>
+        <div id="mobile-top-auth">
+          <!-- Tombol login/logout mobile -->
+        </div>
       </div>
     </div>
 
-    <!-- DYNAMIC VIEW CONTAINER -->
+    <!-- Dynamic View Container -->
     <div id="view-container"></div>
-
-    <!-- Footer -->
-    <footer class="mt-14 pt-6 border-t border-slate-200/70 text-center text-xs text-slate-400">
-      <p id="portal-footer-text">© 2026 Project Hub Microsite. Semua proyek dalam satu klik.</p>
-    </footer>
   </main>
-</div>
 
-<!-- MODAL LOGIN HYBRID (ADMIN & USER) -->
-<div id="login-modal" class="hidden fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="animate-pop-spring bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
-    <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition">
-      <i data-lucide="x" class="w-5 h-5"></i>
-    </button>
-
-    <div class="text-center mb-6">
-      <div class="w-12 h-12 rounded-2xl btn-accent flex items-center justify-center mx-auto mb-3 shadow-md">
-        <i data-lucide="shield-check" class="w-6 h-6"></i>
-      </div>
-      <h3 class="text-xl font-bold text-slate-900">Masuk ke Portal</h3>
-      <p class="text-xs text-slate-500 mt-1">Pilih peran akses Anda untuk mengelola atau membuka proyek privat</p>
-    </div>
-
-    <!-- Tab Selector: Admin vs User -->
-    <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-2xl mb-5">
-      <button type="button" id="tab-btn-admin" onclick="switchLoginTab('admin')" class="py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition">
-        Admin (Firebase Auth)
+  <!-- MODAL LOGIN HYBRID (ADMIN & USER) -->
+  <div id="login-modal" class="hidden fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative animate-pop-spring text-slate-900">
+      <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
       </button>
-      <button type="button" id="tab-btn-user" onclick="switchLoginTab('user')" class="py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition">
-        User / Kontributor
-      </button>
-    </div>
 
-    <!-- Info Demo Login (HANYA MUNCUL JIKA IS_PREVIEW === true) -->
-    <div id="demo-login-hint" class="hidden mb-4 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
-      <!-- Diisi oleh JS saat IS_PREVIEW === true -->
-    </div>
-
-    <!-- Form Login Admin -->
-    <form id="form-login-admin" onsubmit="handleAdminLogin(event)" class="space-y-4">
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Admin</label>
-        <input type="email" id="admin-email" required placeholder="admin@domain.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
-        <input type="password" id="admin-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-      </div>
-      <button type="submit" id="btn-submit-admin" class="w-full py-3 rounded-xl btn-accent font-semibold text-sm shadow-md transition flex items-center justify-center gap-2">
-        <span>Masuk sebagai Admin</span>
-        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-      </button>
-    </form>
-
-    <!-- Form Login User/Kontributor -->
-    <form id="form-login-user" onsubmit="handleUserLogin(event)" class="hidden space-y-4">
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Username / ID User</label>
-        <input type="text" id="user-username" required placeholder="Masukkan ID / Username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
-        <input type="password" id="user-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-      </div>
-      <button type="submit" id="btn-submit-user" class="w-full py-3 rounded-xl btn-accent font-semibold text-sm shadow-md transition flex items-center justify-center gap-2">
-        <span>Masuk sebagai User</span>
-        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-      </button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL TAMBAH / EDIT PROYEK -->
-<div id="project-modal" class="hidden fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="animate-pop-spring bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
-    <button onclick="closeProjectModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition">
-      <i data-lucide="x" class="w-5 h-5"></i>
-    </button>
-
-    <h3 id="project-modal-title" class="text-lg font-bold text-slate-900 mb-1">Tambah Proyek Baru</h3>
-    <p class="text-xs text-slate-500 mb-5">Tautan proyek akan tampil sebagai kartu siap klik di halaman microsite.</p>
-
-    <form id="form-project" onsubmit="handleSaveProject(event)" class="space-y-4">
-      <input type="hidden" id="proj-id" />
-      <input type="hidden" id="proj-image" />
-      
-      <!-- Live Upload Gambar Logo Proyek dari Desktop -->
-      <div class="p-3.5 rounded-2xl bg-slate-100/80 border border-slate-200/70 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div id="proj-image-preview" class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-2xl overflow-hidden shrink-0">
-            🚀
-          </div>
-          <div>
-            <div class="text-xs font-bold text-slate-800">Logo / Gambar Proyek (Opsional)</div>
-            <div class="text-[11px] text-slate-500">Upload langsung dari komputer/HP atau gunakan emoji</div>
-          </div>
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 rounded-2xl btn-accent text-white flex items-center justify-center mx-auto mb-3 shadow-md">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
         </div>
-        <div class="flex items-center gap-1.5">
-          <label class="cursor-pointer px-3 py-2 rounded-xl btn-accent text-[11px] font-semibold shadow-sm transition flex items-center gap-1.5">
-            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-            <span>Upload</span>
-            <input type="file" accept="image/*" onchange="handleProjectImageUpload(event)" class="hidden" />
-          </label>
-          <button type="button" id="btn-clear-proj-img" onclick="clearProjectImage()" class="hidden p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs" title="Hapus Gambar">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
+        <h3 class="text-lg font-bold text-slate-900">Masuk ke Sistem Portal</h3>
+        <p class="text-xs text-slate-500 mt-1">Pilih peran akses Anda untuk mengelola atau membuka proyek privat</p>
       </div>
 
-      <div class="grid grid-cols-4 gap-3">
-        <div class="col-span-1">
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Emoji</label>
-          <input type="text" id="proj-icon" required maxlength="4" value="🌐" oninput="updateProjPreviewEmoji(this.value)" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-center text-lg focus:outline-none focus:border-brand-500" />
-        </div>
-        <div class="col-span-3">
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Proyek</label>
-          <input type="text" id="proj-title" required placeholder="Contoh: Sistem Absensi Digital" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
-        </div>
+      <!-- Tab Switcher Admin / User -->
+      <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl mb-5">
+        <button id="tab-btn-admin" onclick="switchLoginTab('admin')" class="py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition">
+          Admin (Firebase Auth)
+        </button>
+        <button id="tab-btn-user" onclick="switchLoginTab('user')" class="py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition">
+          User / Kontributor
+        </button>
       </div>
 
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">URL / Tautan Proyek</label>
-        <input type="url" id="proj-url" required placeholder="https://aplikasi-anda.web.app" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
-      </div>
+      <!-- Info Akun Demo (Hanya dirender jika IS_PREVIEW === true) -->
+      <div id="demo-login-hint" class="hidden mb-4 p-3 rounded-2xl bg-sky-50 border border-sky-100 text-[11px] text-sky-800 space-y-1"></div>
 
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Singkat</label>
-        <textarea id="proj-desc" rows="2" required placeholder="Jelaskan fungsi utama proyek ini dalam 1-2 kalimat..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500"></textarea>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
+      <!-- Form Login Admin -->
+      <form id="form-login-admin" onsubmit="handleAdminLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori</label>
-          <select id="proj-category" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-brand-500">
-            <option value="Aplikasi Web">Aplikasi Web</option>
-            <option value="Administrasi">Administrasi</option>
-            <option value="Pembelajaran">Pembelajaran</option>
-            <option value="Portofolio">Portofolio</option>
-            <option value="Lainnya">Lainnya</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Admin</label>
+          <input type="email" id="admin-email" required placeholder="admin@domain.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-sky-500 bg-white text-slate-900" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Visibilitas Akses</label>
-          <select id="proj-visibility" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-brand-500">
-            <option value="public">Publik (Semua Pengunjung)</option>
-            <option value="private">Privat (Khusus Login)</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+          <input type="password" id="admin-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-sky-500 bg-white text-slate-900" />
         </div>
-      </div>
+        <button type="submit" id="btn-submit-admin" class="w-full py-2.5 px-4 btn-accent font-semibold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+          <span>Masuk sebagai Admin</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
 
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">Sub-Judul / Sub-Kategori (Opsional — Ketik Sendiri)</label>
-        <input type="text" id="proj-sub-category" list="sub-category-suggestions" placeholder="Contoh: Kurikulum, Kesiswaan, Keuangan (kosongkan jika umum)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
-        <datalist id="sub-category-suggestions"></datalist>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 items-center pt-1">
+      <!-- Form Login User/Kontributor -->
+      <form id="form-login-user" onsubmit="handleUserLogin(event)" class="hidden space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Urutan Tampil</label>
-          <input type="number" id="proj-order" value="1" min="1" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">ID / Username</label>
+          <input type="text" id="user-username" required placeholder="Masukkan ID atau Username" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-sky-500 bg-white text-slate-900" />
         </div>
-        <div class="pt-4">
-          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" id="proj-pinned" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" />
-            <span class="text-xs font-semibold text-slate-700">Sematkan di Paling Atas</span>
-          </label>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+          <input type="password" id="user-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-sky-500 bg-white text-slate-900" />
         </div>
+        <button type="submit" id="btn-submit-user" class="w-full py-2.5 px-4 btn-accent font-semibold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+          <span>Masuk sebagai User</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI KUSTOM (LOGOUT & HAPUS) -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-[100001] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center animate-pop-spring text-slate-900">
+      <div id="confirm-modal-icon-wrap" class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="help-circle" class="w-6 h-6"></i>
       </div>
-
-      <div class="pt-3 flex justify-end gap-2">
-        <button type="button" onclick="closeProjectModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
-        <button type="submit" class="px-5 py-2.5 rounded-xl btn-accent text-xs font-semibold shadow-md transition">Simpan Proyek</button>
+      <h4 id="confirm-modal-title" class="text-base font-bold text-slate-900">Konfirmasi Tindakan</h4>
+      <p id="confirm-modal-text" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin?</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button id="confirm-modal-cancel" onclick="closeConfirmModal()" class="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Cancel</button>
+        <button id="confirm-modal-btn" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition shadow-sm">Ya</button>
       </div>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL KONFIRMASI (Hapus & Logout Ya / Cancel) -->
-<div id="confirm-modal" class="hidden fixed inset-0 z-[100001] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="animate-pop-spring bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center">
-    <div id="confirm-modal-icon-wrap" class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
-      <i data-lucide="trash-2" class="w-6 h-6"></i>
-    </div>
-    <h4 id="confirm-modal-title" class="text-base font-bold text-slate-900 mb-1">Konfirmasi</h4>
-    <p id="confirm-modal-text" class="text-xs text-slate-500 mb-5">Apakah Anda yakin ingin melanjutkan?</p>
-    <div class="flex gap-2 justify-center">
-      <button id="confirm-modal-cancel" onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">Cancel</button>
-      <button id="confirm-modal-btn" class="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700 shadow-sm transition">Ya</button>
     </div>
   </div>
-</div>
 
-<!-- POP-UP ANIMASI MODERN STATUS AUTH (LOGIN / LOGOUT FEEDBACK) -->
-<div id="auth-feedback-modal" class="hidden fixed inset-0 z-[100003] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="animate-pop-spring bg-white rounded-3xl max-w-sm w-full p-7 shadow-2xl border border-slate-100 text-center">
-    <div id="auth-feedback-icon" class="w-16 h-16 rounded-3xl btn-accent flex items-center justify-center mx-auto mb-4 shadow-lg">
-      <i data-lucide="sparkles" class="w-8 h-8"></i>
+  <!-- POP-UP ANIMASI MODERN LOGIN / LOGOUT FEEDBACK -->
+  <div id="auth-feedback-modal" class="hidden fixed inset-0 z-[100002] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-7 shadow-2xl border border-slate-100 text-center animate-pop-spring text-slate-900">
+      <div id="auth-feedback-icon" class="w-16 h-16 rounded-3xl btn-accent text-white flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+      </div>
+      <h3 id="auth-feedback-title" class="text-lg font-extrabold text-slate-900">Berhasil Masuk!</h3>
+      <p id="auth-feedback-desc" class="text-xs text-slate-500 mt-1.5 leading-relaxed">Selamat datang kembali di Portal Microsite Proyek.</p>
+      <div class="mt-5">
+        <button onclick="closeAuthFeedbackModal()" class="w-full py-2.5 px-4 rounded-xl btn-accent text-xs font-bold shadow-sm transition">Lanjutkan</button>
+      </div>
     </div>
-    <h3 id="auth-feedback-title" class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Masuk!</h3>
-    <p id="auth-feedback-desc" class="text-xs text-slate-500 leading-relaxed mb-5">Selamat datang kembali di dashboard pengelola.</p>
-    <button onclick="closeAuthFeedbackModal()" class="w-full py-2.5 rounded-xl btn-accent text-xs font-bold shadow-md transition">
-      Lanjutkan
-    </button>
   </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 z-[100003] flex flex-col gap-2 pointer-events-none"></div>
 </div>
 
-<!-- TOAST NOTIFICATION CONTAINER -->
-<div id="toast-container" class="fixed top-5 right-5 z-[100005] space-y-2 pointer-events-none"></div>
-
-<!-- FIREBASE & APPLICATION SCRIPT -->
+<!-- MAIN APPLICATION SCRIPT (ES MODULE) -->
 <script type="module">
-  // KONFIGURASI APLIKASI
+  // =========================================================================
+  // 1. SAKLAR DEPLOYMENT & KONFIGURASI FIREBASE (WAJIB DI ATAS)
+  // =========================================================================
   const IS_PREVIEW = false; // Ubah menjadi false SAAT DEPLOY / PUBLISH agar terhubung murni ke Firebase tanpa data dummy
 
-  // PASTE FIREBASE CONFIG ANDA DI SINI
 const firebaseConfig = {
   apiKey: "AIzaSyCI55eTi7a3sXzWWwcMNT5-9Di1Tka0ZI0",
   authDomain: "karyasaya-d9181.firebaseapp.com",
@@ -536,28 +425,24 @@ const firebaseConfig = {
   appId: "1:613199622105:web:40c3a1c62f6c18509173c8"
   };
 
-  // Import Firebase SDK v10
+  // =========================================================================
+  // 2. IMPORT FIREBASE SDK (VERSI MODULAR v10) & SERVICE WORKER PWA
+  // =========================================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { 
-    getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, 
-    query, where, onSnapshot, serverTimestamp 
+  import {
+    getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
+    onSnapshot, query, where, orderBy, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // =========================================================================
-  // 1. REGISTRASI SERVICE WORKER DINAMIS VIA BLOB (PWA 1 FILE)
-  // =========================================================================
-  if ('serviceWorker' in navigator) {
+  // Registrasi Service Worker Dinamis via Blob untuk PWA 1 File
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
     const swCode = `
-      const CACHE_NAME = 'project-hub-v1';
-      self.addEventListener('install', (e) => {
-        self.skipWaiting();
-      });
-      self.addEventListener('activate', (e) => {
-        e.waitUntil(clients.claim());
-      });
+      const CACHE_NAME = 'microsite-hub-v1';
+      self.addEventListener('install', (e) => self.skipWaiting());
+      self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
       self.addEventListener('fetch', (e) => {
-        e.respondWith(fetch(e.request).catch(() => new Response('Offline mode')));
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
       });
     `;
     const blob = new Blob([swCode], { type: 'application/javascript' });
@@ -565,85 +450,98 @@ const firebaseConfig = {
     navigator.serviceWorker.register(swUrl).catch(() => {});
   }
 
-  // =========================================================================
-  // 2. STATE APLIKASI & DATA PEMISAHAN STRICT DUAL-MODE
-  // =========================================================================
+  // Inisialisasi Firebase HANYA jika IS_PREVIEW === false
   let app = null;
   let auth = null;
   let db = null;
 
-  // State Utama (In-Memory)
-  const state = {
-    currentUser: null, // { role: 'admin' | 'contributor' | 'viewer', name: string, identifier: string }
-    activeMenu: 'portal', // 'portal' | 'manage-projects' | 'manage-users' | 'settings'
-    searchQuery: '',
-    selectedCategory: 'Semua',
-    portalSettings: {
-      title: 'Rumah Proyek Digital',
-      subtitle: 'Kumpulan seluruh aplikasi, sistem informasi, dan portofolio karya dalam satu pintu akses cepat.',
-      footerText: '© 2026 Rumah Proyek Digital • Dibangun dengan Arsitektur Serverless',
-      logoUrl: '',
-      themeMode: 'light', // 'light' | 'dark' | 'system'
-      accentColor: 'sky' // 'sky' | 'emerald' | 'violet' | 'rose' | 'amber' | 'slate'
-    },
-    projects: [],
-    users: [],
-    isLoading: true
-  };
+  if (!IS_PREVIEW) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  }
 
-  // Data Dummy HANYA diinisialisasi jika IS_PREVIEW === true (Maksimal 2 item krusial)
-  if (IS_PREVIEW) {
-    state.projects = [
+  // =========================================================================
+  // 3. STATE APLIKASI (STRICT DUAL-MODE)
+  // =========================================================================
+  const state = {
+    activeMenu: 'portal', // 'portal' | 'manage-projects' | 'manage-users' | 'settings'
+    selectedCategory: 'Semua',
+    searchQuery: '',
+    editingProjectId: null,
+    currentUser: null, // { role: 'admin' | 'contributor' | 'viewer', name: string, identifier: string }
+    portalSettings: IS_PREVIEW ? {
+      title: 'Portal Hub Proyek Digital',
+      subtitle: 'Kumpulan seluruh aplikasi web, sistem informasi, dan tautan kerja dalam satu klik.',
+      footerText: '© 2026 Portal Microsite Proyek — Akses Cepat & Terpusat',
+      accentColor: 'sky',
+      themeMode: 'light',
+      logoDataUrl: '',
+      sidebarBannerDataUrl: ''
+    } : {
+      title: 'Portal Microsite Proyek',
+      subtitle: 'Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
+      footerText: '© 2026 Portal Microsite Proyek',
+      accentColor: 'sky',
+      themeMode: 'light',
+      logoDataUrl: '',
+      sidebarBannerDataUrl: ''
+    },
+    // Maksimal 2 data dummy HANYA saat IS_PREVIEW === true
+    projects: IS_PREVIEW ? [
       {
         id: 'demo-proj-1',
-        title: 'Sistem Manajemen Inventaris & Aset',
-        url: 'https://example.com/inventaris',
-        description: 'Aplikasi pelacakan barang masuk, keluar, dan audit stok real-time berbasis cloud.',
+        title: 'Sistem Informasi Akademik & Kurikulum',
+        url: 'https://example.com/siakad',
+        description: 'Aplikasi manajemen jadwal pelajaran, silabus, nilai, dan administrasi kurikulum terpadu.',
         category: 'Aplikasi Web',
         subCategory: 'Kurikulum',
-        icon: '📦',
+        icon: '🎓',
+        logoDataUrl: '',
         isPinned: true,
         visibility: 'public',
         order: 1
       },
       {
         id: 'demo-proj-2',
-        title: 'Dashboard Rekapitulasi Internal (Privat)',
-        url: 'https://example.com/internal-report',
-        description: 'Portal laporan kinerja bulanan khusus tim internal dan kontributor terdaftar.',
+        title: 'Dashboard Keuangan & SPJ Internal',
+        url: 'https://example.com/keuangan',
+        description: 'Portal pelaporan anggaran dan rekapitulasi transaksi khusus tim internal.',
         category: 'Administrasi',
-        subCategory: '',
+        subCategory: 'Keuangan & Aset',
         icon: '📊',
+        logoDataUrl: '',
         isPinned: false,
         visibility: 'private',
         order: 2
       }
-    ];
-
-    state.users = [
+    ] : [],
+    users: IS_PREVIEW ? [
       {
         id: 'demo-user-1',
         username: 'tim01',
         password: '123',
-        name: 'Budi Santoso (Kontributor)',
+        name: 'Staf Kontributor',
         role: 'contributor'
       }
-    ];
-    state.isLoading = false;
-  } else {
-    // MODE PRODUKSI: Inisialisasi Firebase murni tanpa data dummy
-    try {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-    } catch (err) {
-      console.error("Gagal inisialisasi Firebase:", err);
-    }
-  }
+    ] : []
+  };
 
   // =========================================================================
-  // 3. HELPER UI (TEMA DINAMIS, UPLOAD GAMBAR, POP-UP ANIMASI, KONFIRMASI)
+  // 4. HELPER UI (TEMA DINAMIS, UPLOAD GAMBAR, POP-UP ANIMASI, KONFIRMASI)
   // =========================================================================
+  let iconRenderQueued = false;
+  function refreshIconsFast() {
+    if (iconRenderQueued) return;
+    iconRenderQueued = true;
+    requestAnimationFrame(() => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+      iconRenderQueued = false;
+    });
+  }
+
   function getEffectiveThemeMode() {
     let mode = state.portalSettings.themeMode || 'light';
     if (mode === 'system') {
@@ -668,99 +566,138 @@ const firebaseConfig = {
     const current = getEffectiveThemeMode();
     state.portalSettings.themeMode = current === 'dark' ? 'light' : 'dark';
     applyThemeAndColors();
-    renderAll();
+    if (state.activeMenu === 'portal') {
+      document.getElementById('view-container').innerHTML = renderPortalView();
+    }
+    refreshIconsFast();
   };
 
   function compressImageFile(file, maxSize = 320) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width;
           let h = img.height;
-          if (w > h && w > maxSize) {
-            h = Math.round((h * maxSize) / w);
-            w = maxSize;
-          } else if (h >= w && h > maxSize) {
-            w = Math.round((w * maxSize) / h);
-            h = maxSize;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) {
+              h = Math.round((h * maxSize) / w);
+              w = maxSize;
+            } else {
+              w = Math.round((w * maxSize) / h);
+              h = maxSize;
+            }
           }
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/webp', 0.85));
+          resolve(canvas.toDataURL('image/png', 0.88));
         };
         img.onerror = reject;
-        img.src = e.target.result;
+        img.src = ev.target.result;
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   }
 
-  window.handlePortalLogoUpload = async (e) => {
-    const file = e.target.files?.[0];
+  window.handlePortalLogoUpload = async (input) => {
+    const file = input.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 256);
-      state.portalSettings.logoUrl = dataUrl;
-      const preview = document.getElementById('settings-logo-preview');
-      if (preview) {
-        preview.innerHTML = `<img src="${dataUrl}" alt="Logo" class="w-full h-full object-cover" />`;
-      }
-      showToast('Logo siap disimpan! Klik "Simpan Perubahan Tampilan".', 'info');
+      const dataUrl = await compressImageFile(file, 320);
+      document.getElementById('set-logo-data').value = dataUrl;
+      const preview = document.getElementById('set-logo-preview');
+      preview.innerHTML = `<img src="${dataUrl}" alt="Logo Preview" class="w-full h-full object-cover" />`;
+      showToast('Logo portal siap disimpan!', 'info');
     } catch (err) {
-      showToast('Gagal memproses file gambar.', 'error');
+      showToast('Gagal memproses gambar logo.', 'error');
     }
   };
 
   window.clearPortalLogo = () => {
-    state.portalSettings.logoUrl = '';
-    const preview = document.getElementById('settings-logo-preview');
-    if (preview) preview.innerHTML = '🚀';
-    showToast('Logo gambar dihapus, kembali ke ikon default.', 'info');
+    document.getElementById('set-logo-data').value = '';
+    const preview = document.getElementById('set-logo-preview');
+    preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
+    refreshIconsFast();
   };
 
-  window.handleProjectImageUpload = async (e) => {
-    const file = e.target.files?.[0];
+  window.handleSidebarBannerUpload = async (input) => {
+    const file = input.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 280);
-      document.getElementById('proj-image').value = dataUrl;
-      document.getElementById('proj-image-preview').innerHTML = `<img src="${dataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`;
-      document.getElementById('btn-clear-proj-img').classList.remove('hidden');
-      showToast('Gambar proyek berhasil dimuat!');
+      const dataUrl = await compressImageFile(file, 640);
+      document.getElementById('set-sidebar-banner-data').value = dataUrl;
+      state.portalSettings.sidebarBannerDataUrl = dataUrl;
+      const preview = document.getElementById('set-sidebar-banner-preview');
+      if (preview) {
+        preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
+      }
+      renderSidebarBanner();
+      refreshIconsFast();
+      showToast('Foto banner portrait terpasang live!', 'info');
     } catch (err) {
-      showToast('Gagal memuat gambar proyek.', 'error');
+      showToast('Gagal memproses foto banner.', 'error');
     }
   };
 
-  window.clearProjectImage = () => {
-    document.getElementById('proj-image').value = '';
-    const emoji = document.getElementById('proj-icon').value || '🌐';
-    document.getElementById('proj-image-preview').innerHTML = escapeHtml(emoji);
-    document.getElementById('btn-clear-proj-img').classList.add('hidden');
+  window.clearSidebarBanner = () => {
+    const hiddenInput = document.getElementById('set-sidebar-banner-data');
+    if (hiddenInput) hiddenInput.value = '';
+    state.portalSettings.sidebarBannerDataUrl = '';
+    const preview = document.getElementById('set-sidebar-banner-preview');
+    if (preview) {
+      preview.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center p-3 theme-text-muted">
+          <i data-lucide="image" class="w-6 h-6 mb-1 opacity-70"></i>
+          <span class="text-[10px] font-semibold">Belum ada banner</span>
+        </div>
+      `;
+    }
+    renderSidebarBanner();
+    refreshIconsFast();
+    showToast('Banner portrait dihapus.', 'info');
   };
 
-  window.updateProjPreviewEmoji = (val) => {
-    if (!document.getElementById('proj-image').value) {
-      document.getElementById('proj-image-preview').textContent = val || '🌐';
+  window.handleProjectLogoUpload = async (input) => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await compressImageFile(file, 240);
+      document.getElementById('proj-logo-data').value = dataUrl;
+      const preview = document.getElementById('proj-logo-preview');
+      preview.innerHTML = `<img src="${dataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`;
+      showToast('Logo proyek berhasil diunggah!', 'info');
+    } catch (err) {
+      showToast('Gagal mengunggah logo proyek.', 'error');
     }
+  };
+
+  window.clearProjectLogo = () => {
+    document.getElementById('proj-logo-data').value = '';
+    const preview = document.getElementById('proj-logo-preview');
+    preview.innerHTML = `<span class="text-xs theme-text-muted">Belum ada</span>`;
   };
 
   window.selectThemeMode = (mode) => {
     state.portalSettings.themeMode = mode;
     applyThemeAndColors();
-    renderAll();
+    if (state.activeMenu === 'portal') {
+      document.getElementById('view-container').innerHTML = renderPortalView();
+    }
+    refreshIconsFast();
   };
 
   window.selectAccentColor = (color) => {
     state.portalSettings.accentColor = color;
     applyThemeAndColors();
-    renderAll();
+    if (state.activeMenu === 'settings') {
+      document.getElementById('view-container').innerHTML = renderSettingsView();
+    }
+    refreshIconsFast();
   };
 
   let authFeedbackTimer = null;
@@ -777,9 +714,9 @@ const firebaseConfig = {
       iconWrap.innerHTML = '<i data-lucide="check-circle-2" class="w-8 h-8"></i>';
     }
     modal.classList.remove('hidden');
-    lucide.createIcons();
+    refreshIconsFast();
     if (authFeedbackTimer) clearTimeout(authFeedbackTimer);
-    authFeedbackTimer = setTimeout(() => closeAuthFeedbackModal(), 2600);
+    authFeedbackTimer = setTimeout(() => closeAuthFeedbackModal(), 2000);
   };
 
   window.closeAuthFeedbackModal = () => {
@@ -795,13 +732,15 @@ const firebaseConfig = {
     container.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
+      toast.style.transition = 'opacity 0.25s ease';
+      setTimeout(() => toast.remove(), 250);
+    }, 2600);
   };
 
   window.openLoginModal = () => {
-    document.getElementById('login-modal').classList.remove('hidden');
+    switchLoginTab('admin');
+    const modal = document.getElementById('login-modal');
+    modal.classList.remove('hidden');
     if (IS_PREVIEW) {
       const hint = document.getElementById('demo-login-hint');
       hint.classList.remove('hidden');
@@ -811,6 +750,9 @@ const firebaseConfig = {
         <div>• <b>User:</b> ID: <code>tim01</code> / Pass: <code>123</code></div>
       `;
     }
+    requestAnimationFrame(() => {
+      document.getElementById('admin-email')?.focus();
+    });
   };
 
   window.closeLoginModal = () => {
@@ -828,11 +770,13 @@ const firebaseConfig = {
       btnUser.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
       formAdmin.classList.remove('hidden');
       formUser.classList.add('hidden');
+      requestAnimationFrame(() => document.getElementById('admin-email')?.focus());
     } else {
       btnUser.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition';
       btnAdmin.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
       formUser.classList.remove('hidden');
       formAdmin.classList.add('hidden');
+      requestAnimationFrame(() => document.getElementById('user-username')?.focus());
     }
   };
 
@@ -846,7 +790,7 @@ const firebaseConfig = {
     iconWrap.innerHTML = `<i data-lucide="${options.icon || 'trash-2'}" class="w-6 h-6"></i>`;
     pendingConfirmCallback = onConfirm;
     document.getElementById('confirm-modal').classList.remove('hidden');
-    lucide.createIcons();
+    refreshIconsFast();
   };
 
   window.closeConfirmModal = () => {
@@ -860,7 +804,7 @@ const firebaseConfig = {
   });
 
   // =========================================================================
-  // 4. LOGIKA AUTENTIKASI HYBRID (ADMIN VIA FIREBASE AUTH, USER VIA FIRESTORE)
+  // 5. LOGIKA AUTENTIKASI HYBRID (ADMIN VIA FIREBASE AUTH, USER VIA FIRESTORE)
   // =========================================================================
   window.handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -871,8 +815,8 @@ const firebaseConfig = {
       if (email === 'admin@demo.com' && password === '123456') {
         state.currentUser = { role: 'admin', name: 'Administrator Demo', identifier: email };
         closeLoginModal();
-        showAuthFeedbackPopup('Login Admin Berhasil!', 'Selamat datang kembali, Administrator Demo. Semua fitur kendali aktif.');
         renderAll();
+        showAuthFeedbackPopup('Login Admin Berhasil!', 'Selamat datang kembali, Administrator Demo. Semua fitur kendali aktif.');
       } else {
         showToast('Email atau password demo salah! Gunakan admin@demo.com / 123456', 'error');
       }
@@ -887,15 +831,15 @@ const firebaseConfig = {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       state.currentUser = { role: 'admin', name: 'Administrator', identifier: userCred.user.email };
       closeLoginModal();
-      showAuthFeedbackPopup('Login Admin Berhasil!', `Selamat datang kembali (${userCred.user.email}).`);
       renderAll();
+      showAuthFeedbackPopup('Login Admin Berhasil!', `Selamat datang kembali (${userCred.user.email}).`);
     } catch (error) {
       showToast('Login Admin gagal: Periksa email & password Anda.', 'error');
     } finally {
       const btn = document.getElementById('btn-submit-admin');
       btn.disabled = false;
       btn.innerHTML = '<span>Masuk sebagai Admin</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-      lucide.createIcons();
+      refreshIconsFast();
     }
   };
 
@@ -909,19 +853,32 @@ const firebaseConfig = {
       if (found) {
         state.currentUser = { role: found.role, name: found.name, identifier: found.username };
         closeLoginModal();
-        showAuthFeedbackPopup(`Halo, ${found.name}!`, 'Anda berhasil masuk dan dapat mengakses proyek privat.');
         renderAll();
+        showAuthFeedbackPopup(`Halo, ${found.name}!`, 'Anda berhasil masuk dan dapat mengakses proyek privat.');
       } else {
         showToast('Username atau Password User tidak ditemukan!', 'error');
       }
       return;
     }
 
-    // Mode Produksi: Validasi langsung ke koleksi Firestore 'users'
+    // Mode Produksi: Validasi cepat ke cache lokal dulu, lalu fallback Firestore
     try {
       const btn = document.getElementById('btn-submit-user');
       btn.disabled = true;
       btn.innerHTML = '<span>Memeriksa Akun...</span>';
+
+      const cachedUser = state.users.find(u => u.username === username && u.password === password);
+      if (cachedUser) {
+        state.currentUser = {
+          role: cachedUser.role || 'contributor',
+          name: cachedUser.name || username,
+          identifier: cachedUser.username
+        };
+        closeLoginModal();
+        renderAll();
+        showAuthFeedbackPopup(`Selamat Datang, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.');
+        return;
+      }
 
       const q = query(
         collection(db, 'users'),
@@ -937,8 +894,8 @@ const firebaseConfig = {
           identifier: userData.username
         };
         closeLoginModal();
-        showAuthFeedbackPopup(`Selamat Datang, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.');
         renderAll();
+        showAuthFeedbackPopup(`Selamat Datang, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.');
       } else {
         showToast('ID/Username atau Password tidak valid.', 'error');
       }
@@ -948,24 +905,26 @@ const firebaseConfig = {
       const btn = document.getElementById('btn-submit-user');
       btn.disabled = false;
       btn.innerHTML = '<span>Masuk sebagai User</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-      lucide.createIcons();
+      refreshIconsFast();
     }
   };
 
   window.handleLogout = () => {
     openConfirmModal(
-      'Apakah Anda yakin ingin keluar dari sesi saat ini?',
+      'Apakah Anda yakin ingin keluar dari sesi akun ini?',
       async () => {
-        if (!IS_PREVIEW && auth && auth.currentUser) {
-          await signOut(auth);
+        const prevName = state.currentUser?.name || 'Pengguna';
+        if (!IS_PREVIEW && auth?.currentUser) {
+          await signOut(auth).catch(() => {});
         }
         state.currentUser = null;
         state.activeMenu = 'portal';
+        state.editingProjectId = null;
         renderAll();
-        showAuthFeedbackPopup('Berhasil Keluar Sesi', 'Anda telah keluar dengan aman dari portal.', true);
+        showAuthFeedbackPopup('Berhasil Keluar (Logout)', `Sesi ${prevName} telah diakhiri dengan aman.`, true);
       },
       {
-        title: 'Konfirmasi Log Out',
+        title: 'Konfirmasi Keluar (Logout)',
         confirmText: 'Ya',
         cancelText: 'Cancel',
         icon: 'log-out'
@@ -974,230 +933,199 @@ const firebaseConfig = {
   };
 
   // =========================================================================
-  // 5. SINKRONISASI DATA REAL-TIME FIRESTORE (SAAT IS_PREVIEW === false)
+  // 6. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
   // =========================================================================
   function initProductionRealtimeSync() {
     if (IS_PREVIEW || !db) return;
 
-    // Pantau status Auth Admin
-    onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        state.currentUser = { role: 'admin', name: 'Administrator', identifier: firebaseUser.email };
-      } else if (state.currentUser && state.currentUser.role === 'admin') {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        state.currentUser = { role: 'admin', name: 'Administrator', identifier: user.email };
+      } else if (state.currentUser?.role === 'admin') {
         state.currentUser = null;
       }
       renderAll();
     });
 
-    // Listener Pengaturan Portal
     onSnapshot(doc(db, 'portal_settings', 'main'), (docSnap) => {
       if (docSnap.exists()) {
-        state.portalSettings = { ...state.portalSettings, ...docSnap.data() };
+        const d = docSnap.data();
+        state.portalSettings = {
+          title: d.title || 'Portal Microsite Proyek',
+          subtitle: d.subtitle || '',
+          footerText: d.footerText || '',
+          accentColor: d.accentColor || 'sky',
+          themeMode: d.themeMode || 'light',
+          logoDataUrl: d.logoDataUrl || '',
+          sidebarBannerDataUrl: d.sidebarBannerDataUrl || ''
+        };
+        applyThemeAndColors();
+        renderAll();
       }
+    });
+
+    const qProjects = query(collection(db, 'projects'), orderBy('order', 'asc'));
+    onSnapshot(qProjects, (snapshot) => {
+      state.projects = snapshot.docs.map(docItem => ({
+        id: docItem.id,
+        ...docItem.data()
+      }));
       renderAll();
     });
 
-    // Listener Koleksi Proyek
-    onSnapshot(collection(db, 'projects'), (snapshot) => {
-      state.projects = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      state.isLoading = false;
-      renderAll();
-    }, (error) => {
-      console.error("Error memuat proyek:", error);
-      state.isLoading = false;
-      renderAll();
-    });
-
-    // Listener Koleksi Users
     onSnapshot(collection(db, 'users'), (snapshot) => {
-      state.users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      state.users = snapshot.docs.map(docItem => ({
+        id: docItem.id,
+        ...docItem.data()
+      }));
       if (state.activeMenu === 'manage-users') renderAll();
     });
   }
 
   // =========================================================================
-  // 6. OPERASI CRUD PROYEK, PENGATURAN PORTAL, & AKUN USER
+  // 7. OPERASI CRUD (DUAL-MODE: IN-MEMORY VS FIRESTORE)
   // =========================================================================
-  window.openProjectModal = (projectId = null) => {
-    const modal = document.getElementById('project-modal');
-    const titleEl = document.getElementById('project-modal-title');
-    const previewEl = document.getElementById('proj-image-preview');
-    const clearBtn = document.getElementById('btn-clear-proj-img');
-    const datalistEl = document.getElementById('sub-category-suggestions');
-
-    if (datalistEl) {
-      const existingSubs = [...new Set(state.projects.map(p => (p.subCategory || '').trim()).filter(Boolean))];
-      datalistEl.innerHTML = existingSubs.map(sub => `<option value="${escapeHtml(sub)}"></option>`).join('');
-    }
-    
-    if (projectId) {
-      const proj = state.projects.find(p => p.id === projectId);
-      if (!proj) return;
-      titleEl.textContent = 'Edit Tautan Proyek';
-      document.getElementById('proj-id').value = proj.id;
-      document.getElementById('proj-image').value = proj.imageUrl || '';
-      document.getElementById('proj-icon').value = proj.icon || '🌐';
-      document.getElementById('proj-title').value = proj.title;
-      document.getElementById('proj-url').value = proj.url;
-      document.getElementById('proj-desc').value = proj.description;
-      document.getElementById('proj-category').value = proj.category || 'Aplikasi Web';
-      document.getElementById('proj-sub-category').value = proj.subCategory || '';
-      document.getElementById('proj-visibility').value = proj.visibility || 'public';
-      document.getElementById('proj-order').value = proj.order || 1;
-      document.getElementById('proj-pinned').checked = !!proj.isPinned;
-
-      if (proj.imageUrl) {
-        previewEl.innerHTML = `<img src="${escapeHtml(proj.imageUrl)}" alt="Logo" class="w-full h-full object-cover" />`;
-        clearBtn.classList.remove('hidden');
-      } else {
-        previewEl.textContent = proj.icon || '🌐';
-        clearBtn.classList.add('hidden');
-      }
-    } else {
-      titleEl.textContent = 'Tambah Proyek Baru';
-      document.getElementById('form-project').reset();
-      document.getElementById('proj-id').value = '';
-      document.getElementById('proj-image').value = '';
-      document.getElementById('proj-icon').value = '🚀';
-      document.getElementById('proj-sub-category').value = '';
-      document.getElementById('proj-order').value = state.projects.length + 1;
-      previewEl.textContent = '🚀';
-      clearBtn.classList.add('hidden');
-    }
-    modal.classList.remove('hidden');
-    lucide.createIcons();
-  };
-
-  window.closeProjectModal = () => {
-    document.getElementById('project-modal').classList.add('hidden');
-  };
-
-  window.handleSaveProject = async (e) => {
+  window.saveProject = async (e) => {
     e.preventDefault();
-    const id = document.getElementById('proj-id').value;
-    const payload = {
-      imageUrl: document.getElementById('proj-image').value || '',
-      icon: document.getElementById('proj-icon').value.trim() || '🌐',
-      title: document.getElementById('proj-title').value.trim(),
-      url: document.getElementById('proj-url').value.trim(),
-      description: document.getElementById('proj-desc').value.trim(),
-      category: document.getElementById('proj-category').value,
-      subCategory: document.getElementById('proj-sub-category').value.trim(),
-      visibility: document.getElementById('proj-visibility').value,
-      order: parseInt(document.getElementById('proj-order').value) || 1,
-      isPinned: document.getElementById('proj-pinned').checked
-    };
+    const title = document.getElementById('proj-title').value.trim();
+    let url = document.getElementById('proj-url').value.trim();
+    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+    const description = document.getElementById('proj-desc').value.trim();
+    const category = document.getElementById('proj-category').value.trim() || 'Umum';
+    const subCategory = document.getElementById('proj-subcategory').value.trim();
+    const icon = document.getElementById('proj-icon').value.trim() || '🚀';
+    const logoDataUrl = document.getElementById('proj-logo-data').value || '';
+    const visibility = document.getElementById('proj-visibility').value;
+    const isPinned = document.getElementById('proj-pinned').checked;
+    const order = parseInt(document.getElementById('proj-order').value, 10) || (state.projects.length + 1);
+
+    const payload = { title, url, description, category, subCategory, icon, logoDataUrl, visibility, isPinned, order };
 
     if (IS_PREVIEW) {
-      if (id) {
-        const idx = state.projects.findIndex(p => p.id === id);
+      if (state.editingProjectId) {
+        const idx = state.projects.findIndex(p => p.id === state.editingProjectId);
         if (idx !== -1) state.projects[idx] = { ...state.projects[idx], ...payload };
         showToast('Proyek diperbarui (Mode Preview)');
       } else {
         state.projects.push({ id: 'demo-' + Date.now(), ...payload });
         showToast('Proyek baru ditambahkan (Mode Preview)');
       }
-      closeProjectModal();
+      state.editingProjectId = null;
       renderAll();
       return;
     }
 
-    // Mode Produksi: Simpan ke Firestore
     try {
-      if (id) {
-        await updateDoc(doc(db, 'projects', id), payload);
-        showToast('Proyek berhasil diperbarui!');
+      if (state.editingProjectId) {
+        await updateDoc(doc(db, 'projects', state.editingProjectId), payload);
+        showToast('Proyek berhasil diperbarui di Firestore!');
       } else {
         await addDoc(collection(db, 'projects'), { ...payload, createdAt: serverTimestamp() });
-        showToast('Proyek baru berhasil ditambahkan!');
+        showToast('Proyek baru berhasil disimpan ke Firestore!');
       }
-      closeProjectModal();
+      state.editingProjectId = null;
+      renderAll();
     } catch (err) {
-      showToast('Gagal menyimpan proyek: Pastikan Anda memiliki hak akses.', 'error');
+      showToast('Gagal menyimpan proyek: ' + err.message, 'error');
     }
   };
 
-  window.deleteProject = (id, title) => {
-    openConfirmModal(`Hapus proyek "${title}" dari daftar portal?`, async () => {
+  window.editProject = (id) => {
+    state.editingProjectId = id;
+    state.activeMenu = 'manage-projects';
+    renderAll();
+    document.getElementById('app-wrapper').scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.cancelEditProject = () => {
+    state.editingProjectId = null;
+    renderAll();
+  };
+
+  window.deleteProject = (id) => {
+    openConfirmModal('Proyek yang dihapus tidak dapat dikembalikan. Lanjutkan?', async () => {
       if (IS_PREVIEW) {
         state.projects = state.projects.filter(p => p.id !== id);
-        showToast('Proyek dihapus (Mode Preview)', 'info');
+        showToast('Proyek dihapus (Mode Preview)');
         renderAll();
         return;
       }
       try {
         await deleteDoc(doc(db, 'projects', id));
-        showToast('Proyek berhasil dihapus.', 'info');
+        showToast('Proyek berhasil dihapus dari Firestore.');
       } catch (err) {
         showToast('Gagal menghapus proyek.', 'error');
       }
     });
   };
 
-  window.handleSaveSettings = async (e) => {
+  window.savePortalSettings = async (e) => {
     e.preventDefault();
-    const updated = {
-      title: document.getElementById('set-title').value.trim(),
-      subtitle: document.getElementById('set-subtitle').value.trim(),
-      footerText: document.getElementById('set-footer').value.trim(),
-      logoUrl: state.portalSettings.logoUrl || '',
-      accentColor: state.portalSettings.accentColor || 'sky'
-    };
+    const title = document.getElementById('set-title').value.trim();
+    const subtitle = document.getElementById('set-subtitle').value.trim();
+    const footerText = document.getElementById('set-footer').value.trim();
+    const logoDataUrl = document.getElementById('set-logo-data').value || '';
+    const sidebarBannerDataUrl = document.getElementById('set-sidebar-banner-data')?.value || '';
+    const accentColor = state.portalSettings.accentColor || 'sky';
+    const themeMode = state.portalSettings.themeMode || 'light';
 
     if (IS_PREVIEW) {
-      state.portalSettings = { ...state.portalSettings, ...updated };
+      state.portalSettings = { title, subtitle, footerText, accentColor, themeMode, logoDataUrl, sidebarBannerDataUrl };
       applyThemeAndColors();
-      showToast('Pengaturan tampilan & tema portal disimpan (Preview)');
+      showToast('Pengaturan portal disimpan (Mode Preview)');
       renderAll();
       return;
     }
 
     try {
-      await setDoc(doc(db, 'portal_settings', 'main'), updated, { merge: true });
-      applyThemeAndColors();
-      showToast('Identitas & tema portal berhasil diperbarui!');
+      await setDoc(doc(db, 'portal_settings', 'main'), {
+        title, subtitle, footerText, accentColor, themeMode, logoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
+      }, { merge: true });
+      showToast('Identitas, banner & tema portal berhasil disimpan!');
     } catch (err) {
-      showToast('Gagal menyimpan pengaturan portal.', 'error');
+      showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
     }
   };
 
-  window.handleAddUser = async (e) => {
+  window.addUserAccount = async (e) => {
     e.preventDefault();
     const name = document.getElementById('new-user-name').value.trim();
     const username = document.getElementById('new-user-username').value.trim();
     const password = document.getElementById('new-user-password').value.trim();
     const role = document.getElementById('new-user-role').value;
 
-    if (!name || !username || !password) return;
+    if (state.users.some(u => u.username === username)) {
+      showToast('ID/Username sudah digunakan!', 'error');
+      return;
+    }
 
     if (IS_PREVIEW) {
       state.users.push({ id: 'u-' + Date.now(), name, username, password, role });
-      e.target.reset();
-      showToast('Akun user ditambahkan (Preview)');
+      showToast('Akun User ditambahkan (Mode Preview)');
       renderAll();
       return;
     }
 
     try {
       await addDoc(collection(db, 'users'), { name, username, password, role, createdAt: serverTimestamp() });
+      showToast('Akun User berhasil disimpan ke Firestore!');
       e.target.reset();
-      showToast('Akun user berhasil dibuat!');
     } catch (err) {
-      showToast('Gagal menambahkan akun user.', 'error');
+      showToast('Gagal menambah akun user.', 'error');
     }
   };
 
-  window.deleteUser = (id, name) => {
-    openConfirmModal(`Hapus akses user "${name}"?`, async () => {
+  window.deleteUserAccount = (id) => {
+    openConfirmModal('Hapus akun user ini dari sistem?', async () => {
       if (IS_PREVIEW) {
         state.users = state.users.filter(u => u.id !== id);
-        showToast('Akun user dihapus (Preview)', 'info');
+        showToast('Akun user dihapus (Mode Preview)');
         renderAll();
         return;
       }
       try {
         await deleteDoc(doc(db, 'users', id));
-        showToast('Akun user berhasil dihapus.', 'info');
+        showToast('Akun user berhasil dihapus.');
       } catch (err) {
         showToast('Gagal menghapus akun user.', 'error');
       }
@@ -1206,18 +1134,38 @@ const firebaseConfig = {
 
   window.copyProjectLink = (url) => {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('Tautan proyek disalin ke clipboard!', 'info');
+      showToast('Tautan berhasil disalin ke clipboard!', 'info');
+    }).catch(() => {
+      showToast('Gagal menyalin tautan.', 'error');
     });
   };
 
+  // =========================================================================
+  // 8. RENDER NAVIGATION & VIEWS (RESPONSIVE UI)
+  // =========================================================================
   window.setMenu = (menu) => {
+    if (state.activeMenu === menu) return;
     state.activeMenu = menu;
-    renderAll();
+    renderNavigation();
+    const container = document.getElementById('view-container');
+    if (state.activeMenu === 'manage-projects' && state.currentUser) {
+      container.innerHTML = renderManageProjectsView();
+    } else if (state.activeMenu === 'manage-users' && state.currentUser?.role === 'admin') {
+      container.innerHTML = renderManageUsersView();
+    } else if (state.activeMenu === 'settings' && state.currentUser?.role === 'admin') {
+      container.innerHTML = renderSettingsView();
+    } else {
+      state.activeMenu = 'portal';
+      container.innerHTML = renderPortalView();
+    }
+    refreshIconsFast();
   };
 
   window.setCategory = (cat) => {
+    if (state.selectedCategory === cat) return;
     state.selectedCategory = cat;
-    renderAll();
+    document.getElementById('view-container').innerHTML = renderPortalView();
+    refreshIconsFast();
   };
 
   window.toggleCategoryGroup = (catKey) => {
@@ -1245,30 +1193,32 @@ const firebaseConfig = {
     renderPortalProjectsGrid();
   };
 
-  // =========================================================================
-  // 7. RENDERER NAVIGASI (SIDEBAR DESKTOP & FLOATING BOTTOM NAV MOBILE)
-  // =========================================================================
+  function getMenuItems() {
+    const items = [
+      { id: 'portal', label: 'Beranda Portal', icon: 'compass', visible: true }
+    ];
+    if (state.currentUser) {
+      items.push({ id: 'manage-projects', label: 'Kelola Proyek', icon: 'folder-kanban', visible: true });
+    }
+    if (state.currentUser?.role === 'admin') {
+      items.push({ id: 'manage-users', label: 'Akun User', icon: 'users', visible: true });
+      items.push({ id: 'settings', label: 'Pengaturan Portal', icon: 'settings', visible: true });
+    }
+    return items.filter(i => i.visible);
+  }
+
   function renderNavigation() {
-    const isAdmin = state.currentUser?.role === 'admin';
-    const isContributor = state.currentUser?.role === 'contributor';
-    const canManageProjects = isAdmin || isContributor;
+    const menus = getMenuItems();
+    const sidebarNav = document.getElementById('sidebar-nav-links');
+    const mobileNav = document.getElementById('mobile-bottom-nav');
 
-    const menus = [
-      { id: 'portal', label: 'Beranda Portal', icon: 'layout-grid', visible: true },
-      { id: 'manage-projects', label: 'Kelola Proyek', icon: 'folder-kanban', visible: canManageProjects },
-      { id: 'manage-users', label: 'Kelola User', icon: 'users', visible: isAdmin },
-      { id: 'settings', label: 'Identitas Portal', icon: 'sliders-horizontal', visible: isAdmin }
-    ].filter(m => m.visible);
-
-    // Desktop Sidebar Links
-    const desktopNav = document.getElementById('desktop-nav-list');
-    desktopNav.innerHTML = menus.map(m => {
-      const isActive = state.activeMenu === m.id;
+    sidebarNav.innerHTML = menus.map(m => {
+      const active = state.activeMenu === m.id;
       return `
-        <button onclick="setMenu('${m.id}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition ${
-          isActive
-            ? 'btn-accent shadow-md'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+        <button onclick="setMenu('${m.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition ${
+          active
+            ? 'btn-accent text-white shadow-md'
+            : 'theme-text-secondary hover:bg-slate-200/50'
         }">
           <i data-lucide="${m.icon}" class="w-4 h-4"></i>
           <span>${m.label}</span>
@@ -1276,201 +1226,136 @@ const firebaseConfig = {
       `;
     }).join('');
 
-    // Mobile Bottom Floating Nav
-    const mobileNav = document.getElementById('mobile-nav-list');
     mobileNav.innerHTML = menus.map(m => {
-      const isActive = state.activeMenu === m.id;
+      const active = state.activeMenu === m.id;
       return `
         <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition ${
-          isActive ? 'text-white bg-white/15' : 'text-slate-400 hover:text-white'
+          active ? 'badge-accent font-bold' : 'theme-text-muted'
         }">
-          <i data-lucide="${m.icon}" class="w-4 h-4 mb-0.5"></i>
-          <span class="text-[10px] font-medium">${m.label.split(' ')[0]}</span>
+          <i data-lucide="${m.icon}" class="w-5 h-5 mb-0.5"></i>
+          <span class="text-[10px]">${m.label.split(' ')[0]}</span>
         </button>
       `;
     }).join('');
 
-    // Sidebar Auth Box & Mobile Top Action
     const sidebarAuth = document.getElementById('sidebar-auth-box');
-    const mobileAction = document.getElementById('mobile-top-action');
-    const mobileRoleBadge = document.getElementById('mobile-role-badge');
+    const mobileTopAuth = document.getElementById('mobile-top-auth');
 
     if (state.currentUser) {
-      const roleLabel = isAdmin ? 'Administrator' : (isContributor ? 'Kontributor' : 'Viewer Privat');
-      mobileRoleBadge.textContent = `${state.currentUser.name} (${roleLabel})`;
-
+      const roleBadge = state.currentUser.role === 'admin' ? 'Admin' : 'User';
       sidebarAuth.innerHTML = `
-        <div class="flex items-center gap-2.5 mb-3">
-          <div class="w-9 h-9 rounded-xl btn-accent flex items-center justify-center font-bold text-xs shrink-0">
-            ${escapeHtml(state.currentUser.name.charAt(0).toUpperCase())}
+        <div class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 mb-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold theme-text-primary truncate">${state.currentUser.name}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-accent">${roleBadge}</span>
           </div>
-          <div class="overflow-hidden">
-            <div class="text-xs font-bold text-slate-900 truncate">${escapeHtml(state.currentUser.name)}</div>
-            <div class="text-[11px] text-accent font-semibold">${roleLabel}</div>
-          </div>
+          <p class="text-[11px] theme-text-muted truncate mt-0.5">${state.currentUser.identifier}</p>
         </div>
-        <button onclick="handleLogout()" class="w-full py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-semibold transition flex items-center justify-center gap-1.5">
-          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-          <span>Keluar Sesi</span>
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Keluar (Logout)</span>
         </button>
       `;
-
-      mobileAction.innerHTML = `
-        <button onclick="handleLogout()" class="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 text-xs font-semibold flex items-center gap-1">
+      mobileTopAuth.innerHTML = `
+        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span>Keluar</span>
         </button>
       `;
     } else {
-      mobileRoleBadge.textContent = 'Pengunjung Publik';
       sidebarAuth.innerHTML = `
-        <p class="text-[11px] text-slate-500 mb-2.5 leading-relaxed">Masuk sebagai Admin atau User untuk mengelola & membuka proyek privat.</p>
-        <button onclick="openLoginModal()" class="w-full py-2.5 rounded-xl btn-accent text-xs font-semibold shadow-sm transition flex items-center justify-center gap-1.5">
-          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
-          <span>Masuk / Login</span>
+        <button onclick="openLoginModal()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs font-bold transition shadow-md">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Masuk Admin / User</span>
         </button>
       `;
-
-      mobileAction.innerHTML = `
-        <button onclick="openLoginModal()" class="px-3.5 py-1.5 rounded-xl btn-accent text-xs font-semibold flex items-center gap-1">
+      mobileTopAuth.innerHTML = `
+        <button onclick="openLoginModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl btn-accent text-white text-xs font-bold shadow-sm">
           <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
           <span>Masuk</span>
         </button>
       `;
     }
+
+    document.getElementById('sidebar-portal-title').textContent = state.portalSettings.title;
+    document.getElementById('mobile-portal-title').textContent = state.portalSettings.title;
+
+    const logoHtml = state.portalSettings.logoDataUrl
+      ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
+      : `<i data-lucide="layers" class="w-5 h-5"></i>`;
+    document.getElementById('sidebar-brand-icon').innerHTML = logoHtml;
+    document.getElementById('mobile-brand-icon').innerHTML = logoHtml;
+
+    renderSidebarBanner();
   }
 
-  // =========================================================================
-  // 8. RENDERER HALAMAN UTAMA (BERANDA PORTAL & DASHBOARD KELOLA)
-  // =========================================================================
-  function renderPortalView() {
-    const categories = ['Semua', 'Aplikasi Web', 'Administrasi', 'Pembelajaran', 'Portofolio', 'Lainnya'];
-    const isLoggedIn = !!state.currentUser;
-    const effectiveTheme = getEffectiveThemeMode();
+  function renderSidebarBanner() {
+    const slot = document.getElementById('sidebar-banner-slot');
+    if (!slot) return;
+    const bannerUrl = state.portalSettings.sidebarBannerDataUrl;
+    const isAdmin = state.currentUser?.role === 'admin';
 
-    return `
-      <!-- Hero Microsite Header -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-10 mb-7 relative overflow-hidden">
-        <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full blur-2xl pointer-events-none" style="background: var(--accent-soft);"></div>
-        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
-          <div class="max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border badge-accent text-xs font-bold mb-4">
-              <span class="w-2 h-2 rounded-full animate-pulse" style="background: var(--accent-color);"></span>
-              <span>Direktori Proyek Terpusat</span>
-            </div>
-            <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-              ${escapeHtml(state.portalSettings.title)}
-            </h1>
-            <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
-              ${escapeHtml(state.portalSettings.subtitle)}
-            </p>
-          </div>
-
-          <!-- Tombol Pemilih Tema Terang / Gelap untuk Pengunjung -->
-          <div class="inline-flex items-center p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80 self-start shrink-0 shadow-sm">
-            <button type="button" onclick="selectThemeMode('light')" class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-              effectiveTheme === 'light' ? 'btn-accent shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }">
-              <i data-lucide="sun" class="w-3.5 h-3.5"></i>
-              <span>Terang</span>
+    if (bannerUrl) {
+      slot.innerHTML = `
+        <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[3/4] w-full group">
+          <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none"></div>
+          ${isAdmin ? `
+            <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 hover:bg-slate-900 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-md">
+              <i data-lucide="camera" class="w-3 h-3"></i>
+              <span>Ganti</span>
             </button>
-            <button type="button" onclick="selectThemeMode('dark')" class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-              effectiveTheme === 'dark' ? 'btn-accent shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }">
-              <i data-lucide="moon" class="w-3.5 h-3.5"></i>
-              <span>Gelap</span>
-            </button>
-          </div>
+          ` : ''}
         </div>
-
-        <!-- Search & Filter Bar -->
-        <div class="mt-7 pt-6 border-t border-slate-200/70 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
-          <div class="relative flex-1 max-w-md">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-            <input 
-              type="text" 
-              value="${escapeHtml(state.searchQuery)}"
-              oninput="handleSearchInput(this.value)"
-              placeholder="Cari nama proyek atau kata kunci..." 
-              class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-            />
+      `;
+    } else if (isAdmin) {
+      slot.innerHTML = `
+        <button type="button" onclick="setMenu('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex flex-col items-center justify-center p-4 text-center transition group">
+          <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2.5 group-hover:scale-110 transition">
+            <i data-lucide="image-plus" class="w-5 h-5"></i>
           </div>
-
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            ${categories.map(cat => {
-              const active = state.selectedCategory === cat;
-              return `
-                <button onclick="setCategory('${cat}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                  active 
-                    ? 'btn-accent shadow-sm' 
-                    : 'bg-white/80 text-slate-600 hover:bg-white border border-slate-200/70'
-                }">
-                  ${cat}
-                </button>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      </div>
-
-      <!-- Status Info Jika Belum Login -->
-      ${!isLoggedIn ? `
-        <div class="mb-5 px-4 py-2.5 rounded-2xl bg-white/70 border border-slate-200/70 flex items-center justify-between text-xs text-slate-500">
-          <span class="flex items-center gap-2"><i data-lucide="globe" class="w-3.5 h-3.5 text-brand-500"></i> Menampilkan daftar proyek publik. Login untuk membuka proyek privat.</span>
-        </div>
-      ` : ''}
-
-      <!-- Daftar Kategori & Kartu Proyek (Sistem Dropdown Modern per Kategori) -->
-      <div id="portal-projects-grid" class="space-y-6">
-        ${getFilteredProjectsHTML()}
-      </div>
-    `;
+          <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
+          <span class="text-[10px] theme-text-muted mt-1 leading-relaxed">Klik untuk upload foto ukuran besar di bawah menu Beranda Portal</span>
+        </button>
+      `;
+    } else {
+      slot.innerHTML = '';
+    }
   }
 
-  function renderProjectCardHTML(proj) {
+  function renderProjectCard(p) {
+    const isPrivate = p.visibility === 'private';
+    const mediaHtml = p.logoDataUrl
+      ? `<img src="${p.logoDataUrl}" alt="${p.title}" class="w-full h-full object-cover" />`
+      : `<span class="text-2xl">${p.icon || '🚀'}</span>`;
+
     return `
-      <div class="glass-card rounded-3xl p-6 flex flex-col justify-between relative group">
+      <div class="glass-card rounded-3xl p-5 flex flex-col justify-between relative group">
         <div>
-          <!-- Top Row: Icon/Logo & Badges -->
-          <div class="flex items-start justify-between gap-2 mb-4">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/70 flex items-center justify-center text-2xl shadow-sm group-hover:scale-105 transition overflow-hidden shrink-0">
-              ${proj.imageUrl 
-                ? `<img src="${escapeHtml(proj.imageUrl)}" alt="${escapeHtml(proj.title)}" class="w-full h-full object-cover" />` 
-                : escapeHtml(proj.icon || '🌐')}
+          <div class="flex items-start justify-between gap-3 mb-3.5">
+            <div class="w-12 h-12 rounded-2xl theme-surface-subtle border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+              ${mediaHtml}
             </div>
-            <div class="flex flex-wrap items-center justify-end gap-1.5">
-              ${proj.isPinned ? `
-                <span class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-700 text-[10px] font-bold flex items-center gap-1">
-                  <i data-lucide="pin" class="w-3 h-3"></i> Utama
-                </span>
-              ` : ''}
-              ${proj.visibility === 'private' ? `
-                <span class="px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200/80 text-purple-700 text-[10px] font-bold flex items-center gap-1">
-                  <i data-lucide="lock" class="w-3 h-3"></i> Privat
-                </span>
-              ` : ''}
-              <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-semibold">
-                ${escapeHtml(proj.category || 'Umum')}
-              </span>
+            <div class="flex items-center gap-1.5 flex-wrap justify-end">
+              ${p.isPinned ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 flex items-center gap-1"><i data-lucide="pin" class="w-3 h-3"></i>Pinned</span>` : ''}
+              ${isPrivate ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3"></i>Privat</span>` : ''}
             </div>
           </div>
 
-          <!-- Title & Desc -->
-          <h3 class="text-base font-bold text-slate-900 mb-1.5 transition line-clamp-1">
-            ${escapeHtml(proj.title)}
+          <h3 class="font-extrabold text-sm sm:text-base theme-text-primary leading-snug mb-1.5 group-hover:text-sky-500 transition-colors">
+            ${p.title}
           </h3>
-          <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-5">
-            ${escapeHtml(proj.description)}
+          <p class="text-xs theme-text-secondary leading-relaxed line-clamp-2 mb-4">
+            ${p.description}
           </p>
         </div>
 
-        <!-- Action Buttons: 1-Click Open & Copy -->
-        <div class="pt-4 border-t border-slate-100 flex items-center gap-2">
-          <a href="${escapeHtml(proj.url)}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-4 rounded-xl btn-accent text-xs font-semibold transition flex items-center justify-center gap-2 shadow-sm">
+        <div class="pt-3 border-t border-slate-200/50 flex items-center gap-2">
+          <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3.5 rounded-2xl btn-accent text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
             <span>Buka Proyek</span>
             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           </a>
-          <button onclick="copyProjectLink('${escapeHtml(proj.url)}')" title="Salin Tautan" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+          <button type="button" onclick="copyProjectLink('${p.url}')" title="Salin Tautan" class="p-2.5 rounded-2xl theme-surface-subtle border border-slate-200/60 theme-text-secondary hover:theme-text-primary transition">
             <i data-lucide="copy" class="w-4 h-4"></i>
           </button>
         </div>
@@ -1478,385 +1363,540 @@ const firebaseConfig = {
     `;
   }
 
-  function getFilteredProjectsHTML() {
-    if (state.isLoading) {
-      return `<div class="text-center py-16 text-sm text-slate-400">Memuat daftar proyek dari database...</div>`;
-    }
+  function renderPortalProjectsGrid() {
+    const gridContainer = document.getElementById('portal-projects-grid');
+    if (!gridContainer) return;
 
-    const isLoggedIn = !!state.currentUser;
-    const q = state.searchQuery.toLowerCase();
-
-    const filtered = state.projects
-      .filter(p => isLoggedIn ? true : p.visibility !== 'private')
-      .filter(p => state.selectedCategory === 'Semua' || p.category === state.selectedCategory)
-      .filter(p => 
-        p.title.toLowerCase().includes(q) || 
-        (p.description && p.description.toLowerCase().includes(q)) ||
-        (p.subCategory && p.subCategory.toLowerCase().includes(q))
-      )
+    const visibleProjects = state.projects
+      .filter(p => p.visibility === 'public' || Boolean(state.currentUser))
+      .filter(p => state.selectedCategory === 'Semua' || (p.category || 'Umum') === state.selectedCategory)
+      .filter(p => {
+        if (!state.searchQuery.trim()) return true;
+        const q = state.searchQuery.toLowerCase();
+        return (
+          (p.title || '').toLowerCase().includes(q) ||
+          (p.description || '').toLowerCase().includes(q) ||
+          (p.category || '').toLowerCase().includes(q) ||
+          (p.subCategory || '').toLowerCase().includes(q)
+        );
+      })
       .sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        return (a.order || 99) - (b.order || 99);
+        if (Boolean(a.isPinned) !== Boolean(b.isPinned)) return a.isPinned ? -1 : 1;
+        return (a.order || 999) - (b.order || 999);
       });
 
-    if (filtered.length === 0) {
-      return `
-        <div class="glass-panel rounded-3xl p-12 text-center">
-          <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+    if (visibleProjects.length === 0) {
+      gridContainer.innerHTML = `
+        <div class="glass-panel rounded-3xl p-10 text-center">
+          <div class="w-14 h-14 rounded-2xl theme-surface-subtle flex items-center justify-center mx-auto mb-3 theme-text-muted">
             <i data-lucide="folder-open" class="w-7 h-7"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Proyek Ditemukan</h3>
-          <p class="text-xs text-slate-500 max-w-sm mx-auto">Tidak ada proyek yang sesuai dengan filter pencarian saat ini, atau Admin belum menambahkan tautan proyek.</p>
+          <h3 class="text-sm font-bold theme-text-primary">Belum ada proyek ditemukan</h3>
+          <p class="text-xs theme-text-muted mt-1">Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
         </div>
       `;
+      refreshIconsFast();
+      return;
     }
 
-    // Kelompokkan proyek berdasarkan kategori agar setiap kategori memiliki baris judul dropdown modern
-    const categoryOrder = ['Aplikasi Web', 'Administrasi', 'Pembelajaran', 'Portofolio', 'Lainnya'];
-    const groupedMap = new Map();
-
-    filtered.forEach(proj => {
-      const catName = proj.category || 'Lainnya';
-      if (!groupedMap.has(catName)) groupedMap.set(catName, []);
-      groupedMap.get(catName).push(proj);
+    // Kelompokkan berdasarkan Kategori Utama -> Sub-Judul (Dropdown Bertingkat Modern)
+    const categoryGroups = {};
+    visibleProjects.forEach(p => {
+      const cat = (p.category || 'Umum').trim();
+      if (!categoryGroups[cat]) categoryGroups[cat] = [];
+      categoryGroups[cat].push(p);
     });
 
-    const sortedCategories = Array.from(groupedMap.keys()).sort((a, b) => {
-      const idxA = categoryOrder.indexOf(a);
-      const idxB = categoryOrder.indexOf(b);
-      return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-    });
-
-    return sortedCategories.map((catName, index) => {
-      const items = groupedMap.get(catName);
-      const catKey = `cat-${index}-${catName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-
-      // Pisahkan item tanpa sub-judul dan kelompokkan item yang memiliki sub-judul
-      const directItems = items.filter(p => !(p.subCategory && p.subCategory.trim()));
-      const subMap = new Map();
-      items.forEach(p => {
-        const sub = (p.subCategory || '').trim();
+    gridContainer.innerHTML = Object.entries(categoryGroups).map(([catName, items], catIdx) => {
+      const catKey = `cat-${catIdx}`;
+      const directItems = items.filter(i => !(i.subCategory || '').trim());
+      const subGroups = {};
+      items.forEach(i => {
+        const sub = (i.subCategory || '').trim();
         if (sub) {
-          if (!subMap.has(sub)) subMap.set(sub, []);
-          subMap.get(sub).push(p);
+          if (!subGroups[sub]) subGroups[sub] = [];
+          subGroups[sub].push(i);
         }
       });
 
-      const subGroupsHTML = Array.from(subMap.entries()).map(([subName, subItems], sIdx) => {
-        const subKey = `${catKey}-sub-${sIdx}-${subName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-        return `
-          <div class="rounded-2xl border border-slate-200/80 bg-white/50 p-3.5 sm:p-4 space-y-3.5">
-            <!-- Sub-Judul Dropdown Modern -->
-            <button type="button" onclick="toggleSubCategoryGroup('${subKey}')" class="w-full flex items-center justify-between gap-2 text-left px-2 py-1 rounded-xl hover:bg-slate-100/80 transition">
-              <div class="flex items-center gap-2.5">
-                <span class="w-2 h-2 rounded-full shrink-0" style="background: var(--accent-color);"></span>
-                <h3 class="text-xs sm:text-sm font-bold text-slate-800">${escapeHtml(subName)}</h3>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
-                  ${subItems.length} Item
-                </span>
-              </div>
-              <span id="subcat-group-chevron-${subKey}" class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center transition-transform duration-200">
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-600"></i>
-              </span>
-            </button>
-
-            <!-- Grid Proyek di dalam Sub-Judul -->
-            <div id="subcat-group-body-${subKey}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-              ${subItems.map(proj => renderProjectCardHTML(proj)).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
+      const subGroupEntries = Object.entries(subGroups);
 
       return `
-        <section class="space-y-4">
-          <!-- Baris Judul Kategori Modern Sistem Dropdown -->
-          <button type="button" onclick="toggleCategoryGroup('${catKey}')" class="w-full glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between gap-3 text-left hover:border-sky-400/60 transition group">
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-200/70">
+          <!-- Baris Judul Kategori Dropdown -->
+          <button type="button" onclick="toggleCategoryGroup('${catKey}')" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
             <div class="flex items-center gap-3">
-              <span class="w-2.5 h-7 rounded-full shrink-0" style="background: var(--accent-color);"></span>
-              <div>
-                <h2 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">${escapeHtml(catName)}</h2>
+              <div class="w-9 h-9 rounded-xl badge-accent flex items-center justify-center shrink-0">
+                <i data-lucide="folder-kanban" class="w-4 h-4"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold badge-accent border">
-                ${items.length} Proyek
-              </span>
+              <div>
+                <h2 class="text-sm sm:text-base font-extrabold theme-text-primary">${catName}</h2>
+                <p class="text-[11px] theme-text-muted">${items.length} proyek tersedia</p>
+              </div>
             </div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-              <span class="hidden sm:inline">Tampilkan / Sembunyikan</span>
-              <span id="cat-group-chevron-${catKey}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center transition-transform duration-200">
-                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-700"></i>
-              </span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full badge-accent">${items.length}</span>
+              <i id="cat-group-chevron-${catKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200"></i>
             </div>
           </button>
 
-          <!-- Konten Proyek & Sub-Judul di dalam Kategori -->
-          <div id="cat-group-body-${catKey}" class="space-y-4 transition-all">
+          <!-- Isi Kategori -->
+          <div id="cat-group-body-${catKey}" class="px-5 pb-5 pt-2 space-y-5 border-t border-slate-200/50">
             ${directItems.length > 0 ? `
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                ${directItems.map(proj => renderProjectCardHTML(proj)).join('')}
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${directItems.map(p => renderProjectCard(p)).join('')}
               </div>
             ` : ''}
-            ${subGroupsHTML}
+
+            ${subGroupEntries.map(([subName, subItems], subIdx) => {
+              const subKey = `${catKey}-sub-${subIdx}`;
+              return `
+                <div class="rounded-2xl theme-surface-subtle border border-slate-200/60 overflow-hidden">
+                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
+                    <div class="flex items-center gap-2.5">
+                      <span class="w-2 h-2 rounded-full btn-accent"></span>
+                      <span class="text-xs sm:text-sm font-bold theme-text-primary">${subName}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-accent">${subItems.length}</span>
+                    </div>
+                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-4 h-4 theme-text-secondary transition-transform duration-200"></i>
+                  </button>
+                  <div id="subcat-group-body-${subKey}" class="p-4 pt-2 border-t border-slate-200/40">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      ${subItems.map(p => renderProjectCard(p)).join('')}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
-        </section>
+        </div>
       `;
     }).join('');
+
+    refreshIconsFast();
   }
 
-  function renderPortalProjectsGrid() {
-    const grid = document.getElementById('portal-projects-grid');
-    if (grid) {
-      grid.innerHTML = getFilteredProjectsHTML();
-      lucide.createIcons();
-    }
+  function renderPortalView() {
+    const mode = getEffectiveThemeMode();
+    const visibleProjects = state.projects.filter(p => p.visibility === 'public' || Boolean(state.currentUser));
+    const categories = ['Semua', ...new Set(visibleProjects.map(p => (p.category || 'Umum').trim()))];
+
+    const heroLogo = state.portalSettings.logoDataUrl
+      ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
+      : `<i data-lucide="sparkles" class="w-7 h-7"></i>`;
+
+    // Jadwalkan pengisian grid setelah container terpasang di DOM
+    requestAnimationFrame(() => renderPortalProjectsGrid());
+
+    return `
+      <div class="space-y-6">
+        <!-- Hero Header Portal -->
+        <section class="glass-panel rounded-3xl p-6 sm:p-7 relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-4">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+                ${heroLogo}
+              </div>
+              <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold theme-text-primary tracking-tight">${state.portalSettings.title}</h1>
+                <p class="text-xs sm:text-sm theme-text-secondary mt-1 max-w-2xl leading-relaxed">${state.portalSettings.subtitle}</p>
+              </div>
+            </div>
+
+            <!-- Saklar Tema Terang / Gelap untuk Pengunjung -->
+            <div class="hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl theme-surface-subtle border border-slate-200/60 self-start sm:self-center shrink-0">
+              <button type="button" onclick="selectThemeMode('light')" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+                <span>Terang</span>
+              </button>
+              <button type="button" onclick="selectThemeMode('dark')" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${mode === 'dark' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+                <span>Gelap</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Category Filter Bar -->
+          <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input
+                type="text"
+                value="${state.searchQuery}"
+                oninput="handleSearchInput(this.value)"
+                placeholder="Cari nama proyek, kategori, atau sub-judul..."
+                class="w-full pl-10 pr-4 py-2.5 text-sm rounded-2xl theme-input border focus:outline-none focus:border-sky-500"
+              />
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              ${categories.map(cat => {
+                const isActive = state.selectedCategory === cat;
+                return `
+                  <button type="button" onclick="setCategory('${cat.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition ${
+                    isActive
+                      ? 'btn-accent text-white shadow-sm'
+                      : 'theme-surface-subtle theme-text-secondary border border-slate-200/60 hover:theme-text-primary'
+                  }">
+                    ${cat}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </section>
+
+        <!-- Daftar Kategori & Proyek (Dropdown Modern) -->
+        <section id="portal-projects-grid" class="space-y-4"></section>
+
+        <!-- Footer -->
+        <footer class="text-center py-4 text-xs theme-text-muted">
+          ${state.portalSettings.footerText}
+        </footer>
+      </div>
+    `;
   }
 
   function renderManageProjectsView() {
-    const sorted = [...state.projects].sort((a, b) => (a.order || 99) - (b.order || 99));
+    const editing = state.editingProjectId
+      ? state.projects.find(p => p.id === state.editingProjectId)
+      : null;
+
+    const existingSubCategories = [...new Set(state.projects.map(p => (p.subCategory || '').trim()).filter(Boolean))];
+
+    const projLogoPreview = editing?.logoDataUrl
+      ? `<img src="${editing.logoDataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`
+      : `<span class="text-[11px] theme-text-muted text-center px-1">Belum ada</span>`;
 
     return `
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-2xl font-extrabold text-slate-900">Kelola Daftar Proyek</h1>
-          <p class="text-xs text-slate-500 mt-0.5">Tambah, ubah urutan, sematkan, atau hapus tautan proyek pada microsite Anda.</p>
-        </div>
-        <button onclick="openProjectModal()" class="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-md transition flex items-center justify-center gap-2">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Tambah Proyek Baru</span>
-        </button>
-      </div>
+      <div class="space-y-6">
+        <!-- Form Tambah / Edit Proyek -->
+        <section class="glass-panel rounded-3xl p-6">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h2 class="text-lg font-extrabold theme-text-primary">${editing ? 'Edit Proyek' : 'Tambah Proyek Baru'}</h2>
+              <p class="text-xs theme-text-secondary">Tambahkan tautan aplikasi web atau dokumen agar muncul di portal</p>
+            </div>
+            ${editing ? `<button onclick="cancelEditProject()" class="text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl">Batal Edit</button>` : ''}
+          </div>
 
-      <div class="glass-panel rounded-3xl overflow-hidden">
-        ${sorted.length === 0 ? `
-          <div class="p-12 text-center">
-            <p class="text-sm font-semibold text-slate-700 mb-1">Belum ada data proyek</p>
-            <p class="text-xs text-slate-500">Klik tombol "Tambah Proyek Baru" di atas untuk mulai mengisi portal.</p>
-          </div>
-        ` : `
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th class="py-3.5 px-5">Proyek</th>
-                  <th class="py-3.5 px-4">Kategori</th>
-                  <th class="py-3.5 px-4">Akses</th>
-                  <th class="py-3.5 px-4">Urutan</th>
-                  <th class="py-3.5 px-5 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200/60 text-xs">
-                ${sorted.map(p => `
-                  <tr class="hover:bg-white/60 transition">
-                    <td class="py-3.5 px-5">
-                      <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg overflow-hidden shrink-0">
-                          ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" class="w-full h-full object-cover" />` : escapeHtml(p.icon || '🌐')}
-                        </div>
-                        <div>
-                          <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                            <span>${escapeHtml(p.title)}</span>
-                            ${p.isPinned ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px]">Pin</span>' : ''}
-                          </div>
-                          <a href="${escapeHtml(p.url)}" target="_blank" class="text-[11px] text-accent hover:underline truncate max-w-[220px] block">${escapeHtml(p.url)}</a>
-                        </div>
+          <form onsubmit="saveProject(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">Nama Proyek *</label>
+              <input type="text" id="proj-title" required value="${editing ? editing.title : ''}" placeholder="Contoh: Portal Akademik" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">URL / Tautan Tujuan *</label>
+              <input type="text" id="proj-url" required value="${editing ? editing.url : ''}" placeholder="https://aplikasi-anda.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">Deskripsi Singkat *</label>
+              <input type="text" id="proj-desc" required value="${editing ? editing.description : ''}" placeholder="Jelaskan kegunaan proyek dalam 1-2 kalimat..." class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">Kategori Utama</label>
+              <input type="text" id="proj-category" list="category-suggestions" value="${editing ? editing.category : 'Aplikasi Web'}" placeholder="Aplikasi Web / Administrasi / Pembelajaran" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+              <datalist id="category-suggestions">
+                <option value="Aplikasi Web">
+                <option value="Administrasi">
+                <option value="Pembelajaran">
+                <option value="Portofolio">
+              </datalist>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">Sub-Judul / Sub-Kategori (Opsional)</label>
+              <input type="text" id="proj-subcategory" list="subcategory-suggestions" value="${editing?.subCategory || ''}" placeholder="Contoh: Kurikulum, Kesiswaan, Keuangan..." class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+              <datalist id="subcategory-suggestions">
+                <option value="Kurikulum">
+                <option value="Kesiswaan">
+                <option value="Keuangan & Aset">
+                <option value="Kepegawaian">
+                ${existingSubCategories.map(sc => `<option value="${sc}">`).join('')}
+              </datalist>
+            </div>
+
+            <!-- Live Upload Logo Proyek dari Desktop -->
+            <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
+              <label class="block text-xs font-bold theme-text-primary mb-2">Logo / Gambar Proyek (Live Upload Desktop)</label>
+              <div class="flex flex-wrap items-center gap-4">
+                <div id="proj-logo-preview" class="w-14 h-14 rounded-2xl theme-input border flex items-center justify-center overflow-hidden shrink-0">
+                  ${projLogoPreview}
+                </div>
+                <div class="flex-1 min-w-[200px] space-y-2">
+                  <input type="hidden" id="proj-logo-data" value="${editing?.logoDataUrl || ''}" />
+                  <div class="flex flex-wrap items-center gap-2">
+                    <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                      <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                      <span>Pilih Gambar dari Komputer</span>
+                      <input type="file" accept="image/*" onchange="handleProjectLogoUpload(this)" class="hidden" />
+                    </label>
+                    <button type="button" onclick="clearProjectLogo()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                      Hapus Gambar
+                    </button>
+                  </div>
+                  <p class="text-[11px] theme-text-muted">Jika gambar tidak diunggah, kartu akan otomatis menggunakan Ikon Emoji di bawah.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold theme-text-secondary mb-1.5">Ikon Cadangan (Emoji)</label>
+                <input type="text" id="proj-icon" value="${editing ? editing.icon : '🚀'}" placeholder="🚀" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500 text-center" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold theme-text-secondary mb-1.5">Urutan</label>
+                <input type="number" id="proj-order" value="${editing ? editing.order : state.projects.length + 1}" min="1" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">Visibilitas Akses</label>
+              <select id="proj-visibility" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500">
+                <option value="public" ${editing?.visibility === 'public' ? 'selected' : ''}>Publik (Tampil untuk Semua Pengunjung)</option>
+                <option value="private" ${editing?.visibility === 'private' ? 'selected' : ''}>Privat (Hanya User / Admin yang Login)</option>
+              </select>
+            </div>
+
+            <div class="flex items-center pt-2">
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="proj-pinned" ${editing?.isPinned ? 'checked' : ''} class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500" />
+                <span class="text-xs font-bold theme-text-primary">Sematkan di Paling Atas (Pinned)</span>
+              </label>
+            </div>
+
+            <div class="sm:col-span-2 pt-2">
+              <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl btn-accent text-white text-xs font-bold transition shadow-md flex items-center justify-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>${editing ? 'Simpan Perubahan Proyek' : 'Simpan Proyek ke Portal'}</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Daftar Proyek Tersimpan -->
+        <section class="glass-panel rounded-3xl p-6">
+          <h3 class="text-base font-extrabold theme-text-primary mb-4">Daftar Proyek Terdaftar (${state.projects.length})</h3>
+          ${state.projects.length === 0 ? `
+            <p class="text-xs theme-text-muted py-6 text-center">Belum ada proyek yang ditambahkan.</p>
+          ` : `
+            <div class="space-y-3">
+              ${state.projects.map(p => `
+                <div class="p-4 rounded-2xl theme-input border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl theme-surface-subtle flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                      ${p.logoDataUrl ? `<img src="${p.logoDataUrl}" class="w-full h-full object-cover" />` : (p.icon || '🚀')}
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-sm theme-text-primary">${p.title}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full theme-surface-subtle theme-text-secondary">${p.category}${p.subCategory ? ` › ${p.subCategory}` : ''}</span>
+                        ${p.visibility === 'private' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400">Privat</span>` : ''}
                       </div>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">${escapeHtml(p.category)}</span>
-                      ${p.subCategory ? `<div class="text-[10px] text-accent font-semibold mt-1">↳ ${escapeHtml(p.subCategory)}</div>` : ''}
-                    </td>
-                    <td class="py-3.5 px-4">
-                      ${p.visibility === 'private' 
-                        ? '<span class="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-semibold">Privat</span>' 
-                        : '<span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold">Publik</span>'}
-                    </td>
-                    <td class="py-3.5 px-4 font-semibold text-slate-600">#${p.order || 1}</td>
-                    <td class="py-3.5 px-5 text-right">
-                      <div class="inline-flex items-center gap-1.5">
-                        <button onclick="openProjectModal('${p.id}')" class="p-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-600 transition" title="Edit">
-                          <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button onclick="deleteProject('${p.id}', '${escapeHtml(p.title)}')" class="p-2 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 transition" title="Hapus">
-                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `}
+                      <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 self-end sm:self-center">
+                    <button onclick="editProject('${p.id}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1">
+                      <i data-lucide="edit-3" class="w-3.5 h-3.5"></i><span>Edit</span>
+                    </button>
+                    ${state.currentUser?.role === 'admin' ? `
+                      <button onclick="deleteProject('${p.id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </section>
       </div>
     `;
   }
 
   function renderManageUsersView() {
     return `
-      <div class="mb-6">
-        <h1 class="text-2xl font-extrabold text-slate-900">Manajemen Akun User / Kontributor</h1>
-        <p class="text-xs text-slate-500 mt-0.5">Buat akun berbasis Username & Password di Firestore untuk tim atau anggota yang membutuhkan akses proyek privat.</p>
-      </div>
+      <div class="space-y-6">
+        <section class="glass-panel rounded-3xl p-6">
+          <h2 class="text-lg font-extrabold theme-text-primary mb-1">Kelola Akun User / Kontributor</h2>
+          <p class="text-xs theme-text-secondary mb-5">Akun ini digunakan untuk login non-Admin (validasi Firestore) agar dapat melihat proyek privat atau ikut mengelola tautan.</p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Form Tambah User -->
-        <div class="glass-panel rounded-3xl p-6 h-fit">
-          <h3 class="text-sm font-bold text-slate-900 mb-4">Tambah Akun Baru</h3>
-          <form onsubmit="handleAddUser(event)" class="space-y-3.5">
+          <form onsubmit="addUserAccount(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
-              <input type="text" id="new-user-name" required placeholder="Contoh: Rina Wijaya" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500" />
+              <label class="block text-xs font-bold theme-text-secondary mb-1">Nama Lengkap</label>
+              <input type="text" id="new-user-name" required placeholder="Budi Santoso" class="w-full px-3.5 py-2 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Username / ID Login</label>
-              <input type="text" id="new-user-username" required placeholder="Contoh: rina2026" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500" />
+              <label class="block text-xs font-bold theme-text-secondary mb-1">ID / Username</label>
+              <input type="text" id="new-user-username" required placeholder="budi01" class="w-full px-3.5 py-2 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-              <input type="text" id="new-user-password" required placeholder="Minimal 4 karakter" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500" />
+              <label class="block text-xs font-bold theme-text-secondary mb-1">Password</label>
+              <input type="text" id="new-user-password" required placeholder="Minimal 4 karakter" class="w-full px-3.5 py-2 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Peran Akses</label>
-              <select id="new-user-role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-brand-500">
-                <option value="contributor">Kontributor (Lihat Privat & Kelola Proyek)</option>
-                <option value="viewer">Viewer (Hanya Lihat Proyek Privat)</option>
+              <label class="block text-xs font-bold theme-text-secondary mb-1">Hak Akses</label>
+              <select id="new-user-role" class="w-full px-3.5 py-2 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500">
+                <option value="contributor">Kontributor (Lihat Privat & Tambah)</option>
+                <option value="viewer">Viewer (Hanya Lihat Privat)</option>
               </select>
             </div>
-            <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition">
-              Simpan Akun User
-            </button>
+            <div class="sm:col-span-2 lg:col-span-4 pt-1">
+              <button type="submit" class="px-5 py-2.5 rounded-xl btn-accent text-white text-xs font-bold transition shadow-sm inline-flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>Tambah Akun User</span>
+              </button>
+            </div>
           </form>
-        </div>
+        </section>
 
-        <!-- Daftar User Terdaftar -->
-        <div class="lg:col-span-2 glass-panel rounded-3xl p-6">
-          <h3 class="text-sm font-bold text-slate-900 mb-4">Daftar User Terdaftar (${state.users.length})</h3>
+        <section class="glass-panel rounded-3xl p-6">
+          <h3 class="text-base font-extrabold theme-text-primary mb-4">Daftar Akun Terdaftar (${state.users.length})</h3>
           ${state.users.length === 0 ? `
-            <div class="text-center py-10 text-xs text-slate-400">Belum ada akun user yang dibuat oleh Admin.</div>
+            <p class="text-xs theme-text-muted py-6 text-center">Belum ada akun user/kontributor yang dibuat.</p>
           ` : `
-            <div class="space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               ${state.users.map(u => `
-                <div class="p-4 rounded-2xl bg-white/80 border border-slate-200/70 flex items-center justify-between gap-3">
+                <div class="p-4 rounded-2xl theme-input border flex items-center justify-between">
                   <div>
-                    <div class="text-xs font-bold text-slate-900">${escapeHtml(u.name)}</div>
-                    <div class="text-[11px] text-slate-500 mt-0.5">
-                      ID: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">${escapeHtml(u.username)}</code> • 
-                      Pass: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">${escapeHtml(u.password)}</code> • 
-                      <span class="capitalize font-semibold text-brand-600">${escapeHtml(u.role)}</span>
-                    </div>
+                    <div class="font-bold text-sm theme-text-primary">${u.name}</div>
+                    <div class="text-xs theme-text-muted mt-0.5">ID: <code class="theme-surface-subtle px-1.5 py-0.5 rounded">${u.username}</code> • Role: <b>${u.role}</b></div>
                   </div>
-                  <button onclick="deleteUser('${u.id}', '${escapeHtml(u.name)}')" class="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition" title="Hapus User">
+                  <button onclick="deleteUserAccount('${u.id}')" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition" title="Hapus User">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
               `).join('')}
             </div>
           `}
-        </div>
+        </section>
       </div>
     `;
   }
 
   function renderSettingsView() {
+    const currentAccent = state.portalSettings.accentColor || 'sky';
+
     const accents = [
       { id: 'sky', label: 'Biru Langit', hex: '#0ea5e9' },
-      { id: 'emerald', label: 'Zamrud', hex: '#10b981' },
-      { id: 'violet', label: 'Ungu Royal', hex: '#8b5cf6' },
+      { id: 'emerald', label: 'Hijau Zamrud', hex: '#10b981' },
+      { id: 'indigo', label: 'Indigo Modern', hex: '#6366f1' },
       { id: 'rose', label: 'Merah Mawar', hex: '#f43f5e' },
-      { id: 'amber', label: 'Emas Hangat', hex: '#f59e0b' },
-      { id: 'slate', label: 'Monokrom', hex: '#334155' }
+      { id: 'amber', label: 'Kuning Emas', hex: '#f59e0b' },
+      { id: 'slate', label: 'Hitam Elegan', hex: '#334155' }
     ];
-    const curAccent = state.portalSettings.accentColor || 'sky';
+
+    const logoPreview = state.portalSettings.logoDataUrl
+      ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo Portal" class="w-full h-full object-cover" />`
+      : `<i data-lucide="layers" class="w-7 h-7"></i>`;
+
+    const sidebarBannerPreview = state.portalSettings.sidebarBannerDataUrl
+      ? `<img src="${state.portalSettings.sidebarBannerDataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`
+      : `
+        <div class="flex flex-col items-center justify-center text-center p-3 theme-text-muted">
+          <i data-lucide="image" class="w-6 h-6 mb-1 opacity-70"></i>
+          <span class="text-[10px] font-semibold">Belum ada banner</span>
+        </div>
+      `;
 
     return `
-      <div class="max-w-2xl">
-        <div class="mb-6">
-          <h1 class="text-2xl font-extrabold text-slate-900">Pengaturan Warna & Identitas Microsite</h1>
-          <p class="text-xs text-slate-500 mt-0.5">Pilih warna aksen dengan kontras otomatis, serta unggah logo langsung dari desktop.</p>
-        </div>
+      <section class="glass-panel rounded-3xl p-6 max-w-2xl">
+        <h2 class="text-lg font-extrabold theme-text-primary mb-1">Pengaturan Identitas, Logo & Warna Portal</h2>
+        <p class="text-xs theme-text-secondary mb-5">Sesuaikan logo web dari desktop, foto banner portrait sidebar, warna aksen utama, dan identitas microsite Anda.</p>
 
-        <div class="glass-panel rounded-3xl p-6 sm:p-8">
-          <form onsubmit="handleSaveSettings(event)" class="space-y-5">
-            <!-- Pemilih Warna Aksen -->
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-2">Warna Aksen Utama (Kontras Huruf Terjamin)</label>
-              <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                ${accents.map(a => `
-                  <button type="button" onclick="selectAccentColor('${a.id}')" class="p-2.5 rounded-2xl border text-[11px] font-semibold flex flex-col items-center gap-1.5 transition ${
-                    curAccent === a.id ? 'ring-2 ring-offset-2 ring-slate-900 bg-white text-slate-900' : 'bg-white/70 text-slate-600 border-slate-200'
-                  }">
-                    <span class="w-6 h-6 rounded-full shadow-inner" style="background-color: ${a.hex};"></span>
-                    <span>${a.label.split(' ')[0]}</span>
+        <form onsubmit="savePortalSettings(event)" class="space-y-5">
+          <!-- Live Upload Logo Web dari Desktop -->
+          <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
+            <label class="block text-xs font-bold theme-text-primary mb-2">Logo Utama Website (Live Upload Desktop)</label>
+            <div class="flex flex-wrap items-center gap-4">
+              <div id="set-logo-preview" class="w-16 h-16 rounded-2xl btn-accent text-white flex items-center justify-center overflow-hidden shadow-md shrink-0">
+                ${logoPreview}
+              </div>
+              <div class="space-y-2">
+                <input type="hidden" id="set-logo-data" value="${state.portalSettings.logoDataUrl || ''}" />
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="image-plus" class="w-3.5 h-3.5"></i>
+                    <span>Upload Logo dari Komputer</span>
+                    <input type="file" accept="image/*" onchange="handlePortalLogoUpload(this)" class="hidden" />
+                  </label>
+                  <button type="button" onclick="clearPortalLogo()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                    Reset Default
                   </button>
-                `).join('')}
+                </div>
+                <p class="text-[11px] theme-text-muted">Format PNG/JPG/WebP otomatis dioptimalkan agar ringan dimuat.</p>
               </div>
             </div>
+          </div>
 
-            <!-- Live Upload Logo Website dari Desktop -->
-            <div class="p-4 rounded-2xl bg-slate-100/80 border border-slate-200/70 flex items-center justify-between gap-4">
-              <div class="flex items-center gap-3.5">
-                <div id="settings-logo-preview" class="w-14 h-14 rounded-2xl btn-accent flex items-center justify-center text-2xl shadow-md overflow-hidden shrink-0">
-                  ${state.portalSettings.logoUrl 
-                    ? `<img src="${escapeHtml(state.portalSettings.logoUrl)}" alt="Logo Web" class="w-full h-full object-cover" />` 
-                    : '🚀'}
-                </div>
-                <div>
-                  <div class="text-xs font-bold text-slate-900">Logo Utama Website</div>
-                  <div class="text-[11px] text-slate-500">Upload langsung dari desktop (PNG, JPG, WebP)</div>
-                </div>
+          <!-- Live Upload Banner Foto Portrait Besar di Bawah Beranda Portal -->
+          <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
+            <label class="block text-xs font-bold theme-text-primary mb-2">Banner Foto Portrait Besar (Bawah Menu Beranda Portal)</label>
+            <div class="flex flex-wrap items-center gap-4">
+              <div id="set-sidebar-banner-preview" class="w-28 aspect-[3/4] rounded-2xl theme-input border flex items-center justify-center overflow-hidden shadow-md shrink-0">
+                ${sidebarBannerPreview}
               </div>
-              <div class="flex items-center gap-2">
-                <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                  <span>Pilih File</span>
-                  <input type="file" accept="image/*" onchange="handlePortalLogoUpload(event)" class="hidden" />
-                </label>
-                ${state.portalSettings.logoUrl ? `
-                  <button type="button" onclick="clearPortalLogo()" class="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100" title="Hapus Logo">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <div class="flex-1 min-w-[200px] space-y-2">
+                <input type="hidden" id="set-sidebar-banner-data" value="${state.portalSettings.sidebarBannerDataUrl || ''}" />
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                    <span>Upload Foto Portrait Live</span>
+                    <input type="file" accept="image/*" onchange="handleSidebarBannerUpload(this)" class="hidden" />
+                  </label>
+                  <button type="button" onclick="clearSidebarBanner()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                    Hapus Banner
                   </button>
-                ` : ''}
+                </div>
+                <p class="text-[11px] theme-text-muted">Tampil dengan rasio portrait besar & efek kilau modern tepat di bawah tombol Beranda Portal. Klik "Simpan Semua Pengaturan" agar tersimpan permanen.</p>
               </div>
             </div>
+          </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Judul Utama Microsite</label>
-              <input type="text" id="set-title" required value="${escapeHtml(state.portalSettings.title)}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
+          <!-- Pilihan Warna Aksen -->
+          <div>
+            <label class="block text-xs font-bold theme-text-secondary mb-2">Warna Aksen Utama</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              ${accents.map(a => `
+                <button type="button" onclick="selectAccentColor('${a.id}')" class="p-2.5 rounded-2xl theme-input border flex items-center gap-2.5 text-left transition ${currentAccent === a.id ? 'ring-2 ring-sky-500 font-bold' : 'opacity-85 hover:opacity-100'}">
+                  <span class="w-5 h-5 rounded-full shrink-0 shadow-inner" style="background-color: ${a.hex};"></span>
+                  <span class="text-xs theme-text-primary truncate">${a.label}</span>
+                </button>
+              `).join('')}
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi Singkat / Bio Portal</label>
-              <textarea id="set-subtitle" rows="3" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500">${escapeHtml(state.portalSettings.subtitle)}</textarea>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Teks Footer Bawah</label>
-              <input type="text" id="set-footer" required value="${escapeHtml(state.portalSettings.footerText)}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500" />
-            </div>
-            <div class="pt-2">
-              <button type="submit" class="px-6 py-3 rounded-xl btn-accent text-xs font-semibold shadow-md transition">
-                Simpan Perubahan Tampilan
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Judul Utama Microsite</label>
+            <input type="text" id="set-title" required value="${state.portalSettings.title}" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Subjudul / Deskripsi Singkat</label>
+            <textarea id="set-subtitle" rows="2" required class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500">${state.portalSettings.subtitle}</textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Teks Footer</label>
+            <input type="text" id="set-footer" required value="${state.portalSettings.footerText}" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+          </div>
+          <div class="pt-1">
+            <button type="submit" class="px-6 py-2.5 rounded-xl btn-accent text-white text-xs font-bold transition shadow-md inline-flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>Simpan Semua Pengaturan</span>
+            </button>
+          </div>
+        </form>
+      </section>
     `;
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
   }
 
   function renderAll() {
     applyThemeAndColors();
 
-    // Banner Mode Preview
+    // Tampilkan banner preview HANYA jika IS_PREVIEW === true
     const banner = document.getElementById('preview-banner');
     if (IS_PREVIEW) {
       banner.classList.remove('hidden');
@@ -1864,20 +1904,8 @@ const firebaseConfig = {
       banner.classList.add('hidden');
     }
 
-    // Update Brand Titles, Logos & Footer
-    const logoHtml = state.portalSettings.logoUrl
-      ? `<img src="${escapeHtml(state.portalSettings.logoUrl)}" alt="Logo" class="w-full h-full object-cover" />`
-      : '🚀';
-    document.getElementById('sidebar-logo-box').innerHTML = logoHtml;
-    document.getElementById('mobile-logo-box').innerHTML = logoHtml;
-    document.getElementById('sidebar-brand-title').textContent = state.portalSettings.title;
-    document.getElementById('mobile-brand-title').textContent = state.portalSettings.title;
-    document.getElementById('portal-footer-text').textContent = state.portalSettings.footerText;
-
-    // Render Navigation
     renderNavigation();
 
-    // Render Active View
     const container = document.getElementById('view-container');
     if (state.activeMenu === 'manage-projects' && state.currentUser) {
       container.innerHTML = renderManageProjectsView();
@@ -1890,8 +1918,8 @@ const firebaseConfig = {
       container.innerHTML = renderPortalView();
     }
 
-    // Re-initialize Lucide Icons
-    lucide.createIcons();
+    // Re-initialize Lucide Icons asynchronously for instant UI response
+    refreshIconsFast();
   }
 
   // Jalankan Aplikasi
@@ -1902,3 +1930,6 @@ const firebaseConfig = {
 </script>
 </body>
 </html>
+```
+
+Fungsi `renderPortalView()` dan `renderPortalProjectsGrid()` sudah dipulihkan sepenuhnya pada `index.html`, sehingga tampilan halaman utama beserta kategori dropdown, sub-kategori, pemilih tema Terang/Gelap pengunjung, dan slot banner portrait di bawah menu Beranda Portal kembali tampil normal.
