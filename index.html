@@ -56,6 +56,12 @@
     [data-accent="rose"]    { --accent-color: #f43f5e; --accent-hover: #e11d48; --accent-soft: rgba(244, 63, 94, 0.14); }
     [data-accent="amber"]   { --accent-color: #f59e0b; --accent-hover: #d97706; --accent-soft: rgba(245, 158, 11, 0.15); }
     [data-accent="slate"]   { --accent-color: #334155; --accent-hover: #1e293b; --accent-soft: rgba(51, 65, 85, 0.14); }
+    [data-accent="violet"]  { --accent-color: #8b5cf6; --accent-hover: #7c3aed; --accent-soft: rgba(139, 92, 246, 0.15); }
+    [data-accent="cyan"]    { --accent-color: #06b6d4; --accent-hover: #0891b2; --accent-soft: rgba(6, 182, 212, 0.15); }
+    [data-accent="fuchsia"] { --accent-color: #d946ef; --accent-hover: #c026d3; --accent-soft: rgba(217, 70, 239, 0.15); }
+    [data-accent="teal"]    { --accent-color: #14b8a6; --accent-hover: #0d9488; --accent-soft: rgba(20, 184, 166, 0.15); }
+    [data-accent="orange"]  { --accent-color: #f97316; --accent-hover: #ea580c; --accent-soft: rgba(249, 115, 22, 0.15); }
+    [data-accent="aurora"]  { --accent-color: #6366f1; --accent-hover: #4f46e5; --accent-soft: rgba(99, 102, 241, 0.16); }
 
     * {
       box-sizing: border-box;
@@ -135,15 +141,72 @@
     .theme-input::placeholder { color: var(--text-muted); }
 
     .btn-accent {
-      background-color: var(--accent-color);
+      background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
       color: #ffffff;
     }
     .btn-accent:hover {
-      background-color: var(--accent-hover);
+      filter: brightness(1.06);
+      box-shadow: 0 10px 24px -8px var(--accent-color);
+    }
+    [data-accent="aurora"] .btn-accent {
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #ec4899 100%);
+    }
+    [data-accent="violet"] .btn-accent {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    }
+    [data-accent="fuchsia"] .btn-accent {
+      background: linear-gradient(135deg, #d946ef 0%, #f43f5e 100%);
+    }
+    [data-accent="cyan"] .btn-accent {
+      background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+    }
+    [data-accent="emerald"] .btn-accent {
+      background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+    }
+    [data-accent="orange"] .btn-accent {
+      background: linear-gradient(135deg, #f97316 0%, #f43f5e 100%);
     }
     .badge-accent {
       background-color: var(--accent-soft);
       color: var(--accent-color);
+    }
+
+    /* World-Class Ambient Mesh Glow */
+    .hero-mesh-accent {
+      position: relative;
+    }
+    .hero-mesh-accent::before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -40px;
+      width: 240px;
+      height: 240px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-mesh-accent::after {
+      content: "";
+      position: absolute;
+      bottom: -70px;
+      left: 15%;
+      width: 260px;
+      height: 200px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.09) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-mesh-accent > * {
+      position: relative;
+      z-index: 1;
+    }
+    .title-gradient-world {
+      background: linear-gradient(120deg, var(--text-primary) 25%, var(--accent-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     /* Pop-up Modal Spring Animation */
@@ -358,7 +421,7 @@
         </div>
         <div class="overflow-hidden">
           <h2 id="sidebar-portal-title" class="font-bold text-sm theme-text-primary truncate">Portal Proyek</h2>
-          <p class="text-[11px] theme-text-muted font-medium">Microsite Hub 1-Klik</p>
+          <p id="sidebar-portal-tagline" class="text-[11px] theme-text-muted font-medium truncate">Microsite Hub 1-Klik</p>
         </div>
       </div>
 
@@ -405,16 +468,13 @@
         </div>
         <div class="min-w-0">
           <span id="mobile-portal-title" class="font-extrabold text-base theme-text-primary truncate block">Portal Proyek</span>
-          <span class="text-xs theme-text-muted font-medium block">Microsite Hub 1-Klik</span>
+          <span id="mobile-portal-tagline" class="text-xs theme-text-muted font-medium truncate block">Microsite Hub 1-Klik</span>
         </div>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="toggleVisitorTheme()" title="Ganti Tema Terang/Gelap" class="p-2.5 rounded-2xl theme-surface-subtle theme-text-primary border border-slate-200/60 hover:opacity-80 transition">
           <i id="mobile-theme-icon" data-lucide="moon" class="w-5 h-5"></i>
         </button>
-        <div id="mobile-top-auth">
-          <!-- Tombol login/logout mobile -->
-        </div>
       </div>
     </div>
 
@@ -600,20 +660,22 @@ const firebaseConfig = {
     currentUser: null, // { role: 'admin' | 'contributor' | 'viewer', name: string, identifier: string }
     portalSettings: IS_PREVIEW ? {
       title: 'Portal Hub Proyek Digital',
+      tagline: 'Microsite Hub 1-Klik',
       subtitle: 'Kumpulan seluruh aplikasi web, sistem informasi, dan tautan kerja dalam satu klik.',
       footerText: '© 2026 Portal Microsite Proyek — Akses Cepat & Terpusat',
       runningText: 'Selamat datang di Portal Hub Proyek Digital — Pilih kategori atau cari aplikasi yang Anda butuhkan dalam satu klik!',
-      accentColor: 'sky',
+      accentColor: 'aurora',
       themeMode: 'light',
       logoDataUrl: '',
       loadingLogoDataUrl: '',
       sidebarBannerDataUrl: ''
     } : {
       title: 'Portal Microsite Proyek',
+      tagline: 'Microsite Hub 1-Klik',
       subtitle: 'Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
       footerText: '© 2026 Portal Microsite Proyek',
       runningText: 'Selamat datang di Portal Microsite Proyek — Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
-      accentColor: 'sky',
+      accentColor: 'aurora',
       themeMode: 'light',
       logoDataUrl: '',
       loadingLogoDataUrl: '',
@@ -1215,10 +1277,11 @@ const firebaseConfig = {
         const d = docSnap.data();
         state.portalSettings = {
           title: d.title || 'Portal Microsite Proyek',
+          tagline: d.tagline || 'Microsite Hub 1-Klik',
           subtitle: d.subtitle || '',
           footerText: d.footerText || '',
           runningText: d.runningText || 'Selamat datang di Portal Microsite Proyek — Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
-          accentColor: d.accentColor || 'sky',
+          accentColor: d.accentColor || 'aurora',
           themeMode: d.themeMode || 'light',
           logoDataUrl: d.logoDataUrl || '',
           loadingLogoDataUrl: d.loadingLogoDataUrl || '',
@@ -1341,28 +1404,29 @@ const firebaseConfig = {
   window.savePortalSettings = async (e) => {
     e.preventDefault();
     const title = document.getElementById('set-title').value.trim();
+    const tagline = document.getElementById('set-tagline')?.value.trim() || 'Microsite Hub 1-Klik';
     const subtitle = document.getElementById('set-subtitle').value.trim();
     const footerText = document.getElementById('set-footer').value.trim();
     const runningText = document.getElementById('set-running-text')?.value.trim() || 'Selamat datang di Portal Microsite Proyek!';
     const logoDataUrl = document.getElementById('set-logo-data').value || '';
     const loadingLogoDataUrl = document.getElementById('set-loading-logo-data')?.value || '';
     const sidebarBannerDataUrl = document.getElementById('set-sidebar-banner-data')?.value || '';
-    const accentColor = state.portalSettings.accentColor || 'sky';
+    const accentColor = state.portalSettings.accentColor || 'aurora';
     const themeMode = state.portalSettings.themeMode || 'light';
 
     if (IS_PREVIEW) {
-      state.portalSettings = { title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl };
+      state.portalSettings = { title, tagline, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl };
       applyThemeAndColors();
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo loading, teks berjalan, banner & tema portal telah diperbarui.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, tulisan tagline, logo loading, teks berjalan, banner & tema portal telah diperbarui.');
       return;
     }
 
     try {
       await setDoc(doc(db, 'portal_settings', 'main'), {
-        title, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
+        title, tagline, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
       }, { merge: true });
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo loading, teks berjalan, banner & tema portal berhasil disimpan.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, tulisan tagline, logo loading, teks berjalan, banner & tema portal berhasil disimpan.');
     } catch (err) {
       showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
     }
@@ -1520,7 +1584,33 @@ const firebaseConfig = {
     }).join('');
 
     const sidebarAuth = document.getElementById('sidebar-auth-box');
-    const mobileTopAuth = document.getElementById('mobile-top-auth');
+
+    mobileNav.innerHTML = [
+      ...menus.map(m => {
+        const active = state.activeMenu === m.id;
+        return `
+          <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 ${
+            active ? 'badge-accent font-extrabold' : 'theme-text-muted font-semibold'
+          }">
+            <i data-lucide="${m.icon}" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs leading-tight text-center">${m.label.split(' ')[0]}</span>
+          </button>
+        `;
+      }),
+      state.currentUser
+        ? `
+          <button onclick="handleLogout()" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 text-red-500 font-bold hover:bg-red-500/10">
+            <i data-lucide="log-out" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs leading-tight text-center">Keluar</span>
+          </button>
+        `
+        : `
+          <button onclick="openLoginModal()" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 theme-text-primary font-bold hover:bg-slate-200/50">
+            <i data-lucide="log-in" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs leading-tight text-center">Login</span>
+          </button>
+        `
+    ].join('');
 
     if (state.currentUser) {
       const roleBadge = state.currentUser.role === 'admin' ? 'Admin' : 'User';
@@ -1537,12 +1627,6 @@ const firebaseConfig = {
           <span>Keluar (Logout)</span>
         </button>
       `;
-      mobileTopAuth.innerHTML = `
-        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-red-500/10 text-red-500 text-xs sm:text-sm font-bold">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-          <span>Keluar</span>
-        </button>
-      `;
     } else {
       sidebarAuth.innerHTML = `
         <button onclick="openLoginModal()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs font-bold transition shadow-md">
@@ -1550,16 +1634,14 @@ const firebaseConfig = {
           <span>Masuk Admin / User</span>
         </button>
       `;
-      mobileTopAuth.innerHTML = `
-        <button onclick="openLoginModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold shadow-sm">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>Masuk</span>
-        </button>
-      `;
     }
 
     document.getElementById('sidebar-portal-title').textContent = state.portalSettings.title;
     document.getElementById('mobile-portal-title').textContent = state.portalSettings.title;
+    const sidebarTaglineEl = document.getElementById('sidebar-portal-tagline');
+    if (sidebarTaglineEl) sidebarTaglineEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+    const mobileTaglineEl = document.getElementById('mobile-portal-tagline');
+    if (mobileTaglineEl) mobileTaglineEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
 
     const runningEl = document.getElementById('dashboard-running-text');
     if (runningEl) {
@@ -1810,14 +1892,18 @@ const firebaseConfig = {
     return `
       <div class="space-y-6 w-full">
         <!-- Hero Header Portal -->
-        <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden">
+        <section class="glass-panel hero-mesh-accent rounded-3xl p-5 sm:p-7 relative overflow-hidden">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-start sm:items-center gap-4">
               <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
                 ${heroLogo}
               </div>
               <div>
-                <h1 class="text-xl sm:text-3xl font-extrabold theme-text-primary tracking-tight leading-snug">${state.portalSettings.title}</h1>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full badge-accent text-[11px] font-bold mb-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full btn-accent"></span>
+                  <span>${state.portalSettings.tagline || 'Microsite Hub 1-Klik'}</span>
+                </div>
+                <h1 class="text-xl sm:text-3xl font-extrabold title-gradient-world tracking-tight leading-snug">${state.portalSettings.title}</h1>
                 <p class="text-sm sm:text-base theme-text-secondary mt-1.5 max-w-3xl leading-relaxed">${state.portalSettings.subtitle}</p>
               </div>
             </div>
@@ -2098,15 +2184,21 @@ const firebaseConfig = {
   }
 
   function renderSettingsView() {
-    const currentAccent = state.portalSettings.accentColor || 'sky';
+    const currentAccent = state.portalSettings.accentColor || 'aurora';
 
     const accents = [
-      { id: 'sky', label: 'Biru Langit', hex: '#0ea5e9' },
-      { id: 'emerald', label: 'Hijau Zamrud', hex: '#10b981' },
-      { id: 'indigo', label: 'Indigo Modern', hex: '#6366f1' },
-      { id: 'rose', label: 'Merah Mawar', hex: '#f43f5e' },
-      { id: 'amber', label: 'Kuning Emas', hex: '#f59e0b' },
-      { id: 'slate', label: 'Hitam Elegan', hex: '#334155' }
+      { id: 'aurora', label: 'Aurora Gradien', bg: 'linear-gradient(135deg, #0ea5e9, #6366f1, #ec4899)' },
+      { id: 'sky', label: 'Biru Langit', bg: 'linear-gradient(135deg, #0ea5e9, #0284c7)' },
+      { id: 'violet', label: 'Ungu Royal', bg: 'linear-gradient(135deg, #8b5cf6, #6366f1)' },
+      { id: 'cyan', label: 'Cyan Samudra', bg: 'linear-gradient(135deg, #06b6d4, #3b82f6)' },
+      { id: 'emerald', label: 'Hijau Zamrud', bg: 'linear-gradient(135deg, #10b981, #0d9488)' },
+      { id: 'teal', label: 'Teal Tosca', bg: 'linear-gradient(135deg, #14b8a6, #0f766e)' },
+      { id: 'fuchsia', label: 'Magenta Neon', bg: 'linear-gradient(135deg, #d946ef, #f43f5e)' },
+      { id: 'rose', label: 'Merah Mawar', bg: 'linear-gradient(135deg, #f43f5e, #e11d48)' },
+      { id: 'orange', label: 'Oranye Senja', bg: 'linear-gradient(135deg, #f97316, #f43f5e)' },
+      { id: 'amber', label: 'Kuning Emas', bg: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+      { id: 'indigo', label: 'Indigo Modern', bg: 'linear-gradient(135deg, #6366f1, #4f46e5)' },
+      { id: 'slate', label: 'Hitam Elegan', bg: 'linear-gradient(135deg, #334155, #0f172a)' }
     ];
 
     const logoPreview = state.portalSettings.logoDataUrl
@@ -2206,11 +2298,11 @@ const firebaseConfig = {
 
           <!-- Pilihan Warna Aksen -->
           <div>
-            <label class="block text-xs font-bold theme-text-secondary mb-2">Warna Aksen Utama</label>
+            <label class="block text-xs font-bold theme-text-secondary mb-2">Pilihan Palet Warna & Gradien Modern</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               ${accents.map(a => `
                 <button type="button" onclick="selectAccentColor('${a.id}')" class="p-2.5 rounded-2xl theme-input border flex items-center gap-2.5 text-left transition ${currentAccent === a.id ? 'ring-2 ring-sky-500 font-bold' : 'opacity-85 hover:opacity-100'}">
-                  <span class="w-5 h-5 rounded-full shrink-0 shadow-inner" style="background-color: ${a.hex};"></span>
+                  <span class="w-5 h-5 rounded-full shrink-0 shadow-inner" style="background: ${a.bg};"></span>
                   <span class="text-xs theme-text-primary truncate">${a.label}</span>
                 </button>
               `).join('')}
@@ -2218,8 +2310,12 @@ const firebaseConfig = {
           </div>
 
           <div>
-            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Judul Utama Microsite</label>
+            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Judul Utama Brand / Microsite (Contoh: KARYA_SAYA)</label>
             <input type="text" id="set-title" required value="${state.portalSettings.title}" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold theme-text-secondary mb-1.5">Sub-Tulisan Brand di Bawah Judul (Contoh: Microsite Hub 1-Klik)</label>
+            <input type="text" id="set-tagline" required value="${state.portalSettings.tagline || 'Microsite Hub 1-Klik'}" placeholder="Contoh: Microsite Hub 1-Klik" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
           </div>
           <div>
             <label class="block text-xs font-bold theme-text-secondary mb-1.5">Teks Berjalan Atas (Running Text Kanan ke Kiri)</label>
