@@ -1157,15 +1157,26 @@ const firebaseConfig = {
 
   function getProjectAttachments(proj) {
     if (!proj) return [];
+    if (typeof proj.attachmentsJson === 'string' && proj.attachmentsJson.trim()) {
+      try {
+        const parsed = JSON.parse(proj.attachmentsJson);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (_) {}
+    }
     if (Array.isArray(proj.attachments) && proj.attachments.length > 0) {
-      return proj.attachments;
+      return proj.attachments.map((att, idx) => ({
+        id: String(att?.id || ('att-' + idx)),
+        name: String(att?.name || 'Berkas Terlampir'),
+        type: String(att?.type || 'image'),
+        dataUrl: String(att?.dataUrl || '')
+      }));
     }
     if (proj.fileDataUrl) {
       return [{
         id: 'legacy-' + (proj.id || 'file'),
-        dataUrl: proj.fileDataUrl,
-        name: proj.fileName || 'Berkas Terlampir',
-        type: proj.fileType || (proj.fileDataUrl.startsWith('data:application/pdf') ? 'pdf' : 'image')
+        dataUrl: String(proj.fileDataUrl),
+        name: String(proj.fileName || 'Berkas Terlampir'),
+        type: String(proj.fileType || (proj.fileDataUrl.startsWith('data:application/pdf') ? 'pdf' : 'image'))
       }];
     }
     return [];
@@ -1658,9 +1669,14 @@ const firebaseConfig = {
     const order = parseInt(document.getElementById('proj-order').value, 10) || 1;
     const visibility = document.getElementById('proj-visibility').value || 'public';
     const isPinned = document.getElementById('proj-pinned').checked;
-    const attachments = [...state.draftAttachments];
+    const cleanAttachments = (state.draftAttachments || []).map((att, idx) => ({
+      id: String(att?.id || ('att-' + Date.now() + '-' + idx)),
+      name: String(att?.name || `Berkas_${idx + 1}`),
+      type: String(att?.type || 'image'),
+      dataUrl: String(att?.dataUrl || '')
+    })).filter(att => att.dataUrl);
 
-    if (!url && attachments.length === 0) {
+    if (!url && cleanAttachments.length === 0) {
       showToast('Isi URL tujuan atau unggah minimal 1 berkas PDF/JPG.', 'error');
       return;
     }
@@ -1669,17 +1685,18 @@ const firebaseConfig = {
     }
 
     const payload = {
-      title,
-      url,
-      description,
-      category,
-      subCategory,
-      logoDataUrl,
-      attachments,
-      icon,
-      order,
-      visibility,
-      isPinned
+      title: String(title),
+      url: String(url),
+      description: String(description),
+      category: String(category),
+      subCategory: String(subCategory),
+      logoDataUrl: String(logoDataUrl || ''),
+      attachments: cleanAttachments,
+      attachmentsJson: JSON.stringify(cleanAttachments),
+      icon: String(icon),
+      order: Number(order),
+      visibility: String(visibility),
+      isPinned: Boolean(isPinned)
     };
 
     const isEditing = Boolean(state.editingProjectId);
@@ -1709,14 +1726,29 @@ const firebaseConfig = {
     }
 
     try {
+      const firestorePayload = {
+        title: payload.title,
+        url: payload.url,
+        description: payload.description,
+        category: payload.category,
+        subCategory: payload.subCategory,
+        logoDataUrl: payload.logoDataUrl,
+        attachmentsJson: payload.attachmentsJson,
+        attachmentCount: cleanAttachments.length,
+        icon: payload.icon,
+        order: payload.order,
+        visibility: payload.visibility,
+        isPinned: payload.isPinned
+      };
+
       if (isEditing) {
         await updateDoc(doc(db, 'projects', state.editingProjectId), {
-          ...payload,
+          ...firestorePayload,
           updatedAt: serverTimestamp()
         });
       } else {
         await addDoc(collection(db, 'projects'), {
-          ...payload,
+          ...firestorePayload,
           createdAt: serverTimestamp()
         });
       }
