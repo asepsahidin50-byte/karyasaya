@@ -77,7 +77,6 @@
       background-color: #f8fafc;
     }
 
-    /* Full-Page Overlay menutupi elemen bawaan Blogger jika disematkan di Blogger */
     #app-wrapper {
       position: fixed;
       inset: 0;
@@ -103,7 +102,6 @@
       background-color: #090d16;
     }
 
-    /* Glassmorphism & Adaptive Contrast Utilities */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(12px);
@@ -171,7 +169,6 @@
       color: var(--accent-color);
     }
 
-    /* World-Class Ambient Mesh Glow */
     .hero-mesh-accent {
       position: relative;
     }
@@ -209,7 +206,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Pop-up Modal Spring Animation */
     @keyframes popSpring {
       0% { opacity: 0; transform: scale(0.92) translateY(8px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
@@ -218,7 +214,6 @@
       animation: popSpring 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    /* Modern Sidebar Portrait Banner Effect */
     @keyframes bannerShimmer {
       0% { transform: translateX(-120%) skewX(-18deg); }
       100% { transform: translateX(220%) skewX(-18deg); }
@@ -251,12 +246,10 @@
       animation: bannerShimmer 0.95s ease forwards;
     }
 
-    /* Fast Response Touch & Click */
     button, a, label {
       touch-action: manipulation;
     }
 
-    /* Responsive Layout: Desktop Sidebar vs Mobile Bottom Nav */
     @media (min-width: 768px) {
       #app-wrapper {
         overflow-y: auto;
@@ -325,13 +318,11 @@
       }
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* Toast Notification Animation */
     @keyframes slideUpFade {
       from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
@@ -340,7 +331,6 @@
       animation: slideUpFade 0.25s ease forwards;
     }
 
-    /* Running Text (Marquee Lurus Kanan ke Kiri) Responsif Desktop & HP */
     @keyframes marqueeLinear {
       0% { transform: translate3d(0, 0, 0); }
       100% { transform: translate3d(-100%, 0, 0); }
@@ -368,7 +358,6 @@
       }
     }
 
-    /* Pop-up Animasi BERHASIL di Tengah Layar */
     @keyframes successPopBounce {
       0% { opacity: 0; transform: scale(0.75) translateY(12px); }
       65% { opacity: 1; transform: scale(1.04) translateY(0); }
@@ -378,7 +367,6 @@
       animation: successPopBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    /* Initial Fullscreen Startup Loader Overlay */
     @keyframes loaderPulseRing {
       0% { transform: scale(0.92); opacity: 0.7; }
       50% { transform: scale(1.08); opacity: 0.25; }
@@ -406,7 +394,7 @@
 </head>
 <body>
 
-<!-- INITIAL STARTUP LOADING OVERLAY (MENGHITUNG & MENGUNCI INPUT SAMPAI SIAP) -->
+<!-- INITIAL STARTUP LOADING OVERLAY -->
 <div id="startup-loader-overlay" role="dialog" aria-modal="true" aria-label="Memuat Portal" class="fixed inset-0 z-[200000] bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-white select-none cursor-wait">
   <div class="relative flex items-center justify-center mb-6">
     <div class="absolute w-28 h-28 rounded-full bg-sky-500/20 loader-ring-pulse"></div>
@@ -426,7 +414,6 @@
       <span id="startup-loader-percent">0</span>%
     </div>
 
-    <!-- Progress Bar -->
     <div class="w-full h-2.5 bg-slate-800/90 rounded-full overflow-hidden p-0.5 border border-white/10">
       <div id="startup-loader-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 transition-all duration-150 ease-out" style="width: 0%;"></div>
     </div>
@@ -436,7 +423,7 @@
 </div>
 
 <div id="app-wrapper" data-theme="light" data-accent="aurora" inert>
-  <!-- Banner Mode Preview (Hanya tampil jika IS_PREVIEW === true) -->
+  <!-- Banner Mode Preview -->
   <div id="preview-banner" class="hidden bg-amber-500/95 text-white text-xs font-semibold px-4 py-2 text-center shadow-sm backdrop-blur-md sticky top-0 z-50 flex items-center justify-center gap-2">
     <i data-lucide="flask-conical" class="w-4 h-4"></i>
     <span>MODE PREVIEW AKTIF — Menggunakan data simulasi di memori. Ubah <code>IS_PREVIEW = false</code> saat deploy ke Firebase.</span>
@@ -445,7 +432,6 @@
   <!-- DESKTOP FIXED SIDEBAR -->
   <aside id="desktop-sidebar" class="glass-panel flex-col justify-between p-5 border-r border-slate-200/70 overflow-y-auto">
     <div class="flex flex-col min-h-0">
-      <!-- Brand Logo -->
       <div class="flex items-center gap-3 px-2 py-3 mb-5 shrink-0">
         <div id="sidebar-brand-icon" class="w-11 h-11 rounded-2xl btn-accent flex items-center justify-center text-white shadow-md overflow-hidden shrink-0">
           <i data-lucide="layers" class="w-6 h-6"></i>
@@ -456,31 +442,19 @@
         </div>
       </div>
 
-      <!-- Navigation Links -->
-      <nav id="sidebar-nav-links" class="space-y-1.5 shrink-0">
-        <!-- Diisi secara dinamis oleh JS -->
-      </nav>
-
-      <!-- Banner Foto Portrait Modern di Bawah Menu Beranda Portal -->
+      <nav id="sidebar-nav-links" class="space-y-1.5 shrink-0"></nav>
       <div id="sidebar-banner-slot" class="mt-4"></div>
     </div>
 
-    <!-- User / Auth Status Card -->
-    <div id="sidebar-auth-box" class="pt-4 mt-4 border-t border-slate-200/60 shrink-0">
-      <!-- Diisi secara dinamis oleh JS -->
-    </div>
+    <div id="sidebar-auth-box" class="pt-4 mt-4 border-t border-slate-200/60 shrink-0"></div>
   </aside>
 
   <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR -->
-  <nav id="mobile-bottom-nav" class="glass-panel rounded-2xl px-3 py-2 shadow-xl border border-slate-200/80 justify-around items-center">
-    <!-- Diisi secara dinamis oleh JS -->
-  </nav>
+  <nav id="mobile-bottom-nav" class="glass-panel rounded-2xl px-3 py-2 shadow-xl border border-slate-200/80 justify-around items-center"></nav>
 
   <!-- MAIN CONTENT AREA -->
   <main id="main-content-area" class="flex-1 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-full">
-    <!-- Baris Atas Sticky: Teks Berjalan & Jam Digital WIB Pojok Kanan Atas (Tetap Tampil Saat Di-Scroll) -->
     <div class="sticky top-3 md:static z-30 mb-4 md:mb-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-      <!-- Teks Berjalan Lurus dari Kanan ke Kiri (Responsif Desktop & HP) -->
       <div class="glass-panel rounded-2xl px-3.5 py-2 flex-1 min-w-0 flex items-center gap-2.5 overflow-hidden border border-slate-200/70 shadow-md">
         <span class="px-2.5 py-0.5 rounded-lg btn-accent text-white text-xs font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-sm">
           <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
@@ -493,7 +467,6 @@
         </div>
       </div>
 
-      <!-- Jam Digital WIB Real-Time + Detik (Pojok Kanan Atas, Tetap Tampil Saat Scroll) -->
       <div class="glass-panel rounded-2xl px-3.5 py-1.5 border border-slate-200/70 shadow-md flex items-center justify-between sm:justify-end gap-2.5 shrink-0 self-end sm:self-auto">
         <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full btn-accent animate-pulse shrink-0"></span>
@@ -524,10 +497,7 @@
       </div>
     </div>
 
-    <!-- Mobile Banner Portrait Slot (Agar Banner Dashboard Tetap Terlihat di HP) -->
     <div id="mobile-banner-slot" class="md:hidden mb-4"></div>
-
-    <!-- Dynamic View Container -->
     <div id="view-container" class="w-full"></div>
   </main>
 
@@ -546,7 +516,6 @@
         <p class="text-xs text-slate-500 mt-1">Pilih peran akses Anda untuk mengelola atau membuka proyek privat</p>
       </div>
 
-      <!-- Tab Switcher Admin / User -->
       <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl mb-5">
         <button id="tab-btn-admin" onclick="switchLoginTab('admin')" class="py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition">
           Admin (Firebase Auth)
@@ -556,10 +525,8 @@
         </button>
       </div>
 
-      <!-- Info Akun Demo (Hanya dirender jika IS_PREVIEW === true) -->
       <div id="demo-login-hint" class="hidden mb-4 p-3 rounded-2xl bg-sky-50 border border-sky-100 text-[11px] text-sky-800 space-y-1"></div>
 
-      <!-- Form Login Admin -->
       <form id="form-login-admin" onsubmit="handleAdminLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Admin</label>
@@ -575,7 +542,6 @@
         </button>
       </form>
 
-      <!-- Form Login User/Kontributor -->
       <form id="form-login-user" onsubmit="handleUserLogin(event)" class="hidden space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5">ID / Username</label>
@@ -593,7 +559,7 @@
     </div>
   </div>
 
-  <!-- MODAL KONFIRMASI KUSTOM (LOGOUT & HAPUS) -->
+  <!-- MODAL KONFIRMASI KUSTOM -->
   <div id="confirm-modal" class="hidden fixed inset-0 z-[100001] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center animate-pop-spring text-slate-900">
       <div id="confirm-modal-icon-wrap" class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
@@ -622,7 +588,7 @@
     </div>
   </div>
 
-  <!-- POP-UP ANIMASI "BERHASIL" DI TENGAH LAYAR SETIAP PERUBAHAN DATA -->
+  <!-- POP-UP ANIMASI "BERHASIL" -->
   <div id="change-success-modal" onclick="closeChangeSuccessPopup()" class="hidden fixed inset-0 z-[100004] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div onclick="event.stopPropagation()" class="bg-white rounded-3xl max-w-xs w-full p-7 shadow-2xl border border-slate-100 text-center animate-success-bounce text-slate-900">
       <div class="w-20 h-20 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 ring-8 ring-emerald-50">
@@ -674,7 +640,7 @@
 <!-- MAIN APPLICATION SCRIPT (ES MODULE) -->
 <script type="module">
   // =========================================================================
-  // 1. SAKLAR DEPLOYMENT & KONFIGURASI FIREBASE (WAJIB DI ATAS)
+  // 1. SAKLAR DEPLOYMENT & KONFIGURASI FIREBASE
   // =========================================================================
   const IS_PREVIEW = false; // Ubah menjadi false SAAT DEPLOY / PUBLISH agar terhubung murni ke Firebase tanpa data dummy
 
@@ -684,7 +650,7 @@ const firebaseConfig = {
   projectId: "microset-asep",
   storageBucket: "microset-asep.firebasestorage.app",
   messagingSenderId: "245356329795",
-  appId: "1:245356329795:web:3b98434d1d2a18cc4d0df6"
+  appId: "1:245356329795:web:eb5ffb7bb54988b94d0df6"
   };
 
   // =========================================================================
@@ -694,7 +660,7 @@ const firebaseConfig = {
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, serverTimestamp, increment
+    onSnapshot, query, where, serverTimestamp, increment, writeBatch
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
@@ -934,7 +900,7 @@ const firebaseConfig = {
   }
 
   // =========================================================================
-  // 4. HELPER UI (TEMA, WARNA, KOMPRESI GAMBAR, MULTI-BERKAS, POP-UP)
+  // 4. HELPER UI & PENYIMPANAN BERKAS TANPA BATAS UKURAN (CHUNKING FIRESTORE)
   // =========================================================================
   let iconRenderQueued = false;
   function refreshIconsFast() {
@@ -1157,6 +1123,9 @@ const firebaseConfig = {
 
   function getProjectAttachments(proj) {
     if (!proj) return [];
+    if (Array.isArray(proj._hydratedAttachments) && proj._hydratedAttachments.length > 0) {
+      return proj._hydratedAttachments;
+    }
     if (typeof proj.attachmentsJson === 'string' && proj.attachmentsJson.trim()) {
       try {
         const parsed = JSON.parse(proj.attachmentsJson);
@@ -1180,6 +1149,57 @@ const firebaseConfig = {
       }];
     }
     return [];
+  }
+
+  function getProjectAttachmentCount(proj) {
+    const localCount = getProjectAttachments(proj).length;
+    if (localCount > 0) return localCount;
+    return Number(proj?.attachmentCount || 0);
+  }
+
+  async function hydrateProjectAttachmentsFromChunks(proj) {
+    if (!proj) return [];
+    const localAtts = getProjectAttachments(proj);
+    if (localAtts.length > 0) return localAtts;
+    if (IS_PREVIEW || !db || !proj.hasChunkedFiles || !proj.id) return [];
+
+    try {
+      const chunksSnap = await getDocs(collection(db, 'projects', proj.id, 'file_chunks'));
+      if (chunksSnap.empty) return [];
+      const sortedDocs = chunksSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (Number(a.chunkIndex) || 0) - (Number(b.chunkIndex) || 0));
+      const combinedJson = sortedDocs.map(c => String(c.chunkData || '')).join('');
+      const parsed = JSON.parse(combinedJson);
+      if (Array.isArray(parsed)) {
+        proj._hydratedAttachments = parsed;
+        return parsed;
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  async function saveChunkedAttachmentsForProject(projectId, attachmentsJsonStr) {
+    if (IS_PREVIEW || !db || !projectId) return;
+    const chunksCol = collection(db, 'projects', projectId, 'file_chunks');
+    const existingSnap = await getDocs(chunksCol);
+    if (!existingSnap.empty) {
+      const delBatch = writeBatch(db);
+      existingSnap.docs.forEach(d => delBatch.delete(d.ref));
+      await delBatch.commit();
+    }
+    if (!attachmentsJsonStr) return;
+
+    const CHUNK_SIZE = 700000;
+    const totalChunks = Math.ceil(attachmentsJsonStr.length / CHUNK_SIZE);
+    for (let i = 0; i < totalChunks; i++) {
+      const slice = attachmentsJsonStr.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      await setDoc(doc(chunksCol, `chunk_${String(i).padStart(4, '0')}`), {
+        chunkIndex: i,
+        totalChunks,
+        chunkData: slice
+      });
+    }
   }
 
   function renderDraftAttachmentsList() {
@@ -1266,13 +1286,9 @@ const firebaseConfig = {
           showToast(`Format ${file.name} tidak didukung (gunakan PDF/JPG/PNG).`, 'error');
           continue;
         }
-        if (file.size > 900 * 1024 && !IS_PREVIEW) {
-          showToast(`Ukuran ${file.name} melebihi 900KB untuk mode Firebase.`, 'error');
-          continue;
-        }
 
         const dataUrl = isImg
-          ? await compressImageFile(file, 1280, 0.86)
+          ? await compressImageFile(file, 1600, 0.88)
           : await readFileAsDataUrl(file);
 
         state.draftAttachments.push({
@@ -1377,11 +1393,18 @@ const firebaseConfig = {
     renderFileViewerActiveTab(index);
   };
 
-  window.openProjectFileViewer = (projectId, startIndex = 0) => {
+  window.openProjectFileViewer = async (projectId, startIndex = 0) => {
     const proj = state.projects.find(p => p.id === projectId);
     if (!proj) return;
-    const attachments = getProjectAttachments(proj);
-    if (attachments.length === 0) return;
+    let attachments = getProjectAttachments(proj);
+    if (attachments.length === 0 && proj.hasChunkedFiles) {
+      showToast('Memuat berkas besar dari server...', 'info');
+      attachments = await hydrateProjectAttachmentsFromChunks(proj);
+    }
+    if (attachments.length === 0) {
+      showToast('Berkas tidak ditemukan.', 'error');
+      return;
+    }
 
     activeViewerAttachments = attachments;
     document.getElementById('file-viewer-modal').classList.remove('hidden');
@@ -1621,7 +1644,7 @@ const firebaseConfig = {
   };
 
   // =========================================================================
-  // 6. CRUD PROYEK, AKUN USER & PENGATURAN PORTAL
+  // 6. CRUD PROYEK (TANPA BATAS UKURAN FILE), AKUN USER & PENGATURAN PORTAL
   // =========================================================================
   window.switchMenu = (menu) => {
     if (menu !== 'portal' && !state.currentUser) {
@@ -1637,11 +1660,16 @@ const firebaseConfig = {
     renderAll();
   };
 
-  window.editProject = (id) => {
+  window.editProject = async (id) => {
     const proj = state.projects.find(p => p.id === id);
     if (!proj) return;
+    let existingAtts = getProjectAttachments(proj);
+    if (existingAtts.length === 0 && proj.hasChunkedFiles) {
+      showToast('Memuat lampiran proyek...', 'info');
+      existingAtts = await hydrateProjectAttachmentsFromChunks(proj);
+    }
     state.editingProjectId = id;
-    state.draftAttachments = getProjectAttachments(proj).map(a => ({ ...a }));
+    state.draftAttachments = existingAtts.map(a => ({ ...a }));
     state.selectedAttachmentIds.clear();
     state.activeMenu = 'manage-projects';
     renderAll();
@@ -1684,6 +1712,9 @@ const firebaseConfig = {
       url = 'https://' + url;
     }
 
+    const attachmentsJsonStr = JSON.stringify(cleanAttachments);
+    const attachmentNamesSummary = cleanAttachments.map(a => a.name).join(', ');
+
     const payload = {
       title: String(title),
       url: String(url),
@@ -1692,7 +1723,8 @@ const firebaseConfig = {
       subCategory: String(subCategory),
       logoDataUrl: String(logoDataUrl || ''),
       attachments: cleanAttachments,
-      attachmentsJson: JSON.stringify(cleanAttachments),
+      attachmentsJson: attachmentsJsonStr,
+      attachmentNames: attachmentNamesSummary,
       icon: String(icon),
       order: Number(order),
       visibility: String(visibility),
@@ -1726,6 +1758,7 @@ const firebaseConfig = {
     }
 
     try {
+      const needsChunking = attachmentsJsonStr.length > 650000;
       const firestorePayload = {
         title: payload.title,
         url: payload.url,
@@ -1733,32 +1766,44 @@ const firebaseConfig = {
         category: payload.category,
         subCategory: payload.subCategory,
         logoDataUrl: payload.logoDataUrl,
-        attachmentsJson: payload.attachmentsJson,
+        attachmentsJson: needsChunking ? '' : attachmentsJsonStr,
+        hasChunkedFiles: Boolean(needsChunking),
         attachmentCount: cleanAttachments.length,
+        attachmentNames: attachmentNamesSummary,
         icon: payload.icon,
         order: payload.order,
         visibility: payload.visibility,
         isPinned: payload.isPinned
       };
 
+      let targetProjectId = state.editingProjectId;
       if (isEditing) {
-        await updateDoc(doc(db, 'projects', state.editingProjectId), {
+        await updateDoc(doc(db, 'projects', targetProjectId), {
           ...firestorePayload,
           updatedAt: serverTimestamp()
         });
       } else {
-        await addDoc(collection(db, 'projects'), {
+        const createdRef = await addDoc(collection(db, 'projects'), {
           ...firestorePayload,
           createdAt: serverTimestamp()
         });
+        targetProjectId = createdRef.id;
       }
+
+      if (needsChunking) {
+        showToast('Menyimpan berkas berukuran besar...', 'info');
+        await saveChunkedAttachmentsForProject(targetProjectId, attachmentsJsonStr);
+      } else if (targetProjectId) {
+        await saveChunkedAttachmentsForProject(targetProjectId, '');
+      }
+
       state.editingProjectId = null;
       state.draftAttachments = [];
       state.selectedAttachmentIds.clear();
       renderAll();
       showChangeSuccessPopup(
         isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
-        'Data proyek berhasil disinkronkan ke cloud.'
+        'Data proyek & seluruh berkas berhasil disimpan.'
       );
     } catch (err) {
       showToast('Gagal menyimpan proyek: ' + err.message, 'error');
@@ -1785,6 +1830,7 @@ const firebaseConfig = {
           return;
         }
         try {
+          await saveChunkedAttachmentsForProject(id, '').catch(() => {});
           await deleteDoc(doc(db, 'projects', id));
           showChangeSuccessPopup('Proyek Dihapus!', `Proyek "${proj.title}" berhasil dihapus.`);
         } catch (err) {
@@ -2182,8 +2228,8 @@ const firebaseConfig = {
   };
 
   function renderProjectCardHtml(p) {
-    const attachments = getProjectAttachments(p);
-    const hasFiles = attachments.length > 0;
+    const fileCount = getProjectAttachmentCount(p);
+    const hasFiles = fileCount > 0;
     const cardVisual = p.logoDataUrl
       ? `<img src="${p.logoDataUrl}" alt="${p.title}" class="w-full h-full object-cover" />`
       : `<span class="text-2xl sm:text-3xl">${p.icon || '🚀'}</span>`;
@@ -2203,7 +2249,7 @@ const firebaseConfig = {
               <div class="flex items-center gap-1.5 flex-wrap mb-1">
                 ${p.isPinned ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 text-[10px] font-extrabold">PINNED</span>` : ''}
                 ${p.visibility === 'private' ? `<span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-500 text-[10px] font-extrabold">PRIVAT</span>` : ''}
-                ${hasFiles ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold">${attachments.length} BERKAS</span>` : ''}
+                ${hasFiles ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold">${fileCount} BERKAS</span>` : ''}
               </div>
               <h4 class="font-extrabold text-base sm:text-lg theme-text-primary leading-snug line-clamp-2 group-hover:text-sky-500 transition">
                 ${p.title}
@@ -2690,8 +2736,8 @@ const firebaseConfig = {
             <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70 space-y-3">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
-                  <label class="block text-xs font-bold theme-text-primary">Upload Berkas / Dokumen (Multi-File PDF, JPG, PNG — Sebanyak Mungkin)</label>
-                  <p class="text-[11px] theme-text-muted mt-0.5">Bisa pilih banyak berkas sekaligus atau tambah lagi berkali-kali. Centang berkas untuk menghapus yang ditandai.</p>
+                  <label class="block text-xs font-bold theme-text-primary">Upload Berkas / Dokumen (Tanpa Batas Ukuran — PDF, JPG, PNG)</label>
+                  <p class="text-[11px] theme-text-muted mt-0.5">Mendukung file besar & banyak berkas sekaligus. Centang berkas untuk menghapus yang ditandai.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
                   <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
@@ -2764,41 +2810,45 @@ const firebaseConfig = {
             <p class="text-xs theme-text-muted py-6 text-center">Belum ada proyek yang ditambahkan.</p>
           ` : `
             <div class="space-y-3">
-              ${state.projects.map(p => `
-                <div class="p-4 rounded-2xl theme-input border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl theme-surface-subtle flex items-center justify-center text-xl shrink-0 overflow-hidden">
-                      ${p.logoDataUrl ? `<img src="${p.logoDataUrl}" class="w-full h-full object-cover" />` : (p.icon || '🚀')}
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <span class="font-bold text-sm theme-text-primary">${p.title}</span>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full theme-surface-subtle theme-text-secondary">${p.category}${p.subCategory ? ` › ${p.subCategory}` : ''}</span>
-                        ${getProjectAttachments(p).length > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600">${getProjectAttachments(p).length} Berkas</span>` : ''}
-                        ${p.visibility === 'private' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400">Privat</span>` : ''}
+              ${state.projects.map(p => {
+                const count = getProjectAttachmentCount(p);
+                const namesLabel = p.attachmentNames || getProjectAttachments(p).map(a => a.name).join(', ');
+                return `
+                  <div class="p-4 rounded-2xl theme-input border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                      <div class="w-10 h-10 rounded-xl theme-surface-subtle flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                        ${p.logoDataUrl ? `<img src="${p.logoDataUrl}" class="w-full h-full object-cover" />` : (p.icon || '🚀')}
                       </div>
-                      ${getProjectAttachments(p).length > 0 ? `
-                        <button type="button" onclick="openProjectFileViewer('${p.id}', 0)" class="text-xs text-emerald-600 hover:underline font-semibold mt-0.5 inline-flex items-center gap-1">
-                          <i data-lucide="eye" class="w-3 h-3"></i>
-                          <span>Lihat ${getProjectAttachments(p).length} Berkas: ${getProjectAttachments(p).map(a => a.name).join(', ')}</span>
+                      <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="font-bold text-sm theme-text-primary">${p.title}</span>
+                          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full theme-surface-subtle theme-text-secondary">${p.category}${p.subCategory ? ` › ${p.subCategory}` : ''}</span>
+                          ${count > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600">${count} Berkas</span>` : ''}
+                          ${p.visibility === 'private' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400">Privat</span>` : ''}
+                        </div>
+                        ${count > 0 ? `
+                          <button type="button" onclick="openProjectFileViewer('${p.id}', 0)" class="text-xs text-emerald-600 hover:underline font-semibold mt-0.5 inline-flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3 h-3"></i>
+                            <span>Lihat ${count} Berkas${namesLabel ? `: ${namesLabel}` : ''}</span>
+                          </button>
+                        ` : `
+                          <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
+                        `}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 self-end sm:self-center">
+                      <button onclick="editProject('${p.id}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1">
+                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i><span>Edit</span>
+                      </button>
+                      ${state.currentUser ? `
+                        <button onclick="deleteProject('${p.id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                         </button>
-                      ` : `
-                        <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
-                      `}
+                      ` : ''}
                     </div>
                   </div>
-                  <div class="flex items-center gap-2 self-end sm:self-center">
-                    <button onclick="editProject('${p.id}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1">
-                      <i data-lucide="edit-3" class="w-3.5 h-3.5"></i><span>Edit</span>
-                    </button>
-                    ${state.currentUser ? `
-                      <button onclick="deleteProject('${p.id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
-                      </button>
-                    ` : ''}
-                  </div>
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
           `}
         </section>
@@ -3047,7 +3097,7 @@ const firebaseConfig = {
   }
 
   // =========================================================================
-  // 9. ANIMASI LOADING AWAL & PENGHITUNG PERSENTASE (BLOKIR INPUT HINGGA SIAP)
+  // 9. ANIMASI LOADING AWAL & PENGHITUNG PERSENTASE
   // =========================================================================
   function runStartupLoader() {
     const overlay = document.getElementById('startup-loader-overlay');
