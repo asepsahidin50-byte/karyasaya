@@ -847,6 +847,7 @@ const firebaseConfig = {
   };
 
   let initialFirebaseReady = IS_PREVIEW;
+  let localSettingsLockedAt = 0;
 
   // =========================================================================
   // 4. HELPER UI (TEMA, WARNA, KOMPRESI GAMBAR, MULTI-BERKAS, POP-UP)
@@ -899,6 +900,7 @@ const firebaseConfig = {
 
   window.selectThemeMode = (mode) => {
     state.portalSettings.themeMode = mode;
+    localSettingsLockedAt = Date.now();
     saveSettingsBackup(state.portalSettings);
     applyThemeAndColors();
     if (state.activeMenu === 'portal') {
@@ -909,6 +911,7 @@ const firebaseConfig = {
 
   window.selectAccentColor = (accent) => {
     state.portalSettings.accentColor = accent;
+    localSettingsLockedAt = Date.now();
     saveSettingsBackup(state.portalSettings);
     applyThemeAndColors();
     renderAll();
@@ -1755,6 +1758,7 @@ const firebaseConfig = {
     };
 
     state.portalSettings = updated;
+    localSettingsLockedAt = Date.now();
     saveSettingsBackup(updated);
 
     if (IS_PREVIEW || !db) {
@@ -1802,7 +1806,17 @@ const firebaseConfig = {
 
     onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
       if (snap.exists()) {
-        state.portalSettings = { ...state.portalSettings, ...snap.data() };
+        // Cegah snapshot lama menimpa perubahan yang baru saja diatur di sesi ini
+        if (Date.now() - localSettingsLockedAt < 4000) {
+          return;
+        }
+        const remoteData = snap.data();
+        const backup = loadSavedSettingsBackup();
+        state.portalSettings = {
+          ...state.portalSettings,
+          ...remoteData,
+          ...(backup && Date.now() - localSettingsLockedAt < 15000 ? backup : {})
+        };
         saveSettingsBackup(state.portalSettings);
         renderAll();
       }
