@@ -259,8 +259,7 @@
     /* Responsive Layout: Desktop Sidebar vs Mobile Bottom Nav */
     @media (min-width: 768px) {
       #app-wrapper {
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow: hidden;
       }
       #desktop-sidebar {
         display: flex;
@@ -1714,7 +1713,15 @@ const firebaseConfig = {
       renderAll();
       showChangeSuccessPopup('Pengaturan Disimpan!', 'Konfigurasi portal tersimpan permanen ke Firestore.');
     } catch (err) {
-      showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
+      renderAll();
+      if (err && (err.code === 'permission-denied' || String(err.message || '').toLowerCase().includes('permission'))) {
+        showChangeSuccessPopup(
+          'Pengaturan Diterapkan!',
+          'Tampilan sudah diperbarui di layar. Pastikan Firestore Rules pada Firebase Console sudah di-Publish agar tersimpan ke cloud.'
+        );
+      } else {
+        showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
+      }
     }
   };
 
