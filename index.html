@@ -731,6 +731,27 @@ const firebaseConfig = {
 
   let sessionSettingsCache = null;
 
+  function buildCompactSettingsForWindowName(settingsObj) {
+    if (!settingsObj || typeof settingsObj !== 'object') return null;
+    // Batasi ukuran data URL gambar di window.name agar tidak gagal/terpotong di browser
+    const safeImg = (val, maxLen = 180000) => {
+      if (typeof val !== 'string' || !val) return '';
+      return val.length <= maxLen ? val : '';
+    };
+    return {
+      title: settingsObj.title ?? 'KARYA_SAYA',
+      tagline: settingsObj.tagline ?? 'Microsite Hub 1-Klik',
+      runningText: settingsObj.runningText ?? '',
+      subtitle: settingsObj.subtitle ?? '',
+      footerText: settingsObj.footerText ?? '',
+      themeMode: settingsObj.themeMode ?? 'light',
+      accentColor: settingsObj.accentColor ?? 'aurora',
+      logoDataUrl: safeImg(settingsObj.logoDataUrl, 160000),
+      loadingLogoDataUrl: safeImg(settingsObj.loadingLogoDataUrl, 160000),
+      sidebarBannerDataUrl: safeImg(settingsObj.sidebarBannerDataUrl, 220000)
+    };
+  }
+
   function readStorageEnvelope() {
     try {
       const raw = window.name || '';
@@ -776,32 +797,33 @@ const firebaseConfig = {
       const safeDropdown = dropdownObj && typeof dropdownObj === 'object'
         ? dropdownObj
         : { collapsedCats: {}, collapsedSubs: {} };
-      const safeSettings = settingsObj && typeof settingsObj === 'object'
-        ? settingsObj
-        : sessionSettingsCache;
+      const compactSettings = buildCompactSettingsForWindowName(settingsObj || sessionSettingsCache);
 
       const payload = JSON.stringify({
         dropdown: safeDropdown,
-        settings: safeSettings
+        settings: compactSettings
       });
       window.name = payload;
     } catch (e) {
       try {
-        if (settingsObj && typeof settingsObj === 'object') {
-          const minimalSettings = {
-            title: settingsObj.title,
-            tagline: settingsObj.tagline,
-            runningText: settingsObj.runningText,
-            subtitle: settingsObj.subtitle,
-            footerText: settingsObj.footerText,
-            themeMode: settingsObj.themeMode,
-            accentColor: settingsObj.accentColor
-          };
-          window.name = JSON.stringify({
-            dropdown: dropdownObj || { collapsedCats: {}, collapsedSubs: {} },
-            settings: minimalSettings
-          });
-        }
+        const textOnlySettings = settingsObj && typeof settingsObj === 'object'
+          ? {
+              title: settingsObj.title,
+              tagline: settingsObj.tagline,
+              runningText: settingsObj.runningText,
+              subtitle: settingsObj.subtitle,
+              footerText: settingsObj.footerText,
+              themeMode: settingsObj.themeMode,
+              accentColor: settingsObj.accentColor,
+              logoDataUrl: '',
+              loadingLogoDataUrl: '',
+              sidebarBannerDataUrl: ''
+            }
+          : null;
+        window.name = JSON.stringify({
+          dropdown: dropdownObj || { collapsedCats: {}, collapsedSubs: {} },
+          settings: textOnlySettings
+        });
       } catch (_) {}
     }
   }
@@ -1020,7 +1042,7 @@ const firebaseConfig = {
     const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 260, 0.86);
+      const dataUrl = await compressImageFile(file, 160, 0.78);
       const logoInput = document.getElementById('set-logo-data');
       if (logoInput) logoInput.value = dataUrl;
       state.portalSettings.logoDataUrl = dataUrl;
@@ -1051,7 +1073,7 @@ const firebaseConfig = {
     const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 260, 0.86);
+      const dataUrl = await compressImageFile(file, 160, 0.78);
       const loadingInput = document.getElementById('set-loading-logo-data');
       if (loadingInput) loadingInput.value = dataUrl;
       state.portalSettings.loadingLogoDataUrl = dataUrl;
@@ -1079,7 +1101,7 @@ const firebaseConfig = {
     const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 640, 0.85);
+      const dataUrl = await compressImageFile(file, 360, 0.78);
       const hiddenInput = document.getElementById('set-sidebar-banner-data');
       if (hiddenInput) hiddenInput.value = dataUrl;
       state.portalSettings.sidebarBannerDataUrl = dataUrl;
@@ -1814,6 +1836,10 @@ const firebaseConfig = {
     const loadLogoEl = document.getElementById('set-loading-logo-data');
     const bannerEl = document.getElementById('set-sidebar-banner-data');
 
+    const nextLogo = logoEl && logoEl.value ? logoEl.value : (state.portalSettings.logoDataUrl || '');
+    const nextLoadingLogo = loadLogoEl && loadLogoEl.value ? loadLogoEl.value : (state.portalSettings.loadingLogoDataUrl || '');
+    const nextBanner = bannerEl && bannerEl.value ? bannerEl.value : (state.portalSettings.sidebarBannerDataUrl || '');
+
     const updated = {
       ...state.portalSettings,
       title: (titleEl ? titleEl.value : state.portalSettings.title).trim() || 'Portal Proyek',
@@ -1821,9 +1847,9 @@ const firebaseConfig = {
       runningText: (runEl ? runEl.value : state.portalSettings.runningText).trim(),
       subtitle: (subEl ? subEl.value : state.portalSettings.subtitle).trim(),
       footerText: (footEl ? footEl.value : state.portalSettings.footerText).trim(),
-      logoDataUrl: logoEl ? (logoEl.value || '') : (state.portalSettings.logoDataUrl || ''),
-      loadingLogoDataUrl: loadLogoEl ? (loadLogoEl.value || '') : (state.portalSettings.loadingLogoDataUrl || ''),
-      sidebarBannerDataUrl: bannerEl ? (bannerEl.value || '') : (state.portalSettings.sidebarBannerDataUrl || '')
+      logoDataUrl: nextLogo,
+      loadingLogoDataUrl: nextLoadingLogo,
+      sidebarBannerDataUrl: nextBanner
     };
 
     state.portalSettings = updated;
@@ -1875,22 +1901,23 @@ const firebaseConfig = {
     onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
       if (snap.exists()) {
         const backup = loadSavedSettingsBackup();
-        if (backup && Date.now() - localSettingsLockedAt < 120000) {
-          state.portalSettings = {
-            ...state.portalSettings,
-            ...snap.data(),
-            ...backup
-          };
-          saveSettingsBackup(state.portalSettings);
-          renderAll();
-          return;
-        }
         const remoteData = snap.data() || {};
-        state.portalSettings = {
+        const merged = {
           ...state.portalSettings,
-          ...remoteData,
-          ...(backup || {})
+          ...remoteData
         };
+        if (backup) {
+          // Pertahankan perubahan lokal (termasuk logo, banner, warna, teks) jika lebih baru atau lebih lengkap
+          Object.keys(backup).forEach((k) => {
+            if (backup[k] !== undefined && backup[k] !== null) {
+              if (typeof backup[k] === 'string' && backup[k] === '' && remoteData[k]) {
+                return;
+              }
+              merged[k] = backup[k];
+            }
+          });
+        }
+        state.portalSettings = merged;
         saveSettingsBackup(state.portalSettings);
         renderAll();
       }
