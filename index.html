@@ -1660,6 +1660,194 @@ const firebaseConfig = {
     renderAll();
   };
 
+  window.cancelEditProject = () => {
+    state.editingProjectId = null;
+    state.draftAttachments = [];
+    state.selectedAttachmentIds.clear();
+    renderAll();
+  };
+
+  window.saveProject = async (e) => {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (!state.currentUser) {
+      openLoginModal('admin');
+      return;
+    }
+
+    const titleEl = document.getElementById('proj-title');
+    const urlEl = document.getElementById('proj-url');
+    const descEl = document.getElementById('proj-desc');
+    const catEl = document.getElementById('proj-category');
+    const subCatEl = document.getElementById('proj-subcategory');
+    const logoEl = document.getElementById('proj-logo-data');
+    const iconEl = document.getElementById('proj-icon');
+    const orderEl = document.getElementById('proj-order');
+    const visEl = document.getElementById('proj-visibility');
+    const pinEl = document.getElementById('proj-pinned');
+
+    const title = (titleEl?.value || '').trim();
+    const rawUrl = (urlEl?.value || '').trim();
+    const description = (descEl?.value || '').trim();
+    const category = (catEl?.value || 'Aplikasi Web').trim() || 'Aplikasi Web';
+    const subCategory = (subCatEl?.value || '').trim();
+    const logoDataUrl = (logoEl?.value || '').trim();
+    const icon = (iconEl?.value || '🚀').trim() || '🚀';
+    const order = Math.max(1, Number(orderEl?.value) || (state.projects.length + 1));
+    const visibility = visEl?.value === 'private' ? 'private' : 'public';
+    const isPinned = Boolean(pinEl?.checked);
+
+    const safeAttachments = (state.draftAttachments || [])
+      .filter(att => att && att.dataUrl)
+      .map((att, idx) => ({
+        id: String(att.id || ('att-' + idx)),
+        name: String(att.name || `Berkas-${idx + 1}`),
+        type: String(att.type || (String(att.dataUrl).startsWith('data:application/pdf') ? 'pdf' : 'image')),
+        dataUrl: String(att.dataUrl)
+      }));
+
+    if (!title || !description) {
+      showToast('Nama proyek dan deskripsi singkat wajib diisi.', 'error');
+      return;
+    }
+
+    if (!rawUrl && safeAttachments.length === 0) {
+      showToast('Isi URL / Tautan Tujuan atau unggah minimal 1 berkas PDF/JPG.', 'error');
+      return;
+    }
+
+    let normalizedUrl = rawUrl;
+    if (normalizedUrl && !/^https?:\/\//i.test(normalizedUrl)) {
+      normalizedUrl = 'https://' + normalizedUrl;
+    }
+
+    const attachmentsJson = safeAttachments.length > 0 ? JSON.stringify(safeAttachments) : '';
+    const attachmentNames = safeAttachments.map(a => a.name).join(', ');
+    const attachmentCount = safeAttachments.length;
+    const shouldChunk = attachmentsJson.length > 750000;
+
+    const projectPayload = {
+      title,
+      url: normalizedUrl,
+      description,
+      category,
+      subCategory,
+      logoDataUrl,
+      icon,
+      order,
+      visibility,
+      isPinned,
+      attachmentCount,
+      attachmentNames,
+      hasChunkedFiles: shouldChunk,
+      attachmentsJson: shouldChunk ? '' : attachmentsJson
+    };
+
+    const editingId = state.editingProjectId;
+
+    if (IS_PREVIEW || !db) {
+      if (editingId) {
+        state.projects = state.projects.map(p =>
+          p.id === editingId
+            ? { ...p, ...projectPayload, _hydratedAttachments: safeAttachments }
+            : p
+        );
+      } else {
+        state.projects.push({
+          id: 'proj-' + Date.now(),
+          ...projectPayload,
+          _hydratedAttachments: safeAttachments
+        });
+      }
+      state.projects.sort(
+        (a, b) =>
+          (Boolean(b.isPinned) - Boolean(a.isPinned)) ||
+          ((Number(a.order) || 99) - (Number(b.order) || 99))
+      );
+      state.editingProjectId = null;
+      state.draftAttachments = [];
+      state.selectedAttachmentIds.clear();
+      renderAll();
+      showChangeSuccessPopup(
+        editingId ? 'Proyek Diperbarui!' : 'Proyek Disimpan!',
+        `"${title}" berhasil disimpan ke portal.`
+      );
+      return;
+    }
+
+    try {
+      let targetProjectId = editingId;
+      if (editingId) {
+        await updateDoc(doc(db, 'projects', editingId), {
+          ...projectPayload,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        const created = await addDoc(collection(db, 'projects'), {
+          ...projectPayload,
+          createdAt: serverTimestamp()
+        });
+        targetProjectId = created.id;
+      }
+
+      if (targetProjectId) {
+        await saveChunkedAttachmentsForProject(targetProjectId, shouldChunk ? attachmentsJson : '');
+      }
+
+      state.editingProjectId = null;
+      state.draftAttachments = [];
+      state.selectedAttachmentIds.clear();
+      renderAll();
+      showChangeSuccessPopup(
+        editingId ? 'Proyek Diperbarui!' : 'Proyek Disimpan!',
+        `"${title}" berhasil disimpan ke Firestore.`
+      );
+    } catch (err) {
+      showToast('Gagal menyimpan proyek: ' + (err.message || 'Terjadi kesalahan.'), 'error');
+    }
+  };
+
+  window.deleteProject = (id) => {
+    const cleanId = String(id || '').trim();
+    if (!cleanId) return;
+    if (!state.currentUser) {
+      openLoginModal('admin');
+      return;
+    }
+    const proj = state.projects.find(p => String(p.id) === cleanId);
+    const label = proj?.title || 'proyek ini';
+
+    openConfirmModal({
+      title: 'Hapus Proyek?',
+      text: `Proyek "${label}" akan dihapus permanen dari portal.`,
+      confirmText: 'Hapus',
+      onConfirm: async () => {
+        if (IS_PREVIEW || !db) {
+          state.projects = state.projects.filter(p => String(p.id) !== cleanId);
+          if (state.editingProjectId === cleanId) {
+            state.editingProjectId = null;
+            state.draftAttachments = [];
+          }
+          renderAll();
+          showChangeSuccessPopup('Proyek Dihapus!', `"${label}" berhasil dihapus.`);
+          return;
+        }
+
+        try {
+          await saveChunkedAttachmentsForProject(cleanId, '').catch(() => {});
+          await deleteDoc(doc(db, 'projects', cleanId));
+          if (state.editingProjectId === cleanId) {
+            state.editingProjectId = null;
+            state.draftAttachments = [];
+          }
+          renderAll();
+          showChangeSuccessPopup('Proyek Dihapus!', `"${label}" berhasil dihapus dari Firestore.`);
+        } catch (err) {
+          showToast('Gagal menghapus proyek: ' + (err.message || 'Terjadi kesalahan.'), 'error');
+        }
+      }
+    });
+  };
+
   window.editProject = async (id) => {
     const cleanId = String(id || '').trim();
     if (!cleanId) return;
