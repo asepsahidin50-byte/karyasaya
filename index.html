@@ -726,60 +726,118 @@ const firebaseConfig = {
   // =========================================================================
   // 3. STATE APLIKASI (STRICT DUAL-MODE)
   // =========================================================================
-  function loadDropdownMemory() {
+  const SETTINGS_STORAGE_KEY = '__PORTAL_SETTINGS_STATE__:';
+  const DROPDOWN_STORAGE_KEY = '__MICROSITE_DROPDOWN_STATE__:';
+
+  let sessionSettingsCache = null;
+
+  function readStorageEnvelope() {
     try {
-      if (window.name && window.name.startsWith('__microsite_ui__:')) {
-        const parsed = JSON.parse(window.name.slice('__microsite_ui__:'.length));
-        if (parsed && typeof parsed === 'object') return parsed;
+      const raw = window.name || '';
+      if (!raw) return { dropdown: { collapsedCats: {}, collapsedSubs: {} }, settings: null };
+
+      let dropdown = { collapsedCats: {}, collapsedSubs: {} };
+      let settings = null;
+
+      if (raw.startsWith('{')) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          if (parsed.dropdown && typeof parsed.dropdown === 'object') dropdown = parsed.dropdown;
+          if (parsed.settings && typeof parsed.settings === 'object') settings = parsed.settings;
+          return { dropdown, settings };
+        }
       }
-    } catch (e) {}
-    return { collapsedCats: {}, collapsedSubs: {} };
+
+      const dIdx = raw.indexOf(DROPDOWN_STORAGE_KEY);
+      const sIdx = raw.indexOf(SETTINGS_STORAGE_KEY);
+
+      if (dIdx !== -1) {
+        const dEnd = sIdx > dIdx ? sIdx : raw.length;
+        const dJson = raw.slice(dIdx + DROPDOWN_STORAGE_KEY.length, dEnd);
+        const parsedD = JSON.parse(dJson);
+        if (parsedD && typeof parsedD === 'object') dropdown = parsedD;
+      }
+
+      if (sIdx !== -1) {
+        const sEnd = dIdx > sIdx ? dIdx : raw.length;
+        const sJson = raw.slice(sIdx + SETTINGS_STORAGE_KEY.length, sEnd);
+        const parsedS = JSON.parse(sJson);
+        if (parsedS && typeof parsedS === 'object') settings = parsedS;
+      }
+
+      return { dropdown, settings };
+    } catch (e) {
+      return { dropdown: { collapsedCats: {}, collapsedSubs: {} }, settings: null };
+    }
+  }
+
+  function writeStorageEnvelope(dropdownObj, settingsObj) {
+    try {
+      const safeDropdown = dropdownObj && typeof dropdownObj === 'object'
+        ? dropdownObj
+        : { collapsedCats: {}, collapsedSubs: {} };
+      const safeSettings = settingsObj && typeof settingsObj === 'object'
+        ? settingsObj
+        : sessionSettingsCache;
+
+      const payload = JSON.stringify({
+        dropdown: safeDropdown,
+        settings: safeSettings
+      });
+      window.name = payload;
+    } catch (e) {
+      try {
+        if (settingsObj && typeof settingsObj === 'object') {
+          const minimalSettings = {
+            title: settingsObj.title,
+            tagline: settingsObj.tagline,
+            runningText: settingsObj.runningText,
+            subtitle: settingsObj.subtitle,
+            footerText: settingsObj.footerText,
+            themeMode: settingsObj.themeMode,
+            accentColor: settingsObj.accentColor
+          };
+          window.name = JSON.stringify({
+            dropdown: dropdownObj || { collapsedCats: {}, collapsedSubs: {} },
+            settings: minimalSettings
+          });
+        }
+      } catch (_) {}
+    }
+  }
+
+  function loadDropdownMemory() {
+    const env = readStorageEnvelope();
+    return env.dropdown || { collapsedCats: {}, collapsedSubs: {} };
   }
 
   function saveDropdownMemory() {
-    try {
-      window.name = '__microsite_ui__:' + JSON.stringify(state.dropdownMemory);
-    } catch (e) {}
+    writeStorageEnvelope(state.dropdownMemory, state.portalSettings);
   }
 
   function loadSavedSettingsBackup() {
-    try {
-      if (window.name && window.name.includes('__portal_settings_backup__:')) {
-        const idx = window.name.indexOf('__portal_settings_backup__:');
-        const raw = window.name.slice(idx + '__portal_settings_backup__:'.length);
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') return parsed;
-      }
-    } catch (e) {}
+    if (sessionSettingsCache && typeof sessionSettingsCache === 'object') {
+      return { ...sessionSettingsCache };
+    }
+    const env = readStorageEnvelope();
+    if (env.settings && typeof env.settings === 'object') {
+      sessionSettingsCache = { ...env.settings };
+      return { ...env.settings };
+    }
     return null;
   }
 
   function saveSettingsBackup(settingsObj) {
-    try {
-      const uiPart = '__microsite_ui__:' + JSON.stringify(state.dropdownMemory || { collapsedCats: {}, collapsedSubs: {} });
-      const cleanObj = { ...settingsObj };
-      const settingsPart = '__portal_settings_backup__:' + JSON.stringify(cleanObj);
-      window.name = uiPart + settingsPart;
-    } catch (e) {
-      try {
-        const lightweightObj = {
-          title: settingsObj.title,
-          tagline: settingsObj.tagline,
-          runningText: settingsObj.runningText,
-          subtitle: settingsObj.subtitle,
-          footerText: settingsObj.footerText,
-          themeMode: settingsObj.themeMode,
-          accentColor: settingsObj.accentColor
-        };
-        window.name = '__portal_settings_backup__:' + JSON.stringify(lightweightObj);
-      } catch (_) {}
-    }
+    if (!settingsObj || typeof settingsObj !== 'object') return;
+    sessionSettingsCache = { ...settingsObj };
+    writeStorageEnvelope(state.dropdownMemory, sessionSettingsCache);
   }
 
   function applySavedSettingsOnBoot() {
     const backup = loadSavedSettingsBackup();
     if (backup && typeof backup === 'object') {
       state.portalSettings = { ...state.portalSettings, ...backup };
+      sessionSettingsCache = { ...state.portalSettings };
     }
   }
 
@@ -849,6 +907,11 @@ const firebaseConfig = {
   let initialFirebaseReady = IS_PREVIEW;
   let localSettingsLockedAt = 0;
 
+  function persistCurrentSettingsNow() {
+    localSettingsLockedAt = Date.now();
+    saveSettingsBackup({ ...state.portalSettings });
+  }
+
   // =========================================================================
   // 4. HELPER UI (TEMA, WARNA, KOMPRESI GAMBAR, MULTI-BERKAS, POP-UP)
   // =========================================================================
@@ -891,6 +954,7 @@ const firebaseConfig = {
   window.toggleVisitorTheme = () => {
     const current = getEffectiveThemeMode();
     state.portalSettings.themeMode = current === 'dark' ? 'light' : 'dark';
+    persistCurrentSettingsNow();
     applyThemeAndColors();
     if (state.activeMenu === 'portal') {
       document.getElementById('view-container').innerHTML = renderPortalView();
@@ -900,8 +964,7 @@ const firebaseConfig = {
 
   window.selectThemeMode = (mode) => {
     state.portalSettings.themeMode = mode;
-    localSettingsLockedAt = Date.now();
-    saveSettingsBackup(state.portalSettings);
+    persistCurrentSettingsNow();
     applyThemeAndColors();
     if (state.activeMenu === 'portal') {
       document.getElementById('view-container').innerHTML = renderPortalView();
@@ -911,8 +974,7 @@ const firebaseConfig = {
 
   window.selectAccentColor = (accent) => {
     state.portalSettings.accentColor = accent;
-    localSettingsLockedAt = Date.now();
-    saveSettingsBackup(state.portalSettings);
+    persistCurrentSettingsNow();
     applyThemeAndColors();
     renderAll();
     showChangeSuccessPopup('Warna Diubah!', 'Palet warna tema portal berhasil diperbarui.');
@@ -959,14 +1021,15 @@ const firebaseConfig = {
     if (!file) return;
     try {
       const dataUrl = await compressImageFile(file, 260, 0.86);
-      document.getElementById('set-logo-data').value = dataUrl;
+      const logoInput = document.getElementById('set-logo-data');
+      if (logoInput) logoInput.value = dataUrl;
       state.portalSettings.logoDataUrl = dataUrl;
-      saveSettingsBackup(state.portalSettings);
+      persistCurrentSettingsNow();
       const preview = document.getElementById('set-logo-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo" class="w-full h-full object-cover" />`;
       renderNavigation();
       refreshIconsFast();
-      showChangeSuccessPopup('Logo Website Diperbarui!', 'Logo website berhasil diunggah. Klik Simpan Pengaturan untuk menyimpan permanen.');
+      showChangeSuccessPopup('Logo Website Diperbarui!', 'Logo website berhasil diunggah dan tersimpan.');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -976,7 +1039,7 @@ const firebaseConfig = {
     const input = document.getElementById('set-logo-data');
     if (input) input.value = '';
     state.portalSettings.logoDataUrl = '';
-    saveSettingsBackup(state.portalSettings);
+    persistCurrentSettingsNow();
     const preview = document.getElementById('set-logo-preview');
     if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
     renderNavigation();
@@ -989,12 +1052,13 @@ const firebaseConfig = {
     if (!file) return;
     try {
       const dataUrl = await compressImageFile(file, 260, 0.86);
-      document.getElementById('set-loading-logo-data').value = dataUrl;
+      const loadingInput = document.getElementById('set-loading-logo-data');
+      if (loadingInput) loadingInput.value = dataUrl;
       state.portalSettings.loadingLogoDataUrl = dataUrl;
-      saveSettingsBackup(state.portalSettings);
+      persistCurrentSettingsNow();
       const preview = document.getElementById('set-loading-logo-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
-      showChangeSuccessPopup('Logo Loading Diperbarui!', 'Logo layar loading awal berhasil diunggah. Klik Simpan Pengaturan untuk menyimpan permanen.');
+      showChangeSuccessPopup('Logo Loading Diperbarui!', 'Logo layar loading awal berhasil diunggah dan tersimpan.');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -1004,7 +1068,7 @@ const firebaseConfig = {
     const input = document.getElementById('set-loading-logo-data');
     if (input) input.value = '';
     state.portalSettings.loadingLogoDataUrl = '';
-    saveSettingsBackup(state.portalSettings);
+    persistCurrentSettingsNow();
     const preview = document.getElementById('set-loading-logo-preview');
     if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
     refreshIconsFast();
@@ -1019,7 +1083,7 @@ const firebaseConfig = {
       const hiddenInput = document.getElementById('set-sidebar-banner-data');
       if (hiddenInput) hiddenInput.value = dataUrl;
       state.portalSettings.sidebarBannerDataUrl = dataUrl;
-      saveSettingsBackup(state.portalSettings);
+      persistCurrentSettingsNow();
       const preview = document.getElementById('set-sidebar-banner-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
       renderNavigation();
@@ -1034,7 +1098,7 @@ const firebaseConfig = {
     const hiddenInput = document.getElementById('set-sidebar-banner-data');
     if (hiddenInput) hiddenInput.value = '';
     state.portalSettings.sidebarBannerDataUrl = '';
-    saveSettingsBackup(state.portalSettings);
+    persistCurrentSettingsNow();
     const preview = document.getElementById('set-sidebar-banner-preview');
     if (preview) {
       preview.innerHTML = `
@@ -1740,26 +1804,30 @@ const firebaseConfig = {
 
   window.savePortalSettings = async (e) => {
     e.preventDefault();
-    if (!state.currentUser) {
-      showToast('Silakan login terlebih dahulu untuk menyimpan pengaturan.', 'error');
-      return;
-    }
+
+    const titleEl = document.getElementById('set-title');
+    const tagEl = document.getElementById('set-tagline');
+    const runEl = document.getElementById('set-running-text');
+    const subEl = document.getElementById('set-subtitle');
+    const footEl = document.getElementById('set-footer');
+    const logoEl = document.getElementById('set-logo-data');
+    const loadLogoEl = document.getElementById('set-loading-logo-data');
+    const bannerEl = document.getElementById('set-sidebar-banner-data');
 
     const updated = {
       ...state.portalSettings,
-      title: document.getElementById('set-title').value.trim() || 'Portal Proyek',
-      tagline: document.getElementById('set-tagline').value.trim() || 'Microsite Hub 1-Klik',
-      runningText: document.getElementById('set-running-text').value.trim(),
-      subtitle: document.getElementById('set-subtitle').value.trim(),
-      footerText: document.getElementById('set-footer').value.trim(),
-      logoDataUrl: document.getElementById('set-logo-data').value || '',
-      loadingLogoDataUrl: document.getElementById('set-loading-logo-data').value || '',
-      sidebarBannerDataUrl: document.getElementById('set-sidebar-banner-data').value || ''
+      title: (titleEl ? titleEl.value : state.portalSettings.title).trim() || 'Portal Proyek',
+      tagline: (tagEl ? tagEl.value : state.portalSettings.tagline).trim() || 'Microsite Hub 1-Klik',
+      runningText: (runEl ? runEl.value : state.portalSettings.runningText).trim(),
+      subtitle: (subEl ? subEl.value : state.portalSettings.subtitle).trim(),
+      footerText: (footEl ? footEl.value : state.portalSettings.footerText).trim(),
+      logoDataUrl: logoEl ? (logoEl.value || '') : (state.portalSettings.logoDataUrl || ''),
+      loadingLogoDataUrl: loadLogoEl ? (loadLogoEl.value || '') : (state.portalSettings.loadingLogoDataUrl || ''),
+      sidebarBannerDataUrl: bannerEl ? (bannerEl.value || '') : (state.portalSettings.sidebarBannerDataUrl || '')
     };
 
     state.portalSettings = updated;
-    localSettingsLockedAt = Date.now();
-    saveSettingsBackup(updated);
+    persistCurrentSettingsNow();
 
     if (IS_PREVIEW || !db) {
       renderAll();
@@ -1806,16 +1874,22 @@ const firebaseConfig = {
 
     onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
       if (snap.exists()) {
-        // Cegah snapshot lama menimpa perubahan yang baru saja diatur di sesi ini
-        if (Date.now() - localSettingsLockedAt < 4000) {
+        const backup = loadSavedSettingsBackup();
+        if (backup && Date.now() - localSettingsLockedAt < 120000) {
+          state.portalSettings = {
+            ...state.portalSettings,
+            ...snap.data(),
+            ...backup
+          };
+          saveSettingsBackup(state.portalSettings);
+          renderAll();
           return;
         }
-        const remoteData = snap.data();
-        const backup = loadSavedSettingsBackup();
+        const remoteData = snap.data() || {};
         state.portalSettings = {
           ...state.portalSettings,
           ...remoteData,
-          ...(backup && Date.now() - localSettingsLockedAt < 15000 ? backup : {})
+          ...(backup || {})
         };
         saveSettingsBackup(state.portalSettings);
         renderAll();
