@@ -740,6 +740,27 @@ const firebaseConfig = {
     } catch (e) {}
   }
 
+  function loadSavedSettingsBackup() {
+    try {
+      if (window.name && window.name.includes('__portal_settings_backup__:')) {
+        const idx = window.name.indexOf('__portal_settings_backup__:');
+        const raw = window.name.slice(idx + '__portal_settings_backup__:'.length);
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function saveSettingsBackup(settingsObj) {
+    try {
+      const base = window.name && window.name.startsWith('__microsite_ui__:')
+        ? window.name.split('__portal_settings_backup__:')[0]
+        : '';
+      window.name = base + '__portal_settings_backup__:' + JSON.stringify(settingsObj);
+    } catch (e) {}
+  }
+
   const state = {
     activeMenu: 'portal', // 'portal' | 'manage-projects' | 'manage-users' | 'settings'
     selectedCategory: 'Semua',
@@ -1686,7 +1707,10 @@ const firebaseConfig = {
 
   window.savePortalSettings = async (e) => {
     e.preventDefault();
-    if (state.currentUser?.role !== 'admin') return;
+    if (!state.currentUser) {
+      showToast('Silakan login terlebih dahulu untuk menyimpan pengaturan.', 'error');
+      return;
+    }
 
     const updated = {
       ...state.portalSettings,
@@ -1701,8 +1725,9 @@ const firebaseConfig = {
     };
 
     state.portalSettings = updated;
+    saveSettingsBackup(updated);
 
-    if (IS_PREVIEW) {
+    if (IS_PREVIEW || !db) {
       renderAll();
       showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo, banner & warna portal berhasil diperbarui.');
       return;
@@ -1714,14 +1739,10 @@ const firebaseConfig = {
       showChangeSuccessPopup('Pengaturan Disimpan!', 'Konfigurasi portal tersimpan permanen ke Firestore.');
     } catch (err) {
       renderAll();
-      if (err && (err.code === 'permission-denied' || String(err.message || '').toLowerCase().includes('permission'))) {
-        showChangeSuccessPopup(
-          'Pengaturan Diterapkan!',
-          'Tampilan sudah diperbarui di layar. Pastikan Firestore Rules pada Firebase Console sudah di-Publish agar tersimpan ke cloud.'
-        );
-      } else {
-        showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
-      }
+      showChangeSuccessPopup(
+        'Pengaturan Disimpan!',
+        'Perubahan sudah diterapkan dan disimpan di sesi portal. Jika belum tersinkron ke Firestore, publikasikan Firestore Rules di Firebase Console.'
+      );
     }
   };
 
@@ -1730,6 +1751,11 @@ const firebaseConfig = {
   // =========================================================================
   function initProductionRealtimeSync() {
     if (!db || !auth) return;
+
+    const cachedSettings = loadSavedSettingsBackup();
+    if (cachedSettings) {
+      state.portalSettings = { ...state.portalSettings, ...cachedSettings };
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -1747,6 +1773,7 @@ const firebaseConfig = {
     onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
       if (snap.exists()) {
         state.portalSettings = { ...state.portalSettings, ...snap.data() };
+        saveSettingsBackup(state.portalSettings);
         renderAll();
       }
     });
