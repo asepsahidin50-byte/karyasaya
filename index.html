@@ -258,21 +258,51 @@
 
     /* Responsive Layout: Desktop Sidebar vs Mobile Bottom Nav */
     @media (min-width: 768px) {
+      #app-wrapper {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
       #desktop-sidebar {
         display: flex;
         position: fixed;
         top: 0;
         left: 0;
         bottom: 0;
-        width: 270px;
+        width: 248px;
         z-index: 40;
+        padding: 0.85rem;
       }
       #mobile-bottom-nav {
         display: none !important;
       }
       #main-content-area {
-        margin-left: 270px;
-        padding-bottom: 2.5rem;
+        margin-left: 248px;
+        width: calc(100% - 248px);
+        min-height: 100vh;
+        height: auto;
+        overflow-y: visible;
+        display: flex;
+        flex-direction: column;
+        padding: 0.7rem 1.2rem;
+        gap: 0.55rem;
+      }
+      #main-content-area > .sticky {
+        position: static;
+        margin-bottom: 0;
+      }
+      #view-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+      }
+      .desktop-one-screen-portal {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .desktop-projects-scroll {
+        overflow: visible;
       }
     }
 
@@ -447,16 +477,31 @@
 
   <!-- MAIN CONTENT AREA -->
   <main id="main-content-area" class="flex-1 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-full">
-    <!-- Teks Berjalan Lurus dari Kanan ke Kiri (Responsif Desktop & HP) -->
-    <div class="glass-panel rounded-2xl px-4 py-2.5 mb-4 flex items-center gap-3 overflow-hidden border border-slate-200/70">
-      <span class="px-3 py-1 rounded-lg btn-accent text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-sm">
-        <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
-        <span>Info</span>
-      </span>
-      <div class="marquee-track flex-1">
-        <span id="dashboard-running-text" class="marquee-text text-sm sm:text-base font-bold theme-text-primary">
-          Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!
+    <!-- Baris Atas Sticky: Teks Berjalan & Jam Digital WIB Pojok Kanan Atas (Tetap Tampil Saat Di-Scroll) -->
+    <div class="sticky top-3 md:static z-30 mb-4 md:mb-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+      <!-- Teks Berjalan Lurus dari Kanan ke Kiri (Responsif Desktop & HP) -->
+      <div class="glass-panel rounded-2xl px-3.5 py-2 flex-1 min-w-0 flex items-center gap-2.5 overflow-hidden border border-slate-200/70 shadow-md">
+        <span class="px-2.5 py-0.5 rounded-lg btn-accent text-white text-xs font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
+          <span>Info</span>
         </span>
+        <div class="marquee-track flex-1">
+          <span id="dashboard-running-text" class="marquee-text text-xs sm:text-sm font-bold theme-text-primary">
+            Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!
+          </span>
+        </div>
+      </div>
+
+      <!-- Jam Digital WIB Real-Time + Detik (Pojok Kanan Atas, Tetap Tampil Saat Scroll) -->
+      <div class="glass-panel rounded-2xl px-3.5 py-1.5 border border-slate-200/70 shadow-md flex items-center justify-between sm:justify-end gap-2.5 shrink-0 self-end sm:self-auto">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full btn-accent animate-pulse shrink-0"></span>
+          <span class="text-[11px] font-extrabold tracking-wider uppercase theme-text-muted">WIB</span>
+        </div>
+        <div class="flex items-baseline gap-1 tabular-nums">
+          <span id="wib-clock-hm" class="text-base font-extrabold title-gradient-world tracking-tight leading-none">--:--</span>
+          <span id="wib-clock-sec" class="px-1.5 py-0.5 rounded-lg btn-accent text-white text-[11px] font-extrabold shadow-sm leading-none">--</span>
+        </div>
       </div>
     </div>
 
@@ -616,6 +661,7 @@
           </button>
         </div>
       </div>
+      <div id="file-viewer-tabs" class="hidden px-4 py-2.5 border-b border-slate-200 bg-white flex items-center gap-2 overflow-x-auto shrink-0"></div>
       <div id="file-viewer-body" class="flex-1 bg-slate-900/5 overflow-auto flex items-center justify-center p-3"></div>
     </div>
   </div>
@@ -647,7 +693,7 @@ const firebaseConfig = {
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, orderBy, serverTimestamp
+    onSnapshot, query, where, orderBy, serverTimestamp, increment
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // Registrasi Service Worker Dinamis via Blob untuk PWA 1 File
@@ -700,25 +746,21 @@ const firebaseConfig = {
     selectedCategory: 'Semua',
     searchQuery: '',
     editingProjectId: null,
+    draftAttachments: [],
+    selectedAttachmentIds: new Set(),
     dropdownMemory: loadDropdownMemory(),
-    currentUser: null, // { role: 'admin' | 'contributor' | 'viewer', name: string, identifier: string }
-    portalSettings: IS_PREVIEW ? {
+    calendarCursor: new Date(),
+    visitorStats: {
+      onlineCount: IS_PREVIEW ? 1 : 1,
+      totalVisits: IS_PREVIEW ? 1 : 0
+    },
+    currentUser: null, // null | { role: 'admin' | 'contributor' | 'viewer', name, identifier }
+    portalSettings: {
       title: 'KARYA_SAYA',
       tagline: 'Microsite Hub 1-Klik',
-      subtitle: 'Kumpulan seluruh aplikasi web, sistem administrasi, dan dokumentasi proyek dalam satu pintu akses cepat.',
-      runningText: 'Selamat datang di Portal Microsite Proyek — Klik kategori atau sub-judul untuk membuka aplikasi dalam satu klik!',
-      footerText: '© 2026 Portal Microsite Hub • Dibangun dengan Arsitektur Serverless Firebase',
-      themeMode: 'light',
-      accentColor: 'aurora',
-      logoDataUrl: '',
-      loadingLogoDataUrl: '',
-      sidebarBannerDataUrl: ''
-    } : {
-      title: 'Portal Microsite Proyek',
-      tagline: 'Microsite Hub 1-Klik',
-      subtitle: 'Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik.',
-      runningText: 'Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!',
-      footerText: '© 2026 Portal Microsite Hub',
+      runningText: 'Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi, dokumen, dan tautan proyek Anda dalam satu klik!',
+      subtitle: 'Pusat akses satu pintu untuk seluruh aplikasi web, sistem administrasi, dan portofolio digital.',
+      footerText: '© 2026 Portal Microsite Proyek • Akses Cepat Satu Klik',
       themeMode: 'light',
       accentColor: 'aurora',
       logoDataUrl: '',
@@ -730,30 +772,22 @@ const firebaseConfig = {
         id: 'demo-proj-1',
         title: 'Sistem Manajemen Kurikulum & Jadwal',
         url: 'https://example.com/kurikulum',
-        description: 'Aplikasi penyusunan perangkat ajar, jadwal pelajaran otomatis, dan kalender akademik terpadu.',
+        description: 'Aplikasi penyusunan jadwal pelajaran otomatis, kalender akademik, dan distribusi jam mengajar.',
         category: 'Aplikasi Web',
         subCategory: 'Kurikulum',
         icon: '📚',
-        logoDataUrl: '',
-        fileDataUrl: '',
-        fileName: '',
-        fileType: '',
         isPinned: true,
         visibility: 'public',
         order: 1
       },
       {
         id: 'demo-proj-2',
-        title: 'Dashboard Keuangan & Inventaris Aset',
-        url: 'https://example.com/keuangan',
-        description: 'Laporan arus kas real-time, rekapitulasi anggaran, dan pelacakan inventaris barang internal.',
-        category: 'Aplikasi Web',
-        subCategory: 'Keuangan & Aset',
-        icon: '📊',
-        logoDataUrl: '',
-        fileDataUrl: '',
-        fileName: '',
-        fileType: '',
+        title: 'Dashboard Laporan & Arsip Internal',
+        url: 'https://example.com/arsip-internal',
+        description: 'Rekapitulasi dokumen evaluasi dan laporan bulanan khusus tim internal terdaftar.',
+        category: 'Administrasi',
+        subCategory: 'Kepegawaian',
+        icon: '🔐',
         isPinned: false,
         visibility: 'private',
         order: 2
@@ -764,7 +798,7 @@ const firebaseConfig = {
         id: 'demo-user-1',
         username: 'tim01',
         password: '123',
-        name: 'Anggota Tim (Demo)',
+        name: 'Anggota Tim Demo',
         role: 'contributor'
       }
     ] : []
@@ -773,7 +807,7 @@ const firebaseConfig = {
   let initialFirebaseReady = IS_PREVIEW;
 
   // =========================================================================
-  // 4. HELPER UI (TEMA, WARNA, UPLOAD GAMBAR, POP-UP ANIMASI, KONFIRMASI)
+  // 4. HELPER UI (TEMA, WARNA, KOMPRESI GAMBAR, MULTI-BERKAS, POP-UP)
   // =========================================================================
   let iconRenderQueued = false;
   function refreshIconsFast() {
@@ -806,8 +840,8 @@ const firebaseConfig = {
     }
 
     const runningEl = document.getElementById('dashboard-running-text');
-    if (runningEl) {
-      runningEl.textContent = state.portalSettings.runningText || 'Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!';
+    if (runningEl && state.portalSettings.runningText) {
+      runningEl.textContent = state.portalSettings.runningText;
     }
   }
 
@@ -833,23 +867,20 @@ const firebaseConfig = {
   window.selectAccentColor = (accent) => {
     state.portalSettings.accentColor = accent;
     applyThemeAndColors();
-    if (state.activeMenu === 'settings') {
-      document.getElementById('view-container').innerHTML = renderSettingsView();
-    }
-    refreshIconsFast();
+    renderAll();
+    showChangeSuccessPopup('Warna Diubah!', 'Palet warna tema portal berhasil diperbarui.');
   };
 
-  function compressImageFile(file, maxSize = 320, quality = 0.82) {
+  function compressImageFile(file, maxSize = 320, quality = 0.85) {
     return new Promise((resolve, reject) => {
       if (!file || !file.type.startsWith('image/')) {
-        reject(new Error('File harus berupa gambar'));
+        reject(new Error('File harus berupa gambar (PNG/JPG/WebP).'));
         return;
       }
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
           let w = img.width;
           let h = img.height;
           if (w > maxSize || h > maxSize) {
@@ -861,16 +892,17 @@ const firebaseConfig = {
               h = maxSize;
             }
           }
+          const canvas = document.createElement('canvas');
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
           resolve(canvas.toDataURL('image/webp', quality));
         };
-        img.onerror = () => reject(new Error('Gagal memproses gambar'));
-        img.src = e.target.result;
+        img.onerror = () => reject(new Error('Gagal memproses gambar.'));
+        img.src = ev.target.result;
       };
-      reader.onerror = () => reject(new Error('Gagal membaca file'));
+      reader.onerror = () => reject(new Error('Gagal membaca file dari perangkat.'));
       reader.readAsDataURL(file);
     });
   }
@@ -879,13 +911,14 @@ const firebaseConfig = {
     const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 260, 0.85);
+      const dataUrl = await compressImageFile(file, 260, 0.86);
       document.getElementById('set-logo-data').value = dataUrl;
       state.portalSettings.logoDataUrl = dataUrl;
       const preview = document.getElementById('set-logo-preview');
-      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Portal" class="w-full h-full object-cover" />`;
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo" class="w-full h-full object-cover" />`;
       renderNavigation();
-      showChangeSuccessPopup('Logo Web Diperbarui!', 'Logo utama website berhasil diunggah dari komputer.');
+      refreshIconsFast();
+      showChangeSuccessPopup('Logo Website Diperbarui!', 'Logo website berhasil diunggah. Klik Simpan Pengaturan untuk menyimpan permanen.');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -984,132 +1017,264 @@ const firebaseConfig = {
     if (preview) preview.innerHTML = `<span class="text-[11px] theme-text-muted text-center px-1">Belum ada</span>`;
   };
 
-  window.handleProjectFileUpload = async (input) => {
-    const file = input.files && input.files[0];
-    if (!file) return;
+  function getProjectAttachments(proj) {
+    if (!proj) return [];
+    if (Array.isArray(proj.attachments) && proj.attachments.length > 0) {
+      return proj.attachments;
+    }
+    if (proj.fileDataUrl) {
+      return [{
+        id: 'legacy-' + (proj.id || 'file'),
+        dataUrl: proj.fileDataUrl,
+        name: proj.fileName || 'Berkas Terlampir',
+        type: proj.fileType || (proj.fileDataUrl.startsWith('data:application/pdf') ? 'pdf' : 'image')
+      }];
+    }
+    return [];
+  }
 
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-    const isImage = file.type.startsWith('image/');
+  function renderDraftAttachmentsList() {
+    const statusBox = document.getElementById('proj-file-status');
+    const bulkActionsBox = document.getElementById('proj-file-bulk-actions');
+    if (!statusBox) return;
 
-    if (!isPdf && !isImage) {
-      showToast('Format berkas harus berupa PDF, JPG, PNG, atau WebP.', 'error');
-      input.value = '';
+    const list = state.draftAttachments || [];
+    if (list.length === 0) {
+      statusBox.innerHTML = `<span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>`;
+      if (bulkActionsBox) bulkActionsBox.classList.add('hidden');
       return;
     }
 
-    try {
-      let dataUrl = '';
-      if (isImage) {
-        dataUrl = await compressImageFile(file, 1280, 0.85);
-      } else {
-        if (file.size > 750 * 1024) {
-          showToast('Ukuran PDF maksimal 750 KB agar dapat tersimpan di database.', 'error');
-          input.value = '';
-          return;
-        }
-        dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => resolve(ev.target.result);
-          reader.onerror = () => reject(new Error('Gagal membaca berkas PDF'));
-          reader.readAsDataURL(file);
-        });
+    if (bulkActionsBox) {
+      bulkActionsBox.classList.remove('hidden');
+      const selectedCount = state.selectedAttachmentIds.size;
+      const delSelectedBtn = document.getElementById('btn-delete-selected-files');
+      if (delSelectedBtn) {
+        delSelectedBtn.disabled = selectedCount === 0;
+        delSelectedBtn.className = selectedCount > 0
+          ? 'px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold inline-flex items-center gap-1.5 transition shadow-sm'
+          : 'px-3 py-1.5 rounded-xl bg-red-500/15 text-red-400 text-xs font-bold inline-flex items-center gap-1.5 cursor-not-allowed';
+        delSelectedBtn.innerHTML = `<i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus Ditandai (${selectedCount})</span>`;
       }
-
-      document.getElementById('proj-file-data').value = dataUrl;
-      document.getElementById('proj-file-name').value = file.name;
-      document.getElementById('proj-file-type').value = isPdf ? 'pdf' : 'image';
-
-      const statusBox = document.getElementById('proj-file-status');
-      if (statusBox) {
-        statusBox.innerHTML = `
-          <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs">
-            <i data-lucide="${isPdf ? 'file-text' : 'image'}" class="w-4 h-4 shrink-0"></i>
-            <span class="truncate">${file.name}</span>
-          </div>
-        `;
+      const selectAllCheckbox = document.getElementById('checkbox-select-all-files');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.checked = list.length > 0 && selectedCount === list.length;
       }
-
-      const urlInput = document.getElementById('proj-url');
-      if (urlInput && !urlInput.value.trim()) {
-        urlInput.value = '#berkas';
-      }
-
-      refreshIconsFast();
-      showToast(`Berkas "${file.name}" siap disimpan!`, 'success');
-    } catch (err) {
-      showToast(err.message || 'Gagal memproses berkas.', 'error');
     }
+
+    statusBox.innerHTML = `
+      <div class="space-y-2 mt-2 max-h-60 overflow-y-auto pr-1">
+        ${list.map((att, idx) => {
+          const isChecked = state.selectedAttachmentIds.has(att.id);
+          const isPdf = att.type === 'pdf' || (att.dataUrl && att.dataUrl.startsWith('data:application/pdf'));
+          return `
+            <div class="flex items-center justify-between gap-2.5 p-2.5 rounded-xl theme-input border ${isChecked ? 'border-sky-500 ring-1 ring-sky-500/40' : ''}">
+              <label class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer select-none">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleAttachmentSelection('${att.id}', this.checked)" class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 shrink-0" />
+                <div class="w-8 h-8 rounded-lg ${isPdf ? 'bg-rose-500/15 text-rose-500' : 'bg-sky-500/15 text-sky-500'} flex items-center justify-center shrink-0">
+                  <i data-lucide="${isPdf ? 'file-text' : 'image'}" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold theme-text-primary truncate">${idx + 1}. ${att.name}</div>
+                  <div class="text-[10px] theme-text-muted uppercase">${isPdf ? 'Dokumen PDF' : 'Gambar'}</div>
+                </div>
+              </label>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="openDraftAttachmentViewer('${att.id}')" class="px-2.5 py-1 rounded-lg badge-accent text-[11px] font-bold hover:opacity-80 transition">
+                  Lihat
+                </button>
+                <button type="button" onclick="removeSingleDraftAttachment('${att.id}')" class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 transition" title="Hapus berkas ini">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    refreshIconsFast();
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.onerror = () => reject(new Error(`Gagal membaca berkas ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  window.handleProjectFileUpload = async (input) => {
+    const files = Array.from(input.files || []);
+    if (files.length === 0) return;
+
+    let addedCount = 0;
+    for (const file of files) {
+      try {
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        const isImg = file.type.startsWith('image/');
+        if (!isPdf && !isImg) {
+          showToast(`Format ${file.name} tidak didukung (gunakan PDF/JPG/PNG).`, 'error');
+          continue;
+        }
+        if (file.size > 900 * 1024 && !IS_PREVIEW) {
+          showToast(`Ukuran ${file.name} melebihi 900KB untuk mode Firebase.`, 'error');
+          continue;
+        }
+
+        const dataUrl = isImg
+          ? await compressImageFile(file, 1280, 0.86)
+          : await readFileAsDataUrl(file);
+
+        state.draftAttachments.push({
+          id: 'att-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+          name: file.name,
+          type: isPdf ? 'pdf' : 'image',
+          dataUrl
+        });
+        addedCount++;
+      } catch (err) {
+        showToast(err.message || 'Gagal memuat berkas.', 'error');
+      }
+    }
+
+    input.value = '';
+    renderDraftAttachmentsList();
+    if (addedCount > 0) {
+      showToast(`${addedCount} berkas berhasil ditambahkan!`, 'success');
+    }
+  };
+
+  window.toggleAttachmentSelection = (attId, checked) => {
+    if (checked) state.selectedAttachmentIds.add(attId);
+    else state.selectedAttachmentIds.delete(attId);
+    renderDraftAttachmentsList();
+  };
+
+  window.toggleSelectAllAttachments = (checked) => {
+    state.selectedAttachmentIds.clear();
+    if (checked) {
+      state.draftAttachments.forEach(a => state.selectedAttachmentIds.add(a.id));
+    }
+    renderDraftAttachmentsList();
+  };
+
+  window.deleteSelectedAttachments = () => {
+    if (state.selectedAttachmentIds.size === 0) return;
+    const count = state.selectedAttachmentIds.size;
+    state.draftAttachments = state.draftAttachments.filter(a => !state.selectedAttachmentIds.has(a.id));
+    state.selectedAttachmentIds.clear();
+    renderDraftAttachmentsList();
+    showToast(`${count} berkas yang ditandai dihapus.`, 'success');
+  };
+
+  window.removeSingleDraftAttachment = (attId) => {
+    state.draftAttachments = state.draftAttachments.filter(a => a.id !== attId);
+    state.selectedAttachmentIds.delete(attId);
+    renderDraftAttachmentsList();
   };
 
   window.clearProjectFile = () => {
-    const fData = document.getElementById('proj-file-data');
-    const fName = document.getElementById('proj-file-name');
-    const fType = document.getElementById('proj-file-type');
-    if (fData) fData.value = '';
-    if (fName) fName.value = '';
-    if (fType) fType.value = '';
-    const statusBox = document.getElementById('proj-file-status');
-    if (statusBox) {
-      statusBox.innerHTML = `<span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>`;
-    }
+    state.draftAttachments = [];
+    state.selectedAttachmentIds.clear();
+    renderDraftAttachmentsList();
   };
 
-  window.openProjectFileViewer = (id) => {
-    const proj = state.projects.find(p => p.id === id);
-    if (!proj || !proj.fileDataUrl) {
-      showToast('Berkas tidak ditemukan.', 'error');
-      return;
-    }
-    const modal = document.getElementById('file-viewer-modal');
+  // Viewer Modal Multi-Berkas (PDF / JPG)
+  let activeViewerAttachments = [];
+
+  function renderFileViewerActiveTab(index) {
+    const att = activeViewerAttachments[index];
+    if (!att) return;
+
     const titleEl = document.getElementById('file-viewer-title');
     const subEl = document.getElementById('file-viewer-subtitle');
     const dlEl = document.getElementById('file-viewer-download');
     const bodyEl = document.getElementById('file-viewer-body');
+    const tabsEl = document.getElementById('file-viewer-tabs');
 
-    const fileName = proj.fileName || `${proj.title}.${proj.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
-    titleEl.textContent = proj.title;
-    subEl.textContent = fileName;
-    dlEl.href = proj.fileDataUrl;
-    dlEl.setAttribute('download', fileName);
-
-    const isPdf = proj.fileType === 'pdf' || proj.fileDataUrl.startsWith('data:application/pdf');
-    if (isPdf) {
-      bodyEl.innerHTML = `<iframe src="${proj.fileDataUrl}" class="w-full h-full rounded-2xl border border-slate-200 bg-white"></iframe>`;
-    } else {
-      bodyEl.innerHTML = `<img src="${proj.fileDataUrl}" alt="${fileName}" class="max-w-full max-h-full object-contain rounded-2xl shadow-lg" />`;
+    if (titleEl) titleEl.textContent = att.name || 'Pratinjau Berkas';
+    if (subEl) subEl.textContent = `Berkas ${index + 1} dari ${activeViewerAttachments.length}`;
+    if (dlEl) {
+      dlEl.href = att.dataUrl;
+      dlEl.download = att.name || 'berkas';
     }
 
-    modal.classList.remove('hidden');
+    if (tabsEl) {
+      if (activeViewerAttachments.length > 1) {
+        tabsEl.classList.remove('hidden');
+        tabsEl.innerHTML = activeViewerAttachments.map((item, idx) => `
+          <button type="button" onclick="switchFileViewerTab(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${idx === index ? 'btn-accent text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+            ${idx + 1}. ${item.name}
+          </button>
+        `).join('');
+      } else {
+        tabsEl.classList.add('hidden');
+        tabsEl.innerHTML = '';
+      }
+    }
+
+    const isPdf = att.type === 'pdf' || (att.dataUrl && att.dataUrl.startsWith('data:application/pdf'));
+    if (bodyEl) {
+      if (isPdf) {
+        bodyEl.innerHTML = `<iframe src="${att.dataUrl}" class="w-full h-full rounded-2xl border-0 bg-white"></iframe>`;
+      } else {
+        bodyEl.innerHTML = `<img src="${att.dataUrl}" alt="${att.name}" class="max-w-full max-h-full object-contain rounded-2xl shadow-lg" />`;
+      }
+    }
     refreshIconsFast();
+  }
+
+  window.switchFileViewerTab = (index) => {
+    renderFileViewerActiveTab(index);
+  };
+
+  window.openProjectFileViewer = (projectId, startIndex = 0) => {
+    const proj = state.projects.find(p => p.id === projectId);
+    if (!proj) return;
+    const attachments = getProjectAttachments(proj);
+    if (attachments.length === 0) return;
+
+    activeViewerAttachments = attachments;
+    document.getElementById('file-viewer-modal').classList.remove('hidden');
+    renderFileViewerActiveTab(startIndex);
+  };
+
+  window.openDraftAttachmentViewer = (attId) => {
+    const idx = state.draftAttachments.findIndex(a => a.id === attId);
+    if (idx === -1) return;
+    activeViewerAttachments = [...state.draftAttachments];
+    document.getElementById('file-viewer-modal').classList.remove('hidden');
+    renderFileViewerActiveTab(idx);
   };
 
   window.closeFileViewerModal = () => {
-    const modal = document.getElementById('file-viewer-modal');
+    document.getElementById('file-viewer-modal').classList.add('hidden');
     const bodyEl = document.getElementById('file-viewer-body');
-    if (modal) modal.classList.add('hidden');
     if (bodyEl) bodyEl.innerHTML = '';
   };
 
+  // Toast & Pop-up Animasi Berhasil
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
-    const toast = document.createElement('div');
-    const bgMap = {
+    const colors = {
       success: 'bg-emerald-600 text-white',
-      error: 'bg-red-600 text-white',
+      error: 'bg-rose-600 text-white',
       info: 'bg-slate-900 text-white'
     };
-    toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 max-w-xs ${bgMap[type] || bgMap.info}`;
+    const toast = document.createElement('div');
+    toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 ${colors[type] || colors.info}`;
     toast.innerHTML = `<span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transition = 'opacity 0.25s ease';
-      setTimeout(() => toast.remove(), 250);
-    }, 3000);
+      setTimeout(() => toast.remove(), 260);
+    }, 2800);
   }
 
-  let successPopupTimer = null;
+  let successModalTimer = null;
   function showChangeSuccessPopup(title = 'Perubahan Disimpan!', desc = 'Data telah berhasil diperbarui.') {
     const modal = document.getElementById('change-success-modal');
     if (!modal) return;
@@ -1117,30 +1282,40 @@ const firebaseConfig = {
     document.getElementById('change-success-desc').textContent = desc;
     modal.classList.remove('hidden');
     refreshIconsFast();
-    if (successPopupTimer) clearTimeout(successPopupTimer);
-    successPopupTimer = setTimeout(() => {
+
+    if (successModalTimer) clearTimeout(successModalTimer);
+    successModalTimer = setTimeout(() => {
       closeChangeSuccessPopup();
-    }, 2200);
+    }, 2400);
   }
 
   window.closeChangeSuccessPopup = () => {
     const modal = document.getElementById('change-success-modal');
     if (modal) modal.classList.add('hidden');
-    if (successPopupTimer) {
-      clearTimeout(successPopupTimer);
-      successPopupTimer = null;
-    }
   };
 
-  function openConfirmDialog({ title, text, confirmLabel = 'Ya', cancelLabel = 'Cancel', onConfirm }) {
+  function showAuthFeedbackModal(title, desc) {
+    const modal = document.getElementById('auth-feedback-modal');
+    if (!modal) return;
+    document.getElementById('auth-feedback-title').textContent = title;
+    document.getElementById('auth-feedback-desc').textContent = desc;
+    modal.classList.remove('hidden');
+    refreshIconsFast();
+  }
+
+  window.closeAuthFeedbackModal = () => {
+    const modal = document.getElementById('auth-feedback-modal');
+    if (modal) modal.classList.add('hidden');
+  };
+
+  function openConfirmModal({ title, text, confirmText = 'Ya', onConfirm }) {
     const modal = document.getElementById('confirm-modal');
+    if (!modal) return;
     document.getElementById('confirm-modal-title').textContent = title;
     document.getElementById('confirm-modal-text').textContent = text;
-    const confirmBtn = document.getElementById('confirm-modal-btn');
-    const cancelBtn = document.getElementById('confirm-modal-cancel');
-    confirmBtn.textContent = confirmLabel;
-    cancelBtn.textContent = cancelLabel;
-    confirmBtn.onclick = () => {
+    const btn = document.getElementById('confirm-modal-btn');
+    btn.textContent = confirmText;
+    btn.onclick = () => {
       closeConfirmModal();
       if (typeof onConfirm === 'function') onConfirm();
     };
@@ -1149,119 +1324,60 @@ const firebaseConfig = {
   }
 
   window.closeConfirmModal = () => {
-    document.getElementById('confirm-modal').classList.add('hidden');
-  };
-
-  function showAuthFeedbackModal(title, desc, iconName = 'check-circle-2') {
-    const modal = document.getElementById('auth-feedback-modal');
-    document.getElementById('auth-feedback-title').textContent = title;
-    document.getElementById('auth-feedback-desc').textContent = desc;
-    const iconBox = document.getElementById('auth-feedback-icon');
-    if (iconBox) iconBox.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8"></i>`;
-    modal.classList.remove('hidden');
-    refreshIconsFast();
-  }
-
-  window.closeAuthFeedbackModal = () => {
-    document.getElementById('auth-feedback-modal').classList.add('hidden');
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.add('hidden');
   };
 
   // =========================================================================
-  // 5. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
+  // 5. AUTENTIKASI HYBRID (ADMIN FIREBASE AUTH & USER FIRESTORE)
   // =========================================================================
-  function initProductionRealtimeSync() {
-    if (IS_PREVIEW || !db) return;
-
-    let settingsLoaded = false;
-    let projectsLoaded = false;
-    const markReady = () => {
-      if (settingsLoaded && projectsLoaded) initialFirebaseReady = true;
-    };
-
-    onSnapshot(doc(db, 'portal_settings', 'main'), (snap) => {
-      if (snap.exists()) {
-        state.portalSettings = { ...state.portalSettings, ...snap.data() };
-      }
-      settingsLoaded = true;
-      markReady();
-      renderAll();
-    }, () => {
-      settingsLoaded = true;
-      markReady();
-    });
-
-    onSnapshot(query(collection(db, 'projects'), orderBy('order', 'asc')), (snapshot) => {
-      state.projects = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      projectsLoaded = true;
-      markReady();
-      renderAll();
-    }, () => {
-      projectsLoaded = true;
-      markReady();
-    });
-
-    onSnapshot(collection(db, 'users'), (snapshot) => {
-      state.users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      if (state.activeMenu === 'manage-users') renderAll();
-    }, () => {});
-
-    onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        state.currentUser = {
-          role: 'admin',
-          name: firebaseUser.email.split('@')[0],
-          identifier: firebaseUser.email
-        };
-      } else if (state.currentUser?.role === 'admin') {
-        state.currentUser = null;
-        state.activeMenu = 'portal';
-      }
-      renderAll();
-    });
-  }
-
-  // =========================================================================
-  // 6. AUTENTIKASI HYBRID (ADMIN VIA FIREBASE AUTH, USER VIA FIRESTORE)
-  // =========================================================================
-  window.openLoginModal = () => {
+  window.openLoginModal = (defaultTab = 'admin') => {
     const modal = document.getElementById('login-modal');
-    const hintBox = document.getElementById('demo-login-hint');
-    if (IS_PREVIEW) {
-      hintBox.classList.remove('hidden');
-      hintBox.innerHTML = `
-        <div class="font-bold">Akun Demo Mode Preview:</div>
-        <div>• <b>Admin:</b> <code>admin@portal.id</code> / <code>admin123</code></div>
-        <div>• <b>User:</b> <code>tim01</code> / <code>123</code></div>
-      `;
-    } else {
-      hintBox.classList.add('hidden');
-      hintBox.innerHTML = '';
-    }
+    if (!modal) return;
     modal.classList.remove('hidden');
-    switchLoginTab('admin');
+
+    const hint = document.getElementById('demo-login-hint');
+    if (hint) {
+      if (IS_PREVIEW) {
+        hint.classList.remove('hidden');
+        hint.innerHTML = `
+          <div class="font-bold">Mode Preview — Akun Simulasi:</div>
+          <div>• <b>Admin:</b> <code>admin@portal.id</code> / <code>admin123</code></div>
+          <div>• <b>User:</b> <code>tim01</code> / <code>123</code></div>
+        `;
+      } else {
+        hint.classList.add('hidden');
+      }
+    }
+
+    switchLoginTab(defaultTab);
     refreshIconsFast();
   };
 
   window.closeLoginModal = () => {
-    document.getElementById('login-modal').classList.add('hidden');
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.classList.add('hidden');
   };
 
   window.switchLoginTab = (tab) => {
-    const isAdmin = tab === 'admin';
-    document.getElementById('tab-btn-admin').className = isAdmin
-      ? 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition'
-      : 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
-    document.getElementById('tab-btn-user').className = !isAdmin
-      ? 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition'
-      : 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
+    const btnAdmin = document.getElementById('tab-btn-admin');
+    const btnUser = document.getElementById('tab-btn-user');
+    const formAdmin = document.getElementById('form-login-admin');
+    const formUser = document.getElementById('form-login-user');
 
-    document.getElementById('form-login-admin').classList.toggle('hidden', !isAdmin);
-    document.getElementById('form-login-user').classList.toggle('hidden', isAdmin);
-
-    requestAnimationFrame(() => {
-      const targetInput = document.getElementById(isAdmin ? 'admin-email' : 'user-username');
-      if (targetInput) targetInput.focus();
-    });
+    if (tab === 'admin') {
+      btnAdmin.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition';
+      btnUser.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
+      formAdmin.classList.remove('hidden');
+      formUser.classList.add('hidden');
+      setTimeout(() => document.getElementById('admin-email')?.focus(), 40);
+    } else {
+      btnUser.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition';
+      btnAdmin.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
+      formUser.classList.remove('hidden');
+      formAdmin.classList.add('hidden');
+      setTimeout(() => document.getElementById('user-username')?.focus(), 40);
+    }
   };
 
   window.handleAdminLogin = async (e) => {
@@ -1271,26 +1387,28 @@ const firebaseConfig = {
 
     if (IS_PREVIEW) {
       if (email === 'admin@portal.id' && password === 'admin123') {
-        state.currentUser = { role: 'admin', name: 'Administrator', identifier: email };
+        state.currentUser = { role: 'admin', name: 'Administrator Utama', identifier: email };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackModal('Selamat Datang, Admin!', 'Anda berhasil masuk ke Dashboard Pengelola Portal.', 'shield-check');
+        showAuthFeedbackModal('Login Admin Berhasil!', 'Anda masuk sebagai Administrator penuh (Mode Preview).');
       } else {
-        showToast('Email atau password demo Admin salah.', 'error');
+        showToast('Email atau password Admin demo salah.', 'error');
       }
       return;
     }
 
-    const btn = document.getElementById('btn-submit-admin');
-    btn.disabled = true;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      state.currentUser = {
+        role: 'admin',
+        name: cred.user.displayName || 'Administrator',
+        identifier: cred.user.email
+      };
       closeLoginModal();
-      showAuthFeedbackModal('Selamat Datang, Admin!', 'Autentikasi Firebase berhasil. Anda memiliki akses penuh.', 'shield-check');
+      renderAll();
+      showAuthFeedbackModal('Login Admin Berhasil!', `Selamat datang, ${state.currentUser.identifier}`);
     } catch (err) {
-      showToast('Login Admin gagal: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
+      showToast('Gagal login Admin: ' + (err.message || 'Periksa email & password.'), 'error');
     }
   };
 
@@ -1302,18 +1420,16 @@ const firebaseConfig = {
     if (IS_PREVIEW) {
       const found = state.users.find(u => u.username === username && u.password === password);
       if (found) {
-        state.currentUser = { role: found.role, name: found.name, identifier: found.username };
+        state.currentUser = { role: found.role || 'contributor', name: found.name, identifier: found.username };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackModal(`Halo, ${found.name}!`, 'Anda berhasil masuk sebagai User/Kontributor.', 'user-check');
+        showAuthFeedbackModal('Berhasil Masuk!', `Selamat datang kembali, ${found.name}.`);
       } else {
-        showToast('ID/Username atau Password tidak cocok.', 'error');
+        showToast('Username atau password User tidak ditemukan.', 'error');
       }
       return;
     }
 
-    const btn = document.getElementById('btn-submit-user');
-    btn.disabled = true;
     try {
       const q = query(
         collection(db, 'users'),
@@ -1324,78 +1440,110 @@ const firebaseConfig = {
       if (!snap.empty) {
         const userData = snap.docs[0].data();
         state.currentUser = {
-          role: userData.role || 'viewer',
+          role: userData.role || 'contributor',
           name: userData.name || username,
-          identifier: username
+          identifier: userData.username
         };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackModal(`Halo, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.', 'user-check');
+        showAuthFeedbackModal('Berhasil Masuk!', `Selamat datang kembali, ${state.currentUser.name}.`);
       } else {
-        showToast('ID/Username atau Password tidak ditemukan.', 'error');
+        showToast('ID / Username atau password tidak cocok.', 'error');
       }
     } catch (err) {
-      showToast('Gagal memvalidasi akun: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
+      showToast('Gagal memeriksa akun: ' + err.message, 'error');
     }
   };
 
-  window.logoutUser = () => {
-    openConfirmDialog({
-      title: 'Konfirmasi Keluar Sesi',
-      text: 'Apakah Anda yakin ingin keluar dari akun saat ini?',
-      confirmLabel: 'Ya',
-      cancelLabel: 'Cancel',
+  window.confirmLogout = () => {
+    openConfirmModal({
+      title: 'Keluar dari Akun?',
+      text: 'Sesi pengelolaan Anda akan diakhiri dan proyek privat akan disembunyikan.',
+      confirmText: 'Keluar',
       onConfirm: async () => {
-        if (!IS_PREVIEW && state.currentUser?.role === 'admin' && auth) {
+        if (!IS_PREVIEW && auth && auth.currentUser) {
           await signOut(auth).catch(() => {});
         }
         state.currentUser = null;
         state.activeMenu = 'portal';
         state.editingProjectId = null;
         renderAll();
-        showAuthFeedbackModal('Berhasil Keluar!', 'Sesi Anda telah diakhiri dengan aman.', 'log-out');
+        showAuthFeedbackModal('Berhasil Keluar', 'Anda telah keluar dari sesi akun portal.');
       }
     });
   };
 
   // =========================================================================
-  // 7. OPERASI CRUD PROYEK, PENGATURAN PORTAL & USER
+  // 6. CRUD PROYEK, AKUN USER & PENGATURAN PORTAL
   // =========================================================================
+  window.switchMenu = (menu) => {
+    if (menu !== 'portal' && !state.currentUser) {
+      openLoginModal('admin');
+      return;
+    }
+    state.activeMenu = menu;
+    if (menu !== 'manage-projects') {
+      state.editingProjectId = null;
+      state.draftAttachments = [];
+      state.selectedAttachmentIds.clear();
+    }
+    renderAll();
+  };
+
+  window.editProject = (id) => {
+    const proj = state.projects.find(p => p.id === id);
+    if (!proj) return;
+    state.editingProjectId = id;
+    state.draftAttachments = getProjectAttachments(proj).map(a => ({ ...a }));
+    state.selectedAttachmentIds.clear();
+    state.activeMenu = 'manage-projects';
+    renderAll();
+    document.getElementById('main-content-area')?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.cancelEditProject = () => {
+    state.editingProjectId = null;
+    state.draftAttachments = [];
+    state.selectedAttachmentIds.clear();
+    renderAll();
+  };
+
   window.saveProject = async (e) => {
     e.preventDefault();
+    if (!state.currentUser) return;
+
     const title = document.getElementById('proj-title').value.trim();
-    const fileDataUrl = document.getElementById('proj-file-data')?.value || '';
-    const fileName = document.getElementById('proj-file-name')?.value || '';
-    const fileType = document.getElementById('proj-file-type')?.value || '';
-
     let url = document.getElementById('proj-url').value.trim();
-    if (!url && fileDataUrl) {
-      url = '#berkas';
-    } else if (url && url !== '#berkas' && !/^https?:\/\//i.test(url)) {
-      url = 'https://' + url;
-    }
+    const description = document.getElementById('proj-desc').value.trim();
+    const category = document.getElementById('proj-category').value.trim() || 'Umum';
+    const subCategory = document.getElementById('proj-subcategory').value.trim();
+    const logoDataUrl = document.getElementById('proj-logo-data').value || '';
+    const icon = document.getElementById('proj-icon').value.trim() || '🚀';
+    const order = parseInt(document.getElementById('proj-order').value, 10) || 1;
+    const visibility = document.getElementById('proj-visibility').value || 'public';
+    const isPinned = document.getElementById('proj-pinned').checked;
+    const attachments = [...state.draftAttachments];
 
-    if (!url && !fileDataUrl) {
-      showToast('Isi URL tujuan atau unggah berkas PDF/JPG terlebih dahulu.', 'error');
+    if (!url && attachments.length === 0) {
+      showToast('Isi URL tujuan atau unggah minimal 1 berkas PDF/JPG.', 'error');
       return;
+    }
+    if (url && !/^https?:\/\//i.test(url) && !url.startsWith('#')) {
+      url = 'https://' + url;
     }
 
     const payload = {
       title,
       url,
-      description: document.getElementById('proj-desc').value.trim(),
-      category: document.getElementById('proj-category').value.trim() || 'Aplikasi Web',
-      subCategory: document.getElementById('proj-subcategory').value.trim(),
-      logoDataUrl: document.getElementById('proj-logo-data').value || '',
-      fileDataUrl,
-      fileName,
-      fileType,
-      icon: document.getElementById('proj-icon').value.trim() || '🚀',
-      order: Number(document.getElementById('proj-order').value) || 1,
-      visibility: document.getElementById('proj-visibility').value,
-      isPinned: document.getElementById('proj-pinned').checked
+      description,
+      category,
+      subCategory,
+      logoDataUrl,
+      attachments,
+      icon,
+      order,
+      visibility,
+      isPinned
     };
 
     const isEditing = Boolean(state.editingProjectId);
@@ -1403,68 +1551,74 @@ const firebaseConfig = {
     if (IS_PREVIEW) {
       if (isEditing) {
         const idx = state.projects.findIndex(p => p.id === state.editingProjectId);
-        if (idx !== -1) state.projects[idx] = { ...state.projects[idx], ...payload };
-        state.editingProjectId = null;
+        if (idx !== -1) {
+          state.projects[idx] = { ...state.projects[idx], ...payload };
+        }
       } else {
-        state.projects.push({ id: 'proj-' + Date.now(), ...payload });
+        state.projects.push({
+          id: 'proj-' + Date.now(),
+          ...payload
+        });
       }
+      state.projects.sort((a, b) => (b.isPinned - a.isPinned) || ((a.order || 99) - (b.order || 99)));
+      state.editingProjectId = null;
+      state.draftAttachments = [];
+      state.selectedAttachmentIds.clear();
       renderAll();
       showChangeSuccessPopup(
         isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
-        isEditing ? `Proyek "${title}" berhasil diperbarui.` : `Proyek "${title}" berhasil ditambahkan ke portal.`
+        isEditing ? 'Perubahan data proyek berhasil disimpan.' : 'Proyek baru telah tampil di portal.'
       );
       return;
     }
 
     try {
       if (isEditing) {
-        await updateDoc(doc(db, 'projects', state.editingProjectId), payload);
-        state.editingProjectId = null;
+        await updateDoc(doc(db, 'projects', state.editingProjectId), {
+          ...payload,
+          updatedAt: serverTimestamp()
+        });
       } else {
-        await addDoc(collection(db, 'projects'), { ...payload, createdAt: serverTimestamp() });
+        await addDoc(collection(db, 'projects'), {
+          ...payload,
+          createdAt: serverTimestamp()
+        });
       }
+      state.editingProjectId = null;
+      state.draftAttachments = [];
+      state.selectedAttachmentIds.clear();
       renderAll();
       showChangeSuccessPopup(
         isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
-        isEditing ? `Proyek "${title}" berhasil disimpan.` : `Proyek "${title}" berhasil ditambahkan.`
+        'Data proyek berhasil disinkronkan ke cloud.'
       );
     } catch (err) {
       showToast('Gagal menyimpan proyek: ' + err.message, 'error');
     }
   };
 
-  window.editProject = (id) => {
-    state.editingProjectId = id;
-    state.activeMenu = 'manage-projects';
-    renderAll();
-    const mainArea = document.getElementById('app-wrapper');
-    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  window.cancelEditProject = () => {
-    state.editingProjectId = null;
-    renderAll();
-  };
-
   window.deleteProject = (id) => {
-    const target = state.projects.find(p => p.id === id);
-    openConfirmDialog({
-      title: 'Hapus Proyek?',
-      text: `Proyek "${target?.title || 'ini'}" akan dihapus secara permanen dari daftar portal.`,
-      confirmLabel: 'Ya, Hapus',
-      cancelLabel: 'Cancel',
+    const proj = state.projects.find(p => p.id === id);
+    if (!proj) return;
+    openConfirmModal({
+      title: 'Hapus Proyek Ini?',
+      text: `Proyek "${proj.title}" akan dihapus secara permanen dari portal.`,
+      confirmText: 'Hapus',
       onConfirm: async () => {
         if (IS_PREVIEW) {
           state.projects = state.projects.filter(p => p.id !== id);
-          if (state.editingProjectId === id) state.editingProjectId = null;
+          if (state.editingProjectId === id) {
+            state.editingProjectId = null;
+            state.draftAttachments = [];
+            state.selectedAttachmentIds.clear();
+          }
           renderAll();
-          showChangeSuccessPopup('Proyek Dihapus!', 'Data proyek berhasil dihapus dari portal.');
+          showChangeSuccessPopup('Proyek Dihapus!', `Proyek "${proj.title}" berhasil dihapus.`);
           return;
         }
         try {
           await deleteDoc(doc(db, 'projects', id));
-          if (state.editingProjectId === id) state.editingProjectId = null;
-          showChangeSuccessPopup('Proyek Dihapus!', 'Data proyek berhasil dihapus dari Firestore.');
+          showChangeSuccessPopup('Proyek Dihapus!', `Proyek "${proj.title}" berhasil dihapus.`);
         } catch (err) {
           showToast('Gagal menghapus proyek: ' + err.message, 'error');
         }
@@ -1472,11 +1626,72 @@ const firebaseConfig = {
     });
   };
 
+  window.addUserAccount = async (e) => {
+    e.preventDefault();
+    if (state.currentUser?.role !== 'admin') return;
+
+    const name = document.getElementById('new-user-name').value.trim();
+    const username = document.getElementById('new-user-username').value.trim();
+    const password = document.getElementById('new-user-password').value.trim();
+    const role = document.getElementById('new-user-role').value;
+
+    if (IS_PREVIEW) {
+      if (state.users.some(u => u.username === username)) {
+        showToast('Username sudah digunakan.', 'error');
+        return;
+      }
+      state.users.push({ id: 'usr-' + Date.now(), name, username, password, role });
+      renderAll();
+      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" (${username}) siap digunakan.`);
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'users'), {
+        name,
+        username,
+        password,
+        role,
+        createdAt: serverTimestamp()
+      });
+      renderAll();
+      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" berhasil disimpan.`);
+    } catch (err) {
+      showToast('Gagal menambah akun: ' + err.message, 'error');
+    }
+  };
+
+  window.deleteUserAccount = (id) => {
+    const usr = state.users.find(u => u.id === id);
+    if (!usr) return;
+    openConfirmModal({
+      title: 'Hapus Akun User?',
+      text: `Akun "${usr.name}" (${usr.username}) tidak akan bisa login lagi.`,
+      confirmText: 'Hapus Akun',
+      onConfirm: async () => {
+        if (IS_PREVIEW) {
+          state.users = state.users.filter(u => u.id !== id);
+          renderAll();
+          showChangeSuccessPopup('Akun Dihapus!', `Akun "${usr.name}" berhasil dihapus.`);
+          return;
+        }
+        try {
+          await deleteDoc(doc(db, 'users', id));
+          showChangeSuccessPopup('Akun Dihapus!', `Akun "${usr.name}" berhasil dihapus.`);
+        } catch (err) {
+          showToast('Gagal menghapus akun: ' + err.message, 'error');
+        }
+      }
+    });
+  };
+
   window.savePortalSettings = async (e) => {
     e.preventDefault();
+    if (state.currentUser?.role !== 'admin') return;
+
     const updated = {
       ...state.portalSettings,
-      title: document.getElementById('set-title').value.trim(),
+      title: document.getElementById('set-title').value.trim() || 'Portal Proyek',
       tagline: document.getElementById('set-tagline').value.trim() || 'Microsite Hub 1-Klik',
       runningText: document.getElementById('set-running-text').value.trim(),
       subtitle: document.getElementById('set-subtitle').value.trim(),
@@ -1486,486 +1701,619 @@ const firebaseConfig = {
       sidebarBannerDataUrl: document.getElementById('set-sidebar-banner-data').value || ''
     };
 
+    state.portalSettings = updated;
+
     if (IS_PREVIEW) {
-      state.portalSettings = updated;
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo, dan warna portal berhasil diperbarui.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo, banner & warna portal berhasil diperbarui.');
       return;
     }
 
     try {
-      await setDoc(doc(db, 'portal_settings', 'main'), updated, { merge: true });
-      state.portalSettings = updated;
+      await setDoc(doc(db, 'settings', 'portal_config'), updated, { merge: true });
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Seluruh pengaturan portal berhasil tersimpan ke Firestore.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Konfigurasi portal tersimpan permanen ke Firestore.');
     } catch (err) {
       showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
     }
   };
 
-  window.addUserAccount = async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('new-user-name').value.trim();
-    const username = document.getElementById('new-user-username').value.trim();
-    const password = document.getElementById('new-user-password').value;
-    const role = document.getElementById('new-user-role').value;
+  // =========================================================================
+  // 7. SINKRONISASI REAL-TIME FIREBASE (HANYA SAAT IS_PREVIEW === false)
+  // =========================================================================
+  function initProductionRealtimeSync() {
+    if (!db || !auth) return;
 
-    if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-      showToast('ID / Username sudah digunakan.', 'error');
-      return;
-    }
-
-    const newUser = { name, username, password, role };
-    if (IS_PREVIEW) {
-      state.users.push({ id: 'user-' + Date.now(), ...newUser });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        state.currentUser = {
+          role: 'admin',
+          name: user.displayName || 'Administrator',
+          identifier: user.email
+        };
+      } else if (state.currentUser?.role === 'admin') {
+        state.currentUser = null;
+      }
       renderAll();
-      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" (${username}) siap digunakan.`);
-      return;
-    }
+    });
 
-    try {
-      await addDoc(collection(db, 'users'), newUser);
-      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" berhasil disimpan ke Firestore.`);
-    } catch (err) {
-      showToast('Gagal menambah akun user: ' + err.message, 'error');
-    }
-  };
-
-  window.deleteUserAccount = (id) => {
-    const target = state.users.find(u => u.id === id);
-    openConfirmDialog({
-      title: 'Hapus Akun User?',
-      text: `Akun "${target?.name || 'ini'}" tidak akan bisa lagi login ke portal.`,
-      confirmLabel: 'Ya, Hapus',
-      cancelLabel: 'Cancel',
-      onConfirm: async () => {
-        if (IS_PREVIEW) {
-          state.users = state.users.filter(u => u.id !== id);
-          renderAll();
-          showChangeSuccessPopup('Akun User Dihapus!', 'Akun user telah dihapus.');
-          return;
-        }
-        try {
-          await deleteDoc(doc(db, 'users', id));
-          showChangeSuccessPopup('Akun User Dihapus!', 'Akun user berhasil dihapus dari Firestore.');
-        } catch (err) {
-          showToast('Gagal menghapus akun: ' + err.message, 'error');
-        }
+    onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
+      if (snap.exists()) {
+        state.portalSettings = { ...state.portalSettings, ...snap.data() };
+        renderAll();
       }
     });
-  };
 
-  window.copyProjectLink = (url, title) => {
-    const tempInput = document.createElement('input');
-    tempInput.value = url;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-    showToast(`Tautan "${title}" berhasil disalin!`, 'success');
-  };
+    onSnapshot(collection(db, 'projects'), (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      items.sort((a, b) => (Boolean(b.isPinned) - Boolean(a.isPinned)) || ((a.order || 99) - (b.order || 99)));
+      state.projects = items;
+      initialFirebaseReady = true;
+      renderAll();
+    });
+
+    onSnapshot(collection(db, 'users'), (snap) => {
+      state.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (state.activeMenu === 'manage-users') renderAll();
+    });
+
+    // Real-Time Visitor Presence & Total Kunjungan
+    const sessionId = 'vis-' + Math.random().toString(36).slice(2, 11);
+    const presenceRef = doc(db, 'portal_presence', sessionId);
+    const statsRef = doc(db, 'portal_stats', 'summary');
+
+    setDoc(statsRef, { totalVisits: increment(1) }, { merge: true }).catch(() => {});
+    const sendHeartbeat = () => {
+      setDoc(presenceRef, { lastSeen: Date.now() }, { merge: true }).catch(() => {});
+    };
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 25000);
+    window.addEventListener('beforeunload', () => {
+      deleteDoc(presenceRef).catch(() => {});
+    });
+
+    onSnapshot(collection(db, 'portal_presence'), (snap) => {
+      const now = Date.now();
+      const active = snap.docs.filter(d => (now - (d.data().lastSeen || 0)) < 65000).length;
+      state.visitorStats.onlineCount = Math.max(1, active);
+      updateDashboardWidgetsOnly();
+    });
+
+    onSnapshot(statsRef, (snap) => {
+      if (snap.exists()) {
+        state.visitorStats.totalVisits = snap.data().totalVisits || 1;
+        updateDashboardWidgetsOnly();
+      }
+    });
+  }
 
   // =========================================================================
-  // 8. NAVIGASI & RENDER TAMPILAN KOMPONEN
+  // 8. RENDER NAVIGASI, BANNER PORTRAIT, DROPDOWN KATEGORI & KALENDER/WIB
   // =========================================================================
-  window.navigateTo = (menu) => {
-    state.activeMenu = menu;
-    renderAll();
-  };
-
-  window.setCategory = (cat) => {
-    state.selectedCategory = cat;
-    renderAll();
-  };
-
-  window.toggleCategoryGroup = (catKey, catName = '') => {
-    const content = document.getElementById(`cat-group-body-${catKey}`);
-    const chevron = document.getElementById(`cat-group-chevron-${catKey}`);
-    if (!content) return;
-    const isHidden = content.classList.toggle('hidden');
-    if (chevron) {
-      chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
-    }
-    if (catName) {
-      state.dropdownMemory.collapsedCats[catName] = isHidden;
-      saveDropdownMemory();
-    }
-  };
-
-  window.toggleSubCategoryGroup = (subKey, catName = '', subName = '') => {
-    const content = document.getElementById(`subcat-group-body-${subKey}`);
-    const chevron = document.getElementById(`subcat-group-chevron-${subKey}`);
-    if (!content) return;
-    const isHidden = content.classList.toggle('hidden');
-    if (chevron) {
-      chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
-    }
-    if (catName && subName) {
-      state.dropdownMemory.collapsedSubs[`${catName}::${subName}`] = isHidden;
-      saveDropdownMemory();
-    }
-  };
-
-  window.handleSearchInput = (val) => {
-    state.searchQuery = val;
-    renderPortalProjectsGrid();
-  };
-
   function renderNavigation() {
-    const title = state.portalSettings.title || 'Portal Proyek';
-    const tagline = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+    const titleEl = document.getElementById('sidebar-portal-title');
+    const tagEl = document.getElementById('sidebar-portal-tagline');
+    const mTitleEl = document.getElementById('mobile-portal-title');
+    const mTagEl = document.getElementById('mobile-portal-tagline');
+
+    if (titleEl) titleEl.textContent = state.portalSettings.title;
+    if (tagEl) tagEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+    if (mTitleEl) mTitleEl.textContent = state.portalSettings.title;
+    if (mTagEl) mTagEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+
     const logoHtml = state.portalSettings.logoDataUrl
       ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
       : `<i data-lucide="layers" class="w-6 h-6"></i>`;
 
-    document.getElementById('sidebar-portal-title').textContent = title;
-    document.getElementById('sidebar-portal-tagline').textContent = tagline;
-    document.getElementById('sidebar-brand-icon').innerHTML = logoHtml;
-    document.getElementById('mobile-portal-title').textContent = title;
-    document.getElementById('mobile-portal-tagline').textContent = tagline;
-    document.getElementById('mobile-brand-icon').innerHTML = logoHtml;
+    const sBrand = document.getElementById('sidebar-brand-icon');
+    const mBrand = document.getElementById('mobile-brand-icon');
+    if (sBrand) sBrand.innerHTML = logoHtml;
+    if (mBrand) mBrand.innerHTML = logoHtml;
 
     const menuItems = [
-      { id: 'portal', label: 'Beranda Portal', shortLabel: 'Beranda', icon: 'compass', show: true },
-      {
-        id: 'manage-projects',
-        label: 'Kelola Proyek',
-        shortLabel: 'Proyek',
-        icon: 'folder-plus',
-        show: state.currentUser && (state.currentUser.role === 'admin' || state.currentUser.role === 'contributor')
-      },
-      {
-        id: 'manage-users',
-        label: 'Akun User',
-        shortLabel: 'User',
-        icon: 'users',
-        show: state.currentUser?.role === 'admin'
-      },
-      {
-        id: 'settings',
-        label: 'Pengaturan Portal',
-        shortLabel: 'Setelan',
-        icon: 'settings',
-        show: state.currentUser?.role === 'admin'
-      }
+      { id: 'portal', label: 'Beranda Portal', icon: 'compass', show: true },
+      { id: 'manage-projects', label: 'Kelola Proyek', icon: 'folder-kanban', show: Boolean(state.currentUser) },
+      { id: 'manage-users', label: 'Kelola User', icon: 'users', show: state.currentUser?.role === 'admin' },
+      { id: 'settings', label: 'Pengaturan Portal', icon: 'sliders', show: state.currentUser?.role === 'admin' }
     ].filter(m => m.show);
 
-    // Render Desktop Sidebar Links
+    // Desktop Sidebar Links
     const sidebarNav = document.getElementById('sidebar-nav-links');
-    sidebarNav.innerHTML = menuItems.map(m => {
-      const isActive = state.activeMenu === m.id;
-      return `
-        <button type="button" onclick="navigateTo('${m.id}')" class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 transition ${
-          isActive
-            ? 'btn-accent text-white shadow-md'
-            : 'theme-text-secondary hover:theme-surface-subtle hover:theme-text-primary'
-        }">
-          <i data-lucide="${m.icon}" class="w-4 h-4 shrink-0"></i>
-          <span>${m.label}</span>
-        </button>
-      `;
-    }).join('');
+    if (sidebarNav) {
+      sidebarNav.innerHTML = menuItems.map(item => {
+        const active = state.activeMenu === item.id;
+        return `
+          <button type="button" onclick="switchMenu('${item.id}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition ${
+            active
+              ? 'btn-accent text-white shadow-md'
+              : 'theme-text-secondary hover:theme-surface-subtle hover:theme-text-primary'
+          }">
+            <i data-lucide="${item.icon}" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">${item.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
 
-    // Render Sidebar & Mobile Banner Portrait
+    // Banner Portrait Modern di Bawah Menu Beranda Portal
     const bannerData = state.portalSettings.sidebarBannerDataUrl;
     const isAdmin = state.currentUser?.role === 'admin';
     const sidebarBannerSlot = document.getElementById('sidebar-banner-slot');
     const mobileBannerSlot = document.getElementById('mobile-banner-slot');
 
-    if (bannerData) {
-      sidebarBannerSlot.innerHTML = `
-        <div class="sidebar-portrait-banner w-full aspect-[3/4] rounded-3xl border border-slate-200/70 shadow-md relative group">
-          <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
-          ${isAdmin ? `
-            <button type="button" onclick="navigateTo('settings')" class="absolute bottom-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 text-white text-[11px] font-bold backdrop-blur-md opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
-              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-              <span>Ganti</span>
-            </button>
-          ` : ''}
-        </div>
-      `;
-      mobileBannerSlot.innerHTML = `
-        <div class="sidebar-portrait-banner w-full aspect-[16/9] rounded-3xl border border-slate-200/70 shadow-md relative">
-          <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
-        </div>
-      `;
-    } else if (isAdmin) {
-      sidebarBannerSlot.innerHTML = `
-        <button type="button" onclick="navigateTo('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-500 theme-surface-subtle flex flex-col items-center justify-center text-center p-4 transition group">
-          <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2 group-hover:scale-105 transition">
-            <i data-lucide="image-plus" class="w-5 h-5"></i>
+    if (sidebarBannerSlot) {
+      if (bannerData) {
+        sidebarBannerSlot.innerHTML = `
+          <div class="sidebar-portrait-banner rounded-2xl border border-slate-200/70 shadow-md max-h-40 w-full bg-slate-900/5 group">
+            <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
+            ${isAdmin ? `
+              <button type="button" onclick="switchMenu('settings')" class="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-slate-900/75 hover:bg-slate-900 text-white text-[10px] font-bold backdrop-blur-md opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+                <i data-lucide="camera" class="w-3 h-3"></i>
+                <span>Ganti</span>
+              </button>
+            ` : ''}
           </div>
-          <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
-          <span class="text-[11px] theme-text-muted mt-1">Klik untuk upload foto dari desktop</span>
-        </button>
-      `;
-      mobileBannerSlot.innerHTML = '';
-    } else {
-      sidebarBannerSlot.innerHTML = '';
-      mobileBannerSlot.innerHTML = '';
-    }
-
-    // Render Desktop Auth Box
-    const authBox = document.getElementById('sidebar-auth-box');
-    if (state.currentUser) {
-      authBox.innerHTML = `
-        <div class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 space-y-2.5">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl btn-accent text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-              ${(state.currentUser.name || 'U').charAt(0).toUpperCase()}
+        `;
+      } else if (isAdmin) {
+        sidebarBannerSlot.innerHTML = `
+          <button type="button" onclick="switchMenu('settings')" class="w-full py-3 rounded-2xl border-2 border-dashed border-slate-300/80 hover:border-sky-500 theme-surface-subtle flex flex-col items-center justify-center p-3 text-center transition group">
+            <div class="w-9 h-9 rounded-xl badge-accent flex items-center justify-center mb-1.5 group-hover:scale-105 transition">
+              <i data-lucide="image-plus" class="w-4 h-4"></i>
             </div>
-            <div class="min-w-0">
-              <div class="text-xs font-extrabold theme-text-primary truncate">${state.currentUser.name}</div>
-              <div class="text-[10px] font-bold uppercase tracking-wider theme-text-muted">${state.currentUser.role}</div>
-            </div>
-          </div>
-          <button type="button" onclick="logoutUser()" class="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span>Keluar Sesi</span>
+            <span class="text-[11px] font-extrabold theme-text-primary">Pasang Banner Portrait</span>
+            <span class="text-[10px] theme-text-muted mt-0.5">Klik untuk upload foto langsung dari desktop</span>
           </button>
-        </div>
-      `;
-    } else {
-      authBox.innerHTML = `
-        <button type="button" onclick="openLoginModal()" class="w-full py-2.5 px-4 rounded-2xl btn-accent text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>Masuk Admin / User</span>
-        </button>
-      `;
+        `;
+      } else {
+        sidebarBannerSlot.innerHTML = '';
+      }
     }
 
-    // Render Mobile Bottom Nav (Tombol Login sejajar langsung dengan Beranda)
+    if (mobileBannerSlot) {
+      if (bannerData && state.activeMenu === 'portal') {
+        mobileBannerSlot.innerHTML = `
+          <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-md aspect-[16/10] sm:aspect-[3/4] max-h-72 w-full overflow-hidden">
+            <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
+          </div>
+        `;
+      } else {
+        mobileBannerSlot.innerHTML = '';
+      }
+    }
+
+    // Desktop Sidebar Auth Box
+    const authBox = document.getElementById('sidebar-auth-box');
+    if (authBox) {
+      if (state.currentUser) {
+        authBox.innerHTML = `
+          <div class="p-3.5 rounded-2xl theme-surface-subtle border border-slate-200/60 space-y-2.5">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl btn-accent text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+                ${(state.currentUser.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold theme-text-primary truncate">${state.currentUser.name}</div>
+                <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">${state.currentUser.role}</div>
+              </div>
+            </div>
+            <button type="button" onclick="confirmLogout()" class="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Keluar Akun</span>
+            </button>
+          </div>
+        `;
+      } else {
+        authBox.innerHTML = `
+          <button type="button" onclick="openLoginModal('admin')" class="w-full py-3 px-4 rounded-2xl btn-accent text-white text-xs font-bold shadow-md flex items-center justify-center gap-2 transition">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            <span>Masuk / Login Admin</span>
+          </button>
+        `;
+      }
+    }
+
+    // Mobile Floating Bottom Navigation (Beranda & Login Sejajar)
     const mobileNav = document.getElementById('mobile-bottom-nav');
-    const navButtons = menuItems.map(m => {
-      const isActive = state.activeMenu === m.id;
-      return `
-        <button type="button" onclick="navigateTo('${m.id}')" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold transition ${
-          isActive ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'
-        }">
-          <i data-lucide="${m.icon}" class="w-4 h-4"></i>
-          <span class="truncate max-w-[72px]">${m.shortLabel}</span>
-        </button>
-      `;
-    }).join('');
+    if (mobileNav) {
+      const navButtons = menuItems.map(item => {
+        const active = state.activeMenu === item.id;
+        return `
+          <button type="button" onclick="switchMenu('${item.id}')" class="flex-1 flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[11px] font-bold transition ${
+            active ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'
+          }">
+            <i data-lucide="${item.icon}" class="w-4 h-4 mb-0.5"></i>
+            <span class="truncate max-w-[84px]">${item.id === 'portal' ? 'Beranda' : item.label.replace('Kelola ', '').replace(' Portal', '')}</span>
+          </button>
+        `;
+      });
 
-    const mobileAuthBtn = state.currentUser
-      ? `
-        <button type="button" onclick="logoutUser()" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-          <span>Keluar</span>
-        </button>
-      `
-      : `
-        <button type="button" onclick="openLoginModal()" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold theme-text-secondary hover:theme-text-primary transition">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>Login</span>
-        </button>
-      `;
+      if (state.currentUser) {
+        navButtons.push(`
+          <button type="button" onclick="confirmLogout()" class="flex-1 flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition">
+            <i data-lucide="log-out" class="w-4 h-4 mb-0.5"></i>
+            <span>Keluar</span>
+          </button>
+        `);
+      } else {
+        navButtons.push(`
+          <button type="button" onclick="openLoginModal('admin')" class="flex-1 flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[11px] font-bold theme-text-primary hover:theme-surface-subtle transition">
+            <i data-lucide="log-in" class="w-4 h-4 mb-0.5 text-sky-500"></i>
+            <span>Login</span>
+          </button>
+        `);
+      }
 
-    mobileNav.innerHTML = navButtons + mobileAuthBtn;
+      mobileNav.innerHTML = navButtons.join('');
+    }
   }
 
-  function renderProjectCard(p) {
-    const iconContent = p.logoDataUrl
+  // Pencarian, Filter & Toggle Dropdown dengan Memori Aktivitas Terakhir
+  window.handleSearchInput = (val) => {
+    state.searchQuery = val;
+    renderPortalProjectsGrid();
+    refreshIconsFast();
+  };
+
+  window.setCategory = (cat) => {
+    state.selectedCategory = cat;
+    const container = document.getElementById('view-container');
+    if (container && state.activeMenu === 'portal') {
+      container.innerHTML = renderPortalView();
+      refreshIconsFast();
+    }
+  };
+
+  window.toggleCategoryDropdown = (catKey) => {
+    state.dropdownMemory.collapsedCats[catKey] = !state.dropdownMemory.collapsedCats[catKey];
+    saveDropdownMemory();
+    renderPortalProjectsGrid();
+    refreshIconsFast();
+  };
+
+  window.toggleSubCategoryDropdown = (subKey) => {
+    state.dropdownMemory.collapsedSubs[subKey] = !state.dropdownMemory.collapsedSubs[subKey];
+    saveDropdownMemory();
+    renderPortalProjectsGrid();
+    refreshIconsFast();
+  };
+
+  function renderProjectCardHtml(p) {
+    const attachments = getProjectAttachments(p);
+    const hasFiles = attachments.length > 0;
+    const cardVisual = p.logoDataUrl
       ? `<img src="${p.logoDataUrl}" alt="${p.title}" class="w-full h-full object-cover" />`
-      : `<span class="text-2xl">${p.icon || '🚀'}</span>`;
+      : `<span class="text-2xl sm:text-3xl">${p.icon || '🚀'}</span>`;
 
-    const hasFile = Boolean(p.fileDataUrl);
-    const hasExternalUrl = p.url && p.url !== '#berkas';
-    const safeUrl = (p.url || '#').replace(/'/g, "\\'");
-    const safeTitle = (p.title || '').replace(/'/g, "\\'");
-
-    const primaryActionHtml = hasFile
-      ? `
-        <button type="button" onclick="openProjectFileViewer('${p.id}')" class="flex-1 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
-          <span>Buka Berkas (${(p.fileType || 'FILE').toUpperCase()})</span>
-          <i data-lucide="file-text" class="w-4 h-4"></i>
-        </button>
-      `
-      : `
-        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
-          <span>Buka Proyek</span>
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-        </a>
-      `;
-
-    const secondaryActionHtml = hasFile && hasExternalUrl
-      ? `
-        <a href="${p.url}" target="_blank" rel="noopener noreferrer" title="Buka Tautan Web" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-        </a>
-      `
-      : hasFile
-      ? `
-        <a href="${p.fileDataUrl}" download="${p.fileName || p.title}" title="Unduh Berkas" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
-          <i data-lucide="download" class="w-4 h-4"></i>
-        </a>
-      `
-      : `
-        <button type="button" onclick="copyProjectLink('${safeUrl}', '${safeTitle}')" title="Salin Tautan" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
-          <i data-lucide="copy" class="w-4 h-4"></i>
-        </button>
-      `;
+    const actionAttr = hasFiles
+      ? `onclick="openProjectFileViewer('${p.id}', 0)"`
+      : `onclick="window.open('${p.url}', '_blank', 'noopener')"`;
 
     return `
-      <article class="glass-card rounded-3xl p-5 flex flex-col justify-between gap-4 relative group">
-        <div>
-          <div class="flex items-start justify-between gap-3 mb-3.5">
-            <div class="w-13 h-13 w-14 h-14 rounded-2xl theme-surface-subtle border border-slate-200/60 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-              ${iconContent}
+      <div ${actionAttr} role="button" tabindex="0" class="glass-card rounded-3xl p-5 flex flex-col justify-between gap-4 cursor-pointer group">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl theme-surface-subtle border border-slate-200/60 flex items-center justify-center overflow-hidden shrink-0 shadow-sm group-hover:scale-105 transition">
+              ${cardVisual}
             </div>
-            <div class="flex items-center gap-1.5 flex-wrap justify-end">
-              ${hasFile ? `
-                <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold inline-flex items-center gap-1">
-                  <i data-lucide="paperclip" class="w-3 h-3"></i>
-                  <span>${(p.fileType || 'Berkas').toUpperCase()}</span>
-                </span>
-              ` : ''}
-              ${p.isPinned ? `
-                <span class="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 text-[10px] font-extrabold inline-flex items-center gap-1">
-                  <i data-lucide="pin" class="w-3 h-3"></i>
-                  <span>Utama</span>
-                </span>
-              ` : ''}
-              ${p.visibility === 'private' ? `
-                <span class="px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-500 text-[10px] font-extrabold inline-flex items-center gap-1">
-                  <i data-lucide="lock" class="w-3 h-3"></i>
-                  <span>Privat</span>
-                </span>
-              ` : ''}
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                ${p.isPinned ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 text-[10px] font-extrabold">PINNED</span>` : ''}
+                ${p.visibility === 'private' ? `<span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-500 text-[10px] font-extrabold">PRIVAT</span>` : ''}
+                ${hasFiles ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold">${attachments.length} BERKAS</span>` : ''}
+              </div>
+              <h4 class="font-extrabold text-base sm:text-lg theme-text-primary leading-snug line-clamp-2 group-hover:text-sky-500 transition">
+                ${p.title}
+              </h4>
             </div>
           </div>
-
-          <h3 class="text-base sm:text-lg font-extrabold theme-text-primary leading-snug group-hover:text-sky-500 transition">
-            ${p.title}
-          </h3>
-          <p class="text-xs sm:text-sm theme-text-secondary mt-1.5 line-clamp-2 leading-relaxed">
-            ${p.description}
-          </p>
+          <div class="w-9 h-9 rounded-xl theme-surface-subtle flex items-center justify-center theme-text-muted group-hover:btn-accent group-hover:text-white transition shrink-0">
+            <i data-lucide="${hasFiles ? 'file-text' : 'arrow-up-right'}" class="w-4 h-4"></i>
+          </div>
         </div>
 
-        <div class="pt-3 border-t border-slate-200/50 flex items-center gap-2">
-          ${primaryActionHtml}
-          ${secondaryActionHtml}
+        <p class="text-xs sm:text-sm theme-text-secondary line-clamp-2 leading-relaxed">
+          ${p.description}
+        </p>
+
+        <div class="pt-3 border-t border-slate-200/50 flex items-center justify-between text-xs font-bold">
+          <span class="theme-text-muted truncate max-w-[65%]">
+            ${p.subCategory ? p.subCategory : p.category}
+          </span>
+          <span class="text-sky-500 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition">
+            <span>${hasFiles ? 'Buka Berkas' : 'Buka Aplikasi'}</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </span>
         </div>
-      </article>
+      </div>
     `;
   }
 
   function renderPortalProjectsGrid() {
-    const gridContainer = document.getElementById('portal-projects-grid');
-    if (!gridContainer) return;
+    const gridEl = document.getElementById('portal-projects-grid');
+    if (!gridEl) return;
 
-    const q = state.searchQuery.trim().toLowerCase();
-    const filtered = state.projects
-      .filter(p => p.visibility === 'public' || Boolean(state.currentUser))
-      .filter(p => state.selectedCategory === 'Semua' || (p.category || 'Umum') === state.selectedCategory)
-      .filter(p => {
-        if (!q) return true;
-        return (
-          (p.title || '').toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q) ||
-          (p.category || '').toLowerCase().includes(q) ||
-          (p.subCategory || '').toLowerCase().includes(q)
-        );
-      })
-      .sort((a, b) => {
-        if (Boolean(b.isPinned) !== Boolean(a.isPinned)) return b.isPinned ? 1 : -1;
-        return (a.order || 999) - (b.order || 999);
-      });
+    const q = (state.searchQuery || '').toLowerCase().trim();
+    const visibleProjects = state.projects.filter(p => {
+      if (p.visibility === 'private' && !state.currentUser) return false;
+      if (state.selectedCategory !== 'Semua' && (p.category || 'Umum').trim() !== state.selectedCategory) return false;
+      if (!q) return true;
+      return (
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q) ||
+        (p.subCategory || '').toLowerCase().includes(q)
+      );
+    });
 
-    if (filtered.length === 0) {
-      gridContainer.innerHTML = `
+    if (visibleProjects.length === 0) {
+      gridEl.innerHTML = `
         <div class="glass-panel rounded-3xl p-10 text-center">
-          <div class="w-14 h-14 rounded-2xl badge-accent flex items-center justify-center mx-auto mb-3">
+          <div class="w-14 h-14 rounded-2xl theme-surface-subtle flex items-center justify-center mx-auto mb-3 theme-text-muted">
             <i data-lucide="folder-search" class="w-7 h-7"></i>
           </div>
-          <h3 class="text-base font-extrabold theme-text-primary">Belum Ada Proyek Ditemukan</h3>
-          <p class="text-xs sm:text-sm theme-text-muted mt-1">Coba ubah kata kunci pencarian atau pilih kategori lainnya.</p>
+          <h3 class="text-base font-extrabold theme-text-primary">Tidak ada proyek yang cocok</h3>
+          <p class="text-xs theme-text-secondary mt-1">Coba ubah kata kunci pencarian atau pilih kategori lainnya.</p>
         </div>
       `;
-      refreshIconsFast();
       return;
     }
 
-    const categoryGroups = {};
-    filtered.forEach(p => {
+    // Kelompokkan berdasarkan Kategori Utama -> Sub-Kategori
+    const groupedByCat = new Map();
+    visibleProjects.forEach(p => {
       const cat = (p.category || 'Umum').trim();
-      if (!categoryGroups[cat]) categoryGroups[cat] = [];
-      categoryGroups[cat].push(p);
+      if (!groupedByCat.has(cat)) groupedByCat.set(cat, []);
+      groupedByCat.get(cat).push(p);
     });
 
-    gridContainer.innerHTML = Object.entries(categoryGroups).map(([catName, items], catIdx) => {
-      const catKey = `cat-${catIdx}`;
-      const isCatCollapsed = Boolean(state.dropdownMemory?.collapsedCats?.[catName]);
-      const escapedCatName = catName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const htmlSections = [];
+    groupedByCat.forEach((items, catName) => {
+      const catKey = encodeURIComponent(catName);
+      const isCatCollapsed = Boolean(state.dropdownMemory.collapsedCats[catKey]) && !q;
+
       const directItems = items.filter(i => !(i.subCategory || '').trim());
-      const subGroups = {};
-      items.forEach(i => {
-        const sub = (i.subCategory || '').trim();
-        if (sub) {
-          if (!subGroups[sub]) subGroups[sub] = [];
-          subGroups[sub].push(i);
-        }
+      const subMap = new Map();
+      items.filter(i => (i.subCategory || '').trim()).forEach(i => {
+        const sc = i.subCategory.trim();
+        if (!subMap.has(sc)) subMap.set(sc, []);
+        subMap.get(sc).push(i);
       });
 
-      const subGroupEntries = Object.entries(subGroups);
+      const subBlocksHtml = [];
+      subMap.forEach((subItems, subName) => {
+        const subKey = `${catKey}::${encodeURIComponent(subName)}`;
+        const isSubCollapsed = Boolean(state.dropdownMemory.collapsedSubs[subKey]) && !q;
 
-      return `
-        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-200/70">
-          <!-- Baris Judul Kategori Dropdown -->
-          <button type="button" onclick="toggleCategoryGroup('${catKey}', '${escapedCatName}')" class="w-full px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
-            <div class="flex items-center gap-3.5">
-              <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center shrink-0">
-                <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+        subBlocksHtml.push(`
+          <div class="rounded-2xl theme-surface-subtle border border-slate-200/60 overflow-hidden">
+            <button type="button" onclick="toggleSubCategoryDropdown('${subKey}')" class="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:opacity-90 transition">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-7 h-7 rounded-xl badge-accent flex items-center justify-center shrink-0">
+                  <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                </span>
+                <span class="font-extrabold text-sm sm:text-base theme-text-primary truncate">${subName}</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold badge-accent">${subItems.length}</span>
               </div>
-              <div>
-                <h3 class="text-base sm:text-lg font-extrabold theme-text-primary leading-tight">${catName}</h3>
-                <p class="text-xs sm:text-sm theme-text-muted mt-0.5">${items.length} proyek tersedia</p>
+              <i data-lucide="${isSubCollapsed ? 'chevron-down' : 'chevron-up'}" class="w-4 h-4 theme-text-secondary shrink-0"></i>
+            </button>
+            ${isSubCollapsed ? '' : `
+              <div class="p-4 pt-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                ${subItems.map(renderProjectCardHtml).join('')}
+              </div>
+            `}
+          </div>
+        `);
+      });
+
+      htmlSections.push(`
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-200/70">
+          <button type="button" onclick="toggleCategoryDropdown('${catKey}')" class="w-full px-5 sm:px-6 py-4 flex items-center justify-between gap-3 text-left hover:opacity-95 transition">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-2xl btn-accent text-white flex items-center justify-center shadow-sm shrink-0">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <h2 class="text-base sm:text-lg font-extrabold theme-text-primary truncate">${catName}</h2>
+                <p class="text-xs theme-text-muted">${items.length} proyek tersedia</p>
               </div>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full badge-accent">${items.length}</span>
-              <i id="cat-group-chevron-${catKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200" style="transform: ${isCatCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};"></i>
+            <div class="w-9 h-9 rounded-xl theme-surface-subtle flex items-center justify-center theme-text-primary shrink-0">
+              <i data-lucide="${isCatCollapsed ? 'chevron-down' : 'chevron-up'}" class="w-5 h-5"></i>
             </div>
           </button>
 
-          <!-- Isi Kategori -->
-          <div id="cat-group-body-${catKey}" class="${isCatCollapsed ? 'hidden ' : ''}px-5 sm:px-6 pb-6 pt-3 space-y-5 border-t border-slate-200/50">
-            ${directItems.length > 0 ? `
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-                ${directItems.map(p => renderProjectCard(p)).join('')}
-              </div>
-            ` : ''}
-
-            ${subGroupEntries.map(([subName, subItems], subIdx) => {
-              const subKey = `${catKey}-sub-${subIdx}`;
-              const isSubCollapsed = Boolean(state.dropdownMemory?.collapsedSubs?.[`${catName}::${subName}`]);
-              const escapedSubName = subName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-              return `
-                <div class="rounded-2xl theme-surface-subtle border border-slate-200/60 overflow-hidden">
-                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}', '${escapedCatName}', '${escapedSubName}')" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
-                    <div class="flex items-center gap-2.5">
-                      <span class="w-2.5 h-2.5 rounded-full btn-accent"></span>
-                      <span class="text-sm sm:text-base font-extrabold theme-text-primary">${subName}</span>
-                      <span class="text-xs font-bold px-2.5 py-0.5 rounded-full badge-accent">${subItems.length}</span>
-                    </div>
-                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200" style="transform: ${isSubCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};"></i>
-                  </button>
-                  <div id="subcat-group-body-${subKey}" class="${isSubCollapsed ? 'hidden ' : ''}p-4 sm:p-5 pt-2.5 border-t border-slate-200/40">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-                      ${subItems.map(p => renderProjectCard(p)).join('')}
-                    </div>
-                  </div>
+          ${isCatCollapsed ? '' : `
+            <div class="px-5 sm:px-6 pb-6 pt-1 space-y-4">
+              ${directItems.length > 0 ? `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  ${directItems.map(renderProjectCardHtml).join('')}
                 </div>
-              `;
-            }).join('')}
+              ` : ''}
+              ${subBlocksHtml.join('')}
+            </div>
+          `}
+        </div>
+      `);
+    });
+
+    gridEl.innerHTML = htmlSections.join('');
+  }
+
+  // Navigasi & Render Widget Kalender, Pengunjung Aktif & Jam Digital WIB
+  window.changeCalendarMonth = (delta) => {
+    const cur = state.calendarCursor || new Date();
+    state.calendarCursor = new Date(cur.getFullYear(), cur.getMonth() + delta, 1);
+    updateDashboardWidgetsOnly();
+  };
+
+  window.resetCalendarToday = () => {
+    state.calendarCursor = new Date();
+    updateDashboardWidgetsOnly();
+  };
+
+  function renderDashboardCalendarAndVisitorWidget() {
+    const now = new Date();
+    const cursor = state.calendarCursor || now;
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth();
+
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+    const todayStr = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(now);
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const cells = [];
+    for (let i = 0; i < firstDayIndex; i++) {
+      cells.push(`<div class="py-1.5 text-xs"></div>`);
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday =
+        day === now.getDate() &&
+        month === now.getMonth() &&
+        year === now.getFullYear();
+      const isSunday = (firstDayIndex + day - 1) % 7 === 0;
+      cells.push(`
+        <div class="py-1.5 rounded-xl text-xs font-bold transition ${
+          isToday
+            ? 'btn-accent text-white shadow-sm'
+            : isSunday
+              ? 'text-rose-500 theme-surface-subtle/50'
+              : 'theme-text-primary hover:theme-surface-subtle'
+        }">
+          ${day}
+        </div>
+      `);
+    }
+    const cellsHtml = cells.join('');
+
+    const onlineCount = state.visitorStats?.onlineCount || 1;
+    const totalVisits = state.visitorStats?.totalVisits || 1;
+
+    return `
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 shrink-0">
+        <!-- Widget Statistik Pengunjung Aktif (Kiri - Kompak & Elegan) -->
+        <div class="lg:col-span-5 glass-panel rounded-2xl px-3.5 py-2.5 flex flex-col justify-between gap-1.5 border border-slate-200/70">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[9px] font-extrabold">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>PENGUNJUNG AKTIF</span>
+              </div>
+              <div class="mt-1 flex items-baseline gap-1.5">
+                <span class="text-lg font-extrabold theme-text-primary tabular-nums">${onlineCount}</span>
+                <span class="text-[11px] font-bold theme-text-secondary truncate">orang sedang mengunjungi link ini</span>
+              </div>
+            </div>
+            <div class="w-8 h-8 rounded-xl badge-accent flex items-center justify-center shrink-0">
+              <i data-lucide="activity" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <div class="pt-1.5 border-t border-slate-200/50 flex items-center justify-between text-[10px] gap-2 flex-wrap">
+            <div class="flex items-center gap-1 theme-text-secondary font-semibold truncate">
+              <i data-lucide="calendar-days" class="w-3 h-3 text-sky-500 shrink-0"></i>
+              <span class="truncate">${todayStr}</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-md theme-surface-subtle font-bold theme-text-primary shrink-0">
+              Total: ${totalVisits.toLocaleString('id-ID')}
+            </span>
           </div>
         </div>
-      `;
-    }).join('');
 
-    refreshIconsFast();
+        <!-- Widget Kalender Interaktif (Kanan - Kompak & Elegan) -->
+        <div class="lg:col-span-7 glass-panel rounded-2xl px-3.5 py-2.5 border border-slate-200/70">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 rounded-lg badge-accent flex items-center justify-center shrink-0">
+                <i data-lucide="calendar" class="w-3 h-3"></i>
+              </div>
+              <h3 class="text-xs font-extrabold theme-text-primary leading-tight">
+                ${monthNames[month]} ${year}
+              </h3>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="resetCalendarToday()" class="px-2 py-0.5 rounded-md theme-surface-subtle hover:opacity-80 text-[9px] font-bold theme-text-primary border border-slate-200/60 transition">
+                Hari Ini
+              </button>
+              <button type="button" onclick="changeCalendarMonth(-1)" title="Bulan Sebelumnya" class="p-0.5 rounded-md theme-surface-subtle hover:opacity-80 theme-text-primary border border-slate-200/60 transition">
+                <i data-lucide="chevron-left" class="w-3 h-3"></i>
+              </button>
+              <button type="button" onclick="changeCalendarMonth(1)" title="Bulan Berikutnya" class="p-0.5 rounded-md theme-surface-subtle hover:opacity-80 theme-text-primary border border-slate-200/60 transition">
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-7 gap-0.5 text-center mb-0.5">
+            ${dayNames.map((dn, idx) => `
+              <div class="text-[8px] font-extrabold uppercase tracking-wider ${idx === 0 ? 'text-rose-500' : 'theme-text-muted'}">
+                ${dn}
+              </div>
+            `).join('')}
+          </div>
+          <div class="grid grid-cols-7 gap-0.5 text-center">
+            ${cellsHtml.replace(/py-1\.5/g, 'py-0.5 text-[10px]')}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function updateWibDigitalClock() {
+    const hmEl = document.getElementById('wib-clock-hm');
+    const secEl = document.getElementById('wib-clock-sec');
+    const dateEl = document.getElementById('wib-clock-date');
+    if (!hmEl || !secEl) return;
+
+    try {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).formatToParts(now);
+
+      const getPart = (type) => (parts.find(p => p.type === type)?.value || '00').padStart(2, '0');
+      hmEl.textContent = `${getPart('hour')}:${getPart('minute')}`;
+      secEl.textContent = getPart('second');
+
+      if (dateEl) {
+        dateEl.textContent = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }).format(now);
+      }
+    } catch (e) {
+      const now = new Date();
+      hmEl.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      secEl.textContent = String(now.getSeconds()).padStart(2, '0');
+    }
+  }
+
+  function updateDashboardWidgetsOnly() {
+    const slot = document.getElementById('portal-calendar-visitor-slot');
+    if (slot) {
+      slot.innerHTML = renderDashboardCalendarAndVisitorWidget();
+      updateWibDigitalClock();
+      refreshIconsFast();
+    }
   }
 
   function renderPortalView() {
@@ -1977,57 +2325,60 @@ const firebaseConfig = {
       ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
       : `<i data-lucide="sparkles" class="w-7 h-7"></i>`;
 
-    requestAnimationFrame(() => renderPortalProjectsGrid());
+    requestAnimationFrame(() => {
+      renderPortalProjectsGrid();
+      updateWibDigitalClock();
+    });
 
     return `
-      <div class="space-y-6 w-full">
+      <div class="desktop-one-screen-portal space-y-4 md:space-y-0 w-full">
         <!-- Hero Header Portal -->
-        <section class="glass-panel hero-mesh-accent rounded-3xl p-5 sm:p-7 relative overflow-hidden">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-start sm:items-center gap-4">
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+        <section class="glass-panel hero-mesh-accent rounded-2xl p-4 sm:p-5 relative overflow-hidden shrink-0">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center gap-3.5">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl btn-accent text-white flex items-center justify-center shadow-lg overflow-hidden shrink-0">
                 ${heroLogo}
               </div>
               <div>
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full badge-accent text-[11px] font-bold mb-1.5">
+                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full badge-accent text-[10px] font-bold mb-1">
                   <span class="w-1.5 h-1.5 rounded-full btn-accent"></span>
                   <span>${state.portalSettings.tagline || 'Microsite Hub 1-Klik'}</span>
                 </div>
-                <h1 class="text-xl sm:text-3xl font-extrabold title-gradient-world tracking-tight leading-snug">${state.portalSettings.title}</h1>
-                <p class="text-sm sm:text-base theme-text-secondary mt-1.5 max-w-3xl leading-relaxed">${state.portalSettings.subtitle}</p>
+                <h1 class="text-lg sm:text-2xl font-extrabold title-gradient-world tracking-tight leading-tight">${state.portalSettings.title}</h1>
+                <p class="text-xs sm:text-sm theme-text-secondary mt-0.5 max-w-3xl line-clamp-1">${state.portalSettings.subtitle}</p>
               </div>
             </div>
 
             <!-- Saklar Tema Terang / Gelap untuk Pengunjung -->
-            <div class="hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl theme-surface-subtle border border-slate-200/60 self-start sm:self-center shrink-0">
-              <button type="button" onclick="selectThemeMode('light')" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
-                <i data-lucide="sun" class="w-4 h-4"></i>
+            <div class="hidden md:flex items-center gap-1 p-1 rounded-xl theme-surface-subtle border border-slate-200/60 self-start sm:self-center shrink-0">
+              <button type="button" onclick="selectThemeMode('light')" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="sun" class="w-3.5 h-3.5"></i>
                 <span>Terang</span>
               </button>
-              <button type="button" onclick="selectThemeMode('dark')" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition ${mode === 'dark' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
-                <i data-lucide="moon" class="w-4 h-4"></i>
+              <button type="button" onclick="selectThemeMode('dark')" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${mode === 'dark' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
+                <i data-lucide="moon" class="w-3.5 h-3.5"></i>
                 <span>Gelap</span>
               </button>
             </div>
           </div>
 
           <!-- Search & Category Filter Bar -->
-          <div class="mt-6 flex flex-col lg:flex-row gap-3">
+          <div class="mt-3 flex flex-col lg:flex-row gap-2.5">
             <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-4 top-1/2 -translate-y-1/2"></i>
+              <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
               <input
                 type="text"
                 value="${state.searchQuery}"
                 oninput="handleSearchInput(this.value)"
                 placeholder="Cari nama proyek, kategori, atau sub-judul..."
-                class="w-full pl-11 pr-4 py-3 text-sm sm:text-base rounded-2xl theme-input border focus:outline-none focus:border-sky-500"
+                class="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500"
               />
             </div>
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
               ${categories.map(cat => {
                 const isActive = state.selectedCategory === cat;
                 return `
-                  <button type="button" onclick="setCategory('${cat.replace(/'/g, "\\'")}')" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition ${
+                  <button type="button" onclick="setCategory('${cat.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
                     isActive
                       ? 'btn-accent text-white shadow-sm'
                       : 'theme-surface-subtle theme-text-secondary border border-slate-200/60 hover:theme-text-primary'
@@ -2041,10 +2392,15 @@ const firebaseConfig = {
         </section>
 
         <!-- Daftar Kategori & Proyek (Dropdown Modern) -->
-        <section id="portal-projects-grid" class="space-y-5"></section>
+        <section id="portal-projects-grid" class="desktop-projects-scroll space-y-3"></section>
+
+        <!-- Widget Bawah Elegan: Pengunjung Aktif & Kalender -->
+        <div id="portal-calendar-visitor-slot" class="shrink-0">
+          ${renderDashboardCalendarAndVisitorWidget()}
+        </div>
 
         <!-- Footer -->
-        <footer class="text-center py-5 text-xs sm:text-sm theme-text-muted">
+        <footer class="text-center py-1 text-[11px] theme-text-muted shrink-0">
           ${state.portalSettings.footerText}
         </footer>
       </div>
@@ -2061,6 +2417,8 @@ const firebaseConfig = {
     const projLogoPreview = editing?.logoDataUrl
       ? `<img src="${editing.logoDataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`
       : `<span class="text-[11px] theme-text-muted text-center px-1">Belum ada</span>`;
+
+    requestAnimationFrame(() => renderDraftAttachmentsList());
 
     return `
       <div class="space-y-6">
@@ -2137,33 +2495,43 @@ const firebaseConfig = {
               </div>
             </div>
 
-            <!-- Upload Berkas Dokumen (PDF / JPG / PNG) untuk Berkas Pribadi atau Lampiran -->
-            <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
-              <label class="block text-xs font-bold theme-text-primary mb-2">Upload Berkas / Dokumen (PDF, JPG, PNG — Opsional)</label>
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div id="proj-file-status" class="min-w-0">
-                  ${editing?.fileDataUrl ? `
-                    <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs">
-                      <i data-lucide="${editing.fileType === 'pdf' ? 'file-text' : 'image'}" class="w-4 h-4 shrink-0"></i>
-                      <span class="truncate">${editing.fileName || 'Berkas Terlampir'}</span>
-                    </div>
-                  ` : `<span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>`}
+            <!-- Upload Multi-Berkas Dokumen (PDF / JPG / PNG) dengan Tandai & Hapus -->
+            <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div>
+                  <label class="block text-xs font-bold theme-text-primary">Upload Berkas / Dokumen (Multi-File PDF, JPG, PNG — Sebanyak Mungkin)</label>
+                  <p class="text-[11px] theme-text-muted mt-0.5">Bisa pilih banyak berkas sekaligus atau tambah lagi berkali-kali. Centang berkas untuk menghapus yang ditandai.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
-                  <input type="hidden" id="proj-file-data" value="${editing?.fileDataUrl || ''}" />
-                  <input type="hidden" id="proj-file-name" value="${editing?.fileName || ''}" />
-                  <input type="hidden" id="proj-file-type" value="${editing?.fileType || ''}" />
                   <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
                     <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
-                    <span>Pilih Berkas PDF / JPG</span>
-                    <input type="file" accept=".pdf,application/pdf,image/jpeg,image/jpg,image/png,image/webp" onchange="handleProjectFileUpload(this)" class="hidden" />
+                    <span>+ Tambah Berkas PDF / JPG</span>
+                    <input type="file" multiple accept=".pdf,application/pdf,image/jpeg,image/jpg,image/png,image/webp" onchange="handleProjectFileUpload(this)" class="hidden" />
                   </label>
-                  <button type="button" onclick="clearProjectFile()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
-                    Hapus Berkas
+                </div>
+              </div>
+
+              <!-- Baris Aksi Tandai & Hapus Berkas -->
+              <div id="proj-file-bulk-actions" class="hidden pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2">
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-bold theme-text-primary">
+                  <input type="checkbox" id="checkbox-select-all-files" onchange="toggleSelectAllAttachments(this.checked)" class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500" />
+                  <span>Tandai Semua Berkas</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <button type="button" id="btn-delete-selected-files" onclick="deleteSelectedAttachments()" disabled class="px-3 py-1.5 rounded-xl bg-red-500/15 text-red-400 text-xs font-bold inline-flex items-center gap-1.5 cursor-not-allowed">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Hapus Ditandai (0)</span>
+                  </button>
+                  <button type="button" onclick="clearProjectFile()" class="px-3 py-1.5 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                    Hapus Semua
                   </button>
                 </div>
               </div>
-              <p class="text-[11px] theme-text-muted mt-2">Cocok untuk menyimpan berkas pribadi (KTP, SK, Sertifikat, PDF). Pilih Visibilitas <b>Privat</b> jika hanya boleh dibuka setelah login.</p>
+
+              <!-- Daftar Berkas Terlampir -->
+              <div id="proj-file-status" class="min-w-0">
+                <span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -2218,13 +2586,13 @@ const firebaseConfig = {
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-bold text-sm theme-text-primary">${p.title}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full theme-surface-subtle theme-text-secondary">${p.category}${p.subCategory ? ` › ${p.subCategory}` : ''}</span>
-                        ${p.fileDataUrl ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600">Berkas ${(p.fileType || 'File').toUpperCase()}</span>` : ''}
+                        ${getProjectAttachments(p).length > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600">${getProjectAttachments(p).length} Berkas</span>` : ''}
                         ${p.visibility === 'private' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400">Privat</span>` : ''}
                       </div>
-                      ${p.fileDataUrl ? `
-                        <button type="button" onclick="openProjectFileViewer('${p.id}')" class="text-xs text-emerald-600 hover:underline font-semibold mt-0.5 inline-flex items-center gap-1">
+                      ${getProjectAttachments(p).length > 0 ? `
+                        <button type="button" onclick="openProjectFileViewer('${p.id}', 0)" class="text-xs text-emerald-600 hover:underline font-semibold mt-0.5 inline-flex items-center gap-1">
                           <i data-lucide="eye" class="w-3 h-3"></i>
-                          <span>Lihat Berkas: ${p.fileName || 'Dokumen'}</span>
+                          <span>Lihat ${getProjectAttachments(p).length} Berkas: ${getProjectAttachments(p).map(a => a.name).join(', ')}</span>
                         </button>
                       ` : `
                         <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
@@ -2565,6 +2933,8 @@ const firebaseConfig = {
     initProductionRealtimeSync();
   }
   renderAll();
+  updateWibDigitalClock();
+  setInterval(updateWibDigitalClock, 1000);
   runStartupLoader();
 </script>
 </body>
