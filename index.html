@@ -1661,182 +1661,40 @@ const firebaseConfig = {
   };
 
   window.editProject = async (id) => {
-    const proj = state.projects.find(p => p.id === id);
-    if (!proj) return;
-    let existingAtts = getProjectAttachments(proj);
-    if (existingAtts.length === 0 && proj.hasChunkedFiles) {
-      showToast('Memuat lampiran proyek...', 'info');
-      existingAtts = await hydrateProjectAttachmentsFromChunks(proj);
+    const cleanId = String(id || '').trim();
+    if (!cleanId) return;
+    if (!state.currentUser) {
+      openLoginModal('admin');
+      return;
     }
-    state.editingProjectId = id;
-    state.draftAttachments = existingAtts.map(a => ({ ...a }));
+    const proj = state.projects.find(p => String(p.id) === cleanId);
+    if (!proj) {
+      showToast('Data proyek tidak ditemukan.', 'error');
+      return;
+    }
+
+    let existingAtts = [];
+    try {
+      existingAtts = getProjectAttachments(proj);
+      if (existingAtts.length === 0 && proj.hasChunkedFiles) {
+        showToast('Memuat lampiran proyek...', 'info');
+        existingAtts = await hydrateProjectAttachmentsFromChunks(proj);
+      }
+    } catch (_) {
+      existingAtts = [];
+    }
+
+    state.editingProjectId = cleanId;
+    state.draftAttachments = Array.isArray(existingAtts) ? existingAtts.map(a => ({ ...a })) : [];
     state.selectedAttachmentIds.clear();
     state.activeMenu = 'manage-projects';
     renderAll();
-    document.getElementById('main-content-area')?.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
-  window.cancelEditProject = () => {
-    state.editingProjectId = null;
-    state.draftAttachments = [];
-    state.selectedAttachmentIds.clear();
-    renderAll();
-  };
-
-  window.saveProject = async (e) => {
-    e.preventDefault();
-    if (!state.currentUser) return;
-
-    const title = document.getElementById('proj-title').value.trim();
-    let url = document.getElementById('proj-url').value.trim();
-    const description = document.getElementById('proj-desc').value.trim();
-    const category = document.getElementById('proj-category').value.trim() || 'Umum';
-    const subCategory = document.getElementById('proj-subcategory').value.trim();
-    const logoDataUrl = document.getElementById('proj-logo-data').value || '';
-    const icon = document.getElementById('proj-icon').value.trim() || '🚀';
-    const order = parseInt(document.getElementById('proj-order').value, 10) || 1;
-    const visibility = document.getElementById('proj-visibility').value || 'public';
-    const isPinned = document.getElementById('proj-pinned').checked;
-    const cleanAttachments = (state.draftAttachments || []).map((att, idx) => ({
-      id: String(att?.id || ('att-' + Date.now() + '-' + idx)),
-      name: String(att?.name || `Berkas_${idx + 1}`),
-      type: String(att?.type || 'image'),
-      dataUrl: String(att?.dataUrl || '')
-    })).filter(att => att.dataUrl);
-
-    if (!url && cleanAttachments.length === 0) {
-      showToast('Isi URL tujuan atau unggah minimal 1 berkas PDF/JPG.', 'error');
-      return;
-    }
-    if (url && !/^https?:\/\//i.test(url) && !url.startsWith('#')) {
-      url = 'https://' + url;
-    }
-
-    const attachmentsJsonStr = JSON.stringify(cleanAttachments);
-    const attachmentNamesSummary = cleanAttachments.map(a => a.name).join(', ');
-
-    const payload = {
-      title: String(title),
-      url: String(url),
-      description: String(description),
-      category: String(category),
-      subCategory: String(subCategory),
-      logoDataUrl: String(logoDataUrl || ''),
-      attachments: cleanAttachments,
-      attachmentsJson: attachmentsJsonStr,
-      attachmentNames: attachmentNamesSummary,
-      icon: String(icon),
-      order: Number(order),
-      visibility: String(visibility),
-      isPinned: Boolean(isPinned)
-    };
-
-    const isEditing = Boolean(state.editingProjectId);
-
-    if (IS_PREVIEW) {
-      if (isEditing) {
-        const idx = state.projects.findIndex(p => p.id === state.editingProjectId);
-        if (idx !== -1) {
-          state.projects[idx] = { ...state.projects[idx], ...payload };
-        }
-      } else {
-        state.projects.push({
-          id: 'proj-' + Date.now(),
-          ...payload
-        });
-      }
-      state.projects.sort((a, b) => (b.isPinned - a.isPinned) || ((a.order || 99) - (b.order || 99)));
-      state.editingProjectId = null;
-      state.draftAttachments = [];
-      state.selectedAttachmentIds.clear();
-      renderAll();
-      showChangeSuccessPopup(
-        isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
-        isEditing ? 'Perubahan data proyek berhasil disimpan.' : 'Proyek baru telah tampil di portal.'
-      );
-      return;
-    }
-
-    try {
-      const needsChunking = attachmentsJsonStr.length > 650000;
-      const firestorePayload = {
-        title: payload.title,
-        url: payload.url,
-        description: payload.description,
-        category: payload.category,
-        subCategory: payload.subCategory,
-        logoDataUrl: payload.logoDataUrl,
-        attachmentsJson: needsChunking ? '' : attachmentsJsonStr,
-        hasChunkedFiles: Boolean(needsChunking),
-        attachmentCount: cleanAttachments.length,
-        attachmentNames: attachmentNamesSummary,
-        icon: payload.icon,
-        order: payload.order,
-        visibility: payload.visibility,
-        isPinned: payload.isPinned
-      };
-
-      let targetProjectId = state.editingProjectId;
-      if (isEditing) {
-        await updateDoc(doc(db, 'projects', targetProjectId), {
-          ...firestorePayload,
-          updatedAt: serverTimestamp()
-        });
-      } else {
-        const createdRef = await addDoc(collection(db, 'projects'), {
-          ...firestorePayload,
-          createdAt: serverTimestamp()
-        });
-        targetProjectId = createdRef.id;
-      }
-
-      if (needsChunking) {
-        showToast('Menyimpan berkas berukuran besar...', 'info');
-        await saveChunkedAttachmentsForProject(targetProjectId, attachmentsJsonStr);
-      } else if (targetProjectId) {
-        await saveChunkedAttachmentsForProject(targetProjectId, '');
-      }
-
-      state.editingProjectId = null;
-      state.draftAttachments = [];
-      state.selectedAttachmentIds.clear();
-      renderAll();
-      showChangeSuccessPopup(
-        isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
-        'Data proyek & seluruh berkas berhasil disimpan.'
-      );
-    } catch (err) {
-      showToast('Gagal menyimpan proyek: ' + err.message, 'error');
-    }
-  };
-
-  window.deleteProject = (id) => {
-    const proj = state.projects.find(p => p.id === id);
-    if (!proj) return;
-    openConfirmModal({
-      title: 'Hapus Proyek Ini?',
-      text: `Proyek "${proj.title}" akan dihapus secara permanen dari portal.`,
-      confirmText: 'Hapus',
-      onConfirm: async () => {
-        if (IS_PREVIEW) {
-          state.projects = state.projects.filter(p => p.id !== id);
-          if (state.editingProjectId === id) {
-            state.editingProjectId = null;
-            state.draftAttachments = [];
-            state.selectedAttachmentIds.clear();
-          }
-          renderAll();
-          showChangeSuccessPopup('Proyek Dihapus!', `Proyek "${proj.title}" berhasil dihapus.`);
-          return;
-        }
-        try {
-          await saveChunkedAttachmentsForProject(id, '').catch(() => {});
-          await deleteDoc(doc(db, 'projects', id));
-          showChangeSuccessPopup('Proyek Dihapus!', `Proyek "${proj.title}" berhasil dihapus.`);
-        } catch (err) {
-          showToast('Gagal menghapus proyek: ' + err.message, 'error');
-        }
-      }
+    requestAnimationFrame(() => {
+      try {
+        document.getElementById('main-content-area')?.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('proj-title')?.focus();
+      } catch (_) {}
     });
   };
 
@@ -2837,11 +2695,11 @@ const firebaseConfig = {
                       </div>
                     </div>
                     <div class="flex items-center gap-2 self-end sm:self-center">
-                      <button onclick="editProject('${p.id}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1">
+                      <button type="button" onclick="window.editProject('${String(p.id).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl badge-accent text-xs font-bold flex items-center gap-1 cursor-pointer">
                         <i data-lucide="edit-3" class="w-3.5 h-3.5"></i><span>Edit</span>
                       </button>
                       ${state.currentUser ? `
-                        <button onclick="deleteProject('${p.id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1">
+                        <button type="button" onclick="window.deleteProject('${String(p.id).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1 cursor-pointer">
                           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                         </button>
                       ` : ''}
