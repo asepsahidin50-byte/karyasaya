@@ -7,7 +7,7 @@
   <title>Portal Microsite Proyek — Hub Aplikasi Satu Klik</title>
 
   <!-- PWA Manifest via Data URI -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Portal%20Microsite%20Proyek%22%2C%22short_name%22%3A%22Microsite%20Hub%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2724%27%20fill%3D%27%25230f172a%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2766%27%20font-size%3D%2752%27%20text-anchor%3D%27middle%27%20fill%3D%27white%27%20font-family%3D%27sans-serif%27%253E%25E2%259A%25A1%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Portal%20Microsite%20Proyek%22%2C%22short_name%22%3A%22Microsite%20Hub%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2724%27%20fill%3D%27%25230f172a%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2766%27%20font-size%3D%2752%27%20text-anchor%3D%27middle%27%20fill%3D%27white%27%20font-family%3D%27sans-serif%27%253E%25E2%259A%25A1%253C%2Ftext%3E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -679,12 +679,12 @@
   const IS_PREVIEW = false; // Ubah menjadi false SAAT DEPLOY / PUBLISH agar terhubung murni ke Firebase tanpa data dummy
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7srK04DysurqvfKqiBhPzlINrfTkIizM",
-  authDomain: "microset-asep.firebaseapp.com",
-  projectId: "microset-asep",
-  storageBucket: "microset-asep.firebasestorage.app",
-  messagingSenderId: "245356329795",
-  appId: "1:245356329795:web:3b98434d1d2a18cc4d0df6"
+  apiKey: "AIzaSyCI55eTi7a3sXzWWwcMNT5-9Di1Tka0ZI0",
+  authDomain: "karyasaya-d9181.firebaseapp.com",
+  projectId: "karyasaya-d9181",
+  storageBucket: "karyasaya-d9181.firebasestorage.app",
+  messagingSenderId: "613199622105",
+  appId: "1:613199622105:web:40c3a1c62f6c18509173c8"
   };
 
   // =========================================================================
@@ -694,10 +694,9 @@ const firebaseConfig = {
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, orderBy, serverTimestamp, increment
+    onSnapshot, query, where, serverTimestamp, increment
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // Registrasi Service Worker Dinamis via Blob untuk PWA 1 File
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
     const swCode = `
       const CACHE_NAME = 'microsite-hub-v1';
@@ -712,7 +711,6 @@ const firebaseConfig = {
     navigator.serviceWorker.register(swUrl).catch(() => {});
   }
 
-  // Inisialisasi Firebase HANYA jika IS_PREVIEW === false
   let app = null;
   let auth = null;
   let db = null;
@@ -733,7 +731,6 @@ const firebaseConfig = {
 
   function buildCompactSettingsForWindowName(settingsObj) {
     if (!settingsObj || typeof settingsObj !== 'object') return null;
-    // Batasi ukuran data URL gambar di window.name agar tidak gagal/terpotong di browser
     const safeImg = (val, maxLen = 180000) => {
       if (typeof val !== 'string' || !val) return '';
       return val.length <= maxLen ? val : '';
@@ -746,6 +743,7 @@ const firebaseConfig = {
       footerText: settingsObj.footerText ?? '',
       themeMode: settingsObj.themeMode ?? 'light',
       accentColor: settingsObj.accentColor ?? 'aurora',
+      updatedAtMs: settingsObj.updatedAtMs ?? 0,
       logoDataUrl: safeImg(settingsObj.logoDataUrl, 160000),
       loadingLogoDataUrl: safeImg(settingsObj.loadingLogoDataUrl, 160000),
       sidebarBannerDataUrl: safeImg(settingsObj.sidebarBannerDataUrl, 220000)
@@ -799,11 +797,10 @@ const firebaseConfig = {
         : { collapsedCats: {}, collapsedSubs: {} };
       const compactSettings = buildCompactSettingsForWindowName(settingsObj || sessionSettingsCache);
 
-      const payload = JSON.stringify({
+      window.name = JSON.stringify({
         dropdown: safeDropdown,
         settings: compactSettings
       });
-      window.name = payload;
     } catch (e) {
       try {
         const textOnlySettings = settingsObj && typeof settingsObj === 'object'
@@ -864,7 +861,7 @@ const firebaseConfig = {
   }
 
   const state = {
-    activeMenu: 'portal', // 'portal' | 'manage-projects' | 'manage-users' | 'settings'
+    activeMenu: 'portal',
     selectedCategory: 'Semua',
     searchQuery: '',
     editingProjectId: null,
@@ -876,7 +873,7 @@ const firebaseConfig = {
       onlineCount: IS_PREVIEW ? 1 : 1,
       totalVisits: IS_PREVIEW ? 1 : 0
     },
-    currentUser: null, // null | { role: 'admin' | 'contributor' | 'viewer', name, identifier }
+    currentUser: null,
     portalSettings: {
       title: 'KARYA_SAYA',
       tagline: 'Microsite Hub 1-Klik',
@@ -930,7 +927,9 @@ const firebaseConfig = {
   let localSettingsLockedAt = 0;
 
   function persistCurrentSettingsNow() {
-    localSettingsLockedAt = Date.now();
+    const nowMs = Date.now();
+    localSettingsLockedAt = nowMs;
+    state.portalSettings.updatedAtMs = nowMs;
     saveSettingsBackup({ ...state.portalSettings });
   }
 
@@ -1319,7 +1318,6 @@ const firebaseConfig = {
     renderDraftAttachmentsList();
   };
 
-  // Viewer Modal Multi-Berkas (PDF / JPG)
   let activeViewerAttachments = [];
 
   function renderFileViewerActiveTab(index) {
@@ -1393,7 +1391,6 @@ const firebaseConfig = {
     if (bodyEl) bodyEl.innerHTML = '';
   };
 
-  // Toast & Pop-up Animasi Berhasil
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -1839,6 +1836,7 @@ const firebaseConfig = {
     const nextLogo = logoEl && logoEl.value ? logoEl.value : (state.portalSettings.logoDataUrl || '');
     const nextLoadingLogo = loadLogoEl && loadLogoEl.value ? loadLogoEl.value : (state.portalSettings.loadingLogoDataUrl || '');
     const nextBanner = bannerEl && bannerEl.value ? bannerEl.value : (state.portalSettings.sidebarBannerDataUrl || '');
+    const savedAtMs = Date.now();
 
     const updated = {
       ...state.portalSettings,
@@ -1849,11 +1847,13 @@ const firebaseConfig = {
       footerText: (footEl ? footEl.value : state.portalSettings.footerText).trim(),
       logoDataUrl: nextLogo,
       loadingLogoDataUrl: nextLoadingLogo,
-      sidebarBannerDataUrl: nextBanner
+      sidebarBannerDataUrl: nextBanner,
+      updatedAtMs: savedAtMs
     };
 
     state.portalSettings = updated;
-    persistCurrentSettingsNow();
+    localSettingsLockedAt = savedAtMs;
+    saveSettingsBackup({ ...updated });
 
     if (IS_PREVIEW || !db) {
       renderAll();
@@ -1862,15 +1862,15 @@ const firebaseConfig = {
     }
 
     try {
-      await setDoc(doc(db, 'settings', 'portal_config'), updated, { merge: true });
+      await setDoc(doc(db, 'settings', 'portal_config'), {
+        ...updated,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Konfigurasi portal tersimpan permanen ke Firestore.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Perubahan tersimpan ke Firestore dan akan tampil di HP maupun akun lain.');
     } catch (err) {
       renderAll();
-      showChangeSuccessPopup(
-        'Pengaturan Disimpan!',
-        'Perubahan sudah diterapkan dan disimpan di sesi portal. Jika belum tersinkron ke Firestore, publikasikan Firestore Rules di Firebase Console.'
-      );
+      showToast('Gagal menyimpan ke Firestore: ' + (err.message || 'Periksa izin Firestore Rules'), 'error');
     }
   };
 
@@ -1900,25 +1900,24 @@ const firebaseConfig = {
 
     onSnapshot(doc(db, 'settings', 'portal_config'), (snap) => {
       if (snap.exists()) {
-        const backup = loadSavedSettingsBackup();
         const remoteData = snap.data() || {};
-        const merged = {
-          ...state.portalSettings,
-          ...remoteData
-        };
-        if (backup) {
-          // Pertahankan perubahan lokal (termasuk logo, banner, warna, teks) jika lebih baru atau lebih lengkap
-          Object.keys(backup).forEach((k) => {
-            if (backup[k] !== undefined && backup[k] !== null) {
-              if (typeof backup[k] === 'string' && backup[k] === '' && remoteData[k]) {
-                return;
-              }
-              merged[k] = backup[k];
-            }
-          });
+        const backup = loadSavedSettingsBackup();
+        const remoteUpdatedAt = Number(remoteData.updatedAtMs || 0);
+        const localUpdatedAt = Number(backup?.updatedAtMs || localSettingsLockedAt || 0);
+
+        if (localUpdatedAt > remoteUpdatedAt && (Date.now() - localSettingsLockedAt) < 5000 && backup) {
+          state.portalSettings = { ...state.portalSettings, ...remoteData, ...backup };
+          renderAll();
+          return;
         }
-        state.portalSettings = merged;
-        saveSettingsBackup(state.portalSettings);
+
+        state.portalSettings = {
+          ...state.portalSettings,
+          ...remoteData,
+          updatedAtMs: remoteUpdatedAt || Date.now()
+        };
+        sessionSettingsCache = { ...state.portalSettings };
+        writeStorageEnvelope(state.dropdownMemory, sessionSettingsCache);
         renderAll();
       }
     });
@@ -1936,7 +1935,6 @@ const firebaseConfig = {
       if (state.activeMenu === 'manage-users') renderAll();
     });
 
-    // Real-Time Visitor Presence & Total Kunjungan
     const sessionId = 'vis-' + Math.random().toString(36).slice(2, 11);
     const presenceRef = doc(db, 'portal_presence', sessionId);
     const statsRef = doc(db, 'portal_stats', 'summary');
@@ -1996,7 +1994,6 @@ const firebaseConfig = {
       { id: 'settings', label: 'Pengaturan Portal', icon: 'sliders', show: state.currentUser?.role === 'admin' }
     ].filter(m => m.show);
 
-    // Desktop Sidebar Links
     const sidebarNav = document.getElementById('sidebar-nav-links');
     if (sidebarNav) {
       sidebarNav.innerHTML = menuItems.map(item => {
@@ -2014,7 +2011,6 @@ const firebaseConfig = {
       }).join('');
     }
 
-    // Banner Portrait Modern di Bawah Menu Beranda Portal
     const bannerData = state.portalSettings.sidebarBannerDataUrl;
     const isAdmin = state.currentUser?.role === 'admin';
     const sidebarBannerSlot = document.getElementById('sidebar-banner-slot');
@@ -2060,7 +2056,6 @@ const firebaseConfig = {
       }
     }
 
-    // Desktop Sidebar Auth Box
     const authBox = document.getElementById('sidebar-auth-box');
     if (authBox) {
       if (state.currentUser) {
@@ -2091,7 +2086,6 @@ const firebaseConfig = {
       }
     }
 
-    // Mobile Floating Bottom Navigation (Beranda & Login Sejajar)
     const mobileNav = document.getElementById('mobile-bottom-nav');
     if (mobileNav) {
       const navButtons = menuItems.map(item => {
@@ -2126,7 +2120,6 @@ const firebaseConfig = {
     }
   }
 
-  // Pencarian, Filter & Toggle Dropdown dengan Memori Aktivitas Terakhir
   window.handleSearchInput = (val) => {
     state.searchQuery = val;
     renderPortalProjectsGrid();
@@ -2237,7 +2230,6 @@ const firebaseConfig = {
       return;
     }
 
-    // Kelompokkan berdasarkan Kategori Utama -> Sub-Kategori
     const groupedByCat = new Map();
     visibleProjects.forEach(p => {
       const cat = (p.category || 'Umum').trim();
@@ -2318,7 +2310,6 @@ const firebaseConfig = {
     gridEl.innerHTML = htmlSections.join('');
   }
 
-  // Navigasi & Render Widget Kalender, Pengunjung Aktif & Jam Digital WIB
   window.changeCalendarMonth = (delta) => {
     const cur = state.calendarCursor || new Date();
     state.calendarCursor = new Date(cur.getFullYear(), cur.getMonth() + delta, 1);
@@ -2382,7 +2373,6 @@ const firebaseConfig = {
 
     return `
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 shrink-0">
-        <!-- Widget Statistik Pengunjung Aktif (Kiri - Kompak & Elegan) -->
         <div class="lg:col-span-5 glass-panel rounded-2xl px-3.5 py-2.5 flex flex-col justify-between gap-1.5 border border-slate-200/70">
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
@@ -2411,7 +2401,6 @@ const firebaseConfig = {
           </div>
         </div>
 
-        <!-- Widget Kalender Interaktif (Kanan - Kompak & Elegan) -->
         <div class="lg:col-span-7 glass-panel rounded-2xl px-3.5 py-2.5 border border-slate-200/70">
           <div class="flex items-center justify-between gap-2 mb-1">
             <div class="flex items-center gap-1.5">
@@ -2511,7 +2500,6 @@ const firebaseConfig = {
 
     return `
       <div class="desktop-one-screen-portal space-y-4 md:space-y-0 w-full">
-        <!-- Hero Header Portal -->
         <section class="glass-panel hero-mesh-accent rounded-2xl p-4 sm:p-5 relative overflow-hidden shrink-0">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-start sm:items-center gap-3.5">
@@ -2528,7 +2516,6 @@ const firebaseConfig = {
               </div>
             </div>
 
-            <!-- Saklar Tema Terang / Gelap untuk Pengunjung -->
             <div class="hidden md:flex items-center gap-1 p-1 rounded-xl theme-surface-subtle border border-slate-200/60 self-start sm:self-center shrink-0">
               <button type="button" onclick="selectThemeMode('light')" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${mode === 'light' ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}">
                 <i data-lucide="sun" class="w-3.5 h-3.5"></i>
@@ -2541,7 +2528,6 @@ const firebaseConfig = {
             </div>
           </div>
 
-          <!-- Search & Category Filter Bar -->
           <div class="mt-3 flex flex-col lg:flex-row gap-2.5">
             <div class="relative flex-1">
               <i data-lucide="search" class="w-4 h-4 theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
@@ -2570,15 +2556,12 @@ const firebaseConfig = {
           </div>
         </section>
 
-        <!-- Daftar Kategori & Proyek (Dropdown Modern) -->
         <section id="portal-projects-grid" class="desktop-projects-scroll space-y-3"></section>
 
-        <!-- Widget Bawah Elegan: Pengunjung Aktif & Kalender -->
         <div id="portal-calendar-visitor-slot" class="shrink-0">
           ${renderDashboardCalendarAndVisitorWidget()}
         </div>
 
-        <!-- Footer -->
         <footer class="text-center py-1 text-[11px] theme-text-muted shrink-0">
           ${state.portalSettings.footerText}
         </footer>
@@ -2601,7 +2584,6 @@ const firebaseConfig = {
 
     return `
       <div class="space-y-6">
-        <!-- Form Tambah / Edit Proyek -->
         <section class="glass-panel rounded-3xl p-6">
           <div class="flex items-center justify-between mb-5">
             <div>
@@ -2650,7 +2632,6 @@ const firebaseConfig = {
               </datalist>
             </div>
 
-            <!-- Live Upload Logo Proyek dari Desktop -->
             <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
               <label class="block text-xs font-bold theme-text-primary mb-2">Logo / Gambar Proyek (Live Upload Desktop)</label>
               <div class="flex flex-wrap items-center gap-4">
@@ -2674,7 +2655,6 @@ const firebaseConfig = {
               </div>
             </div>
 
-            <!-- Upload Multi-Berkas Dokumen (PDF / JPG / PNG) dengan Tandai & Hapus -->
             <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70 space-y-3">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
@@ -2690,7 +2670,6 @@ const firebaseConfig = {
                 </div>
               </div>
 
-              <!-- Baris Aksi Tandai & Hapus Berkas -->
               <div id="proj-file-bulk-actions" class="hidden pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2">
                 <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-bold theme-text-primary">
                   <input type="checkbox" id="checkbox-select-all-files" onchange="toggleSelectAllAttachments(this.checked)" class="w-4 h-4 rounded text-sky-600 focus:ring-sky-500" />
@@ -2707,7 +2686,6 @@ const firebaseConfig = {
                 </div>
               </div>
 
-              <!-- Daftar Berkas Terlampir -->
               <div id="proj-file-status" class="min-w-0">
                 <span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>
               </div>
@@ -2748,7 +2726,6 @@ const firebaseConfig = {
           </form>
         </section>
 
-        <!-- Daftar Proyek Tersimpan -->
         <section class="glass-panel rounded-3xl p-6">
           <h3 class="text-base font-extrabold theme-text-primary mb-4">Daftar Proyek Terdaftar (${state.projects.length})</h3>
           ${state.projects.length === 0 ? `
@@ -2898,7 +2875,6 @@ const firebaseConfig = {
         <p class="text-xs theme-text-secondary mb-5">Sesuaikan logo web dari desktop, foto banner portrait sidebar, warna aksen utama, dan identitas microsite Anda.</p>
 
         <form onsubmit="savePortalSettings(event)" class="space-y-5">
-          <!-- Live Upload Logo Web dari Desktop -->
           <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
             <label class="block text-xs font-bold theme-text-primary mb-2">Logo Utama Website (Live Upload Desktop)</label>
             <div class="flex flex-wrap items-center gap-4">
@@ -2922,7 +2898,6 @@ const firebaseConfig = {
             </div>
           </div>
 
-          <!-- Live Upload Logo Layar Loading Awal dari Desktop -->
           <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
             <label class="block text-xs font-bold theme-text-primary mb-2">Logo Layar Loading Awal Masuk Web (Live Upload Desktop)</label>
             <div class="flex flex-wrap items-center gap-4">
@@ -2946,7 +2921,6 @@ const firebaseConfig = {
             </div>
           </div>
 
-          <!-- Live Upload Banner Foto Portrait Besar di Bawah Beranda Portal -->
           <div class="p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
             <label class="block text-xs font-bold theme-text-primary mb-2">Banner Foto Portrait Besar (Bawah Menu Beranda Portal)</label>
             <div class="flex flex-wrap items-center gap-4">
@@ -2970,7 +2944,6 @@ const firebaseConfig = {
             </div>
           </div>
 
-          <!-- Pilihan Warna Aksen -->
           <div>
             <label class="block text-xs font-bold theme-text-secondary mb-2">Pilihan Palet Warna & Gradien Modern</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -3017,7 +2990,6 @@ const firebaseConfig = {
   function renderAll() {
     applyThemeAndColors();
 
-    // Tampilkan banner preview HANYA jika IS_PREVIEW === true
     const banner = document.getElementById('preview-banner');
     if (IS_PREVIEW) {
       banner.classList.remove('hidden');
@@ -3107,7 +3079,6 @@ const firebaseConfig = {
     }, 55);
   }
 
-  // Jalankan Aplikasi
   applySavedSettingsOnBoot();
   if (!IS_PREVIEW) {
     initProductionRealtimeSync();
