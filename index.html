@@ -404,7 +404,7 @@
   </div>
 </div>
 
-<div id="app-wrapper" data-theme="light" data-accent="sky" inert>
+<div id="app-wrapper" data-theme="light" data-accent="aurora" inert>
   <!-- Banner Mode Preview (Hanya tampil jika IS_PREVIEW === true) -->
   <div id="preview-banner" class="hidden bg-amber-500/95 text-white text-xs font-semibold px-4 py-2 text-center shadow-sm backdrop-blur-md sticky top-0 z-50 flex items-center justify-center gap-2">
     <i data-lucide="flask-conical" class="w-4 h-4"></i>
@@ -593,6 +593,33 @@
     </div>
   </div>
 
+  <!-- MODAL PRATINJAU BERKAS / DOKUMEN (PDF / JPG) -->
+  <div id="file-viewer-modal" onclick="closeFileViewerModal()" class="hidden fixed inset-0 z-[100005] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+    <div onclick="event.stopPropagation()" class="bg-white rounded-3xl max-w-4xl w-full h-[86vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-pop-spring text-slate-900">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50 shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl btn-accent text-white flex items-center justify-center shrink-0">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 id="file-viewer-title" class="text-sm font-extrabold text-slate-900 truncate">Pratinjau Berkas</h4>
+            <p id="file-viewer-subtitle" class="text-[11px] text-slate-500 truncate">Dokumen tersimpan</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a id="file-viewer-download" href="#" download="berkas" class="px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Unduh</span>
+          </a>
+          <button type="button" onclick="closeFileViewerModal()" class="p-2 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 transition" title="Tutup">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <div id="file-viewer-body" class="flex-1 bg-slate-900/5 overflow-auto flex items-center justify-center p-3"></div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 z-[100003] flex flex-col gap-2 pointer-events-none"></div>
 </div>
@@ -652,59 +679,81 @@ const firebaseConfig = {
   // =========================================================================
   // 3. STATE APLIKASI (STRICT DUAL-MODE)
   // =========================================================================
+  function loadDropdownMemory() {
+    try {
+      if (window.name && window.name.startsWith('__microsite_ui__:')) {
+        const parsed = JSON.parse(window.name.slice('__microsite_ui__:'.length));
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    return { collapsedCats: {}, collapsedSubs: {} };
+  }
+
+  function saveDropdownMemory() {
+    try {
+      window.name = '__microsite_ui__:' + JSON.stringify(state.dropdownMemory);
+    } catch (e) {}
+  }
+
   const state = {
     activeMenu: 'portal', // 'portal' | 'manage-projects' | 'manage-users' | 'settings'
     selectedCategory: 'Semua',
     searchQuery: '',
     editingProjectId: null,
+    dropdownMemory: loadDropdownMemory(),
     currentUser: null, // { role: 'admin' | 'contributor' | 'viewer', name: string, identifier: string }
     portalSettings: IS_PREVIEW ? {
-      title: 'Portal Hub Proyek Digital',
+      title: 'KARYA_SAYA',
       tagline: 'Microsite Hub 1-Klik',
-      subtitle: 'Kumpulan seluruh aplikasi web, sistem informasi, dan tautan kerja dalam satu klik.',
-      footerText: '© 2026 Portal Microsite Proyek — Akses Cepat & Terpusat',
-      runningText: 'Selamat datang di Portal Hub Proyek Digital — Pilih kategori atau cari aplikasi yang Anda butuhkan dalam satu klik!',
-      accentColor: 'aurora',
+      subtitle: 'Kumpulan seluruh aplikasi web, sistem administrasi, dan dokumentasi proyek dalam satu pintu akses cepat.',
+      runningText: 'Selamat datang di Portal Microsite Proyek — Klik kategori atau sub-judul untuk membuka aplikasi dalam satu klik!',
+      footerText: '© 2026 Portal Microsite Hub • Dibangun dengan Arsitektur Serverless Firebase',
       themeMode: 'light',
+      accentColor: 'aurora',
       logoDataUrl: '',
       loadingLogoDataUrl: '',
       sidebarBannerDataUrl: ''
     } : {
       title: 'Portal Microsite Proyek',
       tagline: 'Microsite Hub 1-Klik',
-      subtitle: 'Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
-      footerText: '© 2026 Portal Microsite Proyek',
-      runningText: 'Selamat datang di Portal Microsite Proyek — Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
-      accentColor: 'aurora',
+      subtitle: 'Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik.',
+      runningText: 'Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!',
+      footerText: '© 2026 Portal Microsite Hub',
       themeMode: 'light',
+      accentColor: 'aurora',
       logoDataUrl: '',
       loadingLogoDataUrl: '',
       sidebarBannerDataUrl: ''
     },
-    // Maksimal 2 data dummy HANYA saat IS_PREVIEW === true
     projects: IS_PREVIEW ? [
       {
         id: 'demo-proj-1',
-        title: 'Sistem Informasi Akademik & Kurikulum',
-        url: 'https://example.com/siakad',
-        description: 'Aplikasi manajemen jadwal pelajaran, silabus, nilai, dan administrasi kurikulum terpadu.',
+        title: 'Sistem Manajemen Kurikulum & Jadwal',
+        url: 'https://example.com/kurikulum',
+        description: 'Aplikasi penyusunan perangkat ajar, jadwal pelajaran otomatis, dan kalender akademik terpadu.',
         category: 'Aplikasi Web',
         subCategory: 'Kurikulum',
-        icon: '🎓',
+        icon: '📚',
         logoDataUrl: '',
+        fileDataUrl: '',
+        fileName: '',
+        fileType: '',
         isPinned: true,
         visibility: 'public',
         order: 1
       },
       {
         id: 'demo-proj-2',
-        title: 'Dashboard Keuangan & SPJ Internal',
+        title: 'Dashboard Keuangan & Inventaris Aset',
         url: 'https://example.com/keuangan',
-        description: 'Portal pelaporan anggaran dan rekapitulasi transaksi khusus tim internal.',
-        category: 'Administrasi',
+        description: 'Laporan arus kas real-time, rekapitulasi anggaran, dan pelacakan inventaris barang internal.',
+        category: 'Aplikasi Web',
         subCategory: 'Keuangan & Aset',
         icon: '📊',
         logoDataUrl: '',
+        fileDataUrl: '',
+        fileName: '',
+        fileType: '',
         isPinned: false,
         visibility: 'private',
         order: 2
@@ -715,23 +764,23 @@ const firebaseConfig = {
         id: 'demo-user-1',
         username: 'tim01',
         password: '123',
-        name: 'Staf Kontributor',
+        name: 'Anggota Tim (Demo)',
         role: 'contributor'
       }
     ] : []
   };
 
+  let initialFirebaseReady = IS_PREVIEW;
+
   // =========================================================================
-  // 4. HELPER UI (TEMA DINAMIS, UPLOAD GAMBAR, POP-UP ANIMASI, KONFIRMASI)
+  // 4. HELPER UI (TEMA, WARNA, UPLOAD GAMBAR, POP-UP ANIMASI, KONFIRMASI)
   // =========================================================================
   let iconRenderQueued = false;
   function refreshIconsFast() {
     if (iconRenderQueued) return;
     iconRenderQueued = true;
     requestAnimationFrame(() => {
-      if (window.lucide) {
-        lucide.createIcons();
-      }
+      if (window.lucide) lucide.createIcons();
       iconRenderQueued = false;
     });
   }
@@ -749,10 +798,16 @@ const firebaseConfig = {
     if (!wrapper) return;
     const mode = getEffectiveThemeMode();
     wrapper.setAttribute('data-theme', mode);
-    wrapper.setAttribute('data-accent', state.portalSettings.accentColor || 'sky');
+    wrapper.setAttribute('data-accent', state.portalSettings.accentColor || 'aurora');
+
     const mobileThemeIcon = document.getElementById('mobile-theme-icon');
     if (mobileThemeIcon) {
       mobileThemeIcon.setAttribute('data-lucide', mode === 'dark' ? 'sun' : 'moon');
+    }
+
+    const runningEl = document.getElementById('dashboard-running-text');
+    if (runningEl) {
+      runningEl.textContent = state.portalSettings.runningText || 'Selamat datang di Portal Microsite Proyek — Akses seluruh aplikasi dan tautan proyek Anda dalam satu klik!';
     }
   }
 
@@ -766,10 +821,32 @@ const firebaseConfig = {
     refreshIconsFast();
   };
 
-  function compressImageFile(file, maxSize = 320) {
+  window.selectThemeMode = (mode) => {
+    state.portalSettings.themeMode = mode;
+    applyThemeAndColors();
+    if (state.activeMenu === 'portal') {
+      document.getElementById('view-container').innerHTML = renderPortalView();
+    }
+    refreshIconsFast();
+  };
+
+  window.selectAccentColor = (accent) => {
+    state.portalSettings.accentColor = accent;
+    applyThemeAndColors();
+    if (state.activeMenu === 'settings') {
+      document.getElementById('view-container').innerHTML = renderSettingsView();
+    }
+    refreshIconsFast();
+  };
+
+  function compressImageFile(file, maxSize = 320, quality = 0.82) {
     return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        reject(new Error('File harus berupa gambar'));
+        return;
+      }
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
@@ -788,174 +865,83 @@ const firebaseConfig = {
           canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/png', 0.88));
+          resolve(canvas.toDataURL('image/webp', quality));
         };
-        img.onerror = reject;
-        img.src = ev.target.result;
+        img.onerror = () => reject(new Error('Gagal memproses gambar'));
+        img.src = e.target.result;
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Gagal membaca file'));
       reader.readAsDataURL(file);
     });
   }
 
   window.handlePortalLogoUpload = async (input) => {
-    const file = input.files?.[0];
+    const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 320);
+      const dataUrl = await compressImageFile(file, 260, 0.85);
       document.getElementById('set-logo-data').value = dataUrl;
+      state.portalSettings.logoDataUrl = dataUrl;
       const preview = document.getElementById('set-logo-preview');
-      preview.innerHTML = `<img src="${dataUrl}" alt="Logo Preview" class="w-full h-full object-cover" />`;
-      showChangeSuccessPopup('Logo Portal Diperbarui!', 'Gambar logo baru siap disimpan.');
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Portal" class="w-full h-full object-cover" />`;
+      renderNavigation();
+      showChangeSuccessPopup('Logo Web Diperbarui!', 'Logo utama website berhasil diunggah dari komputer.');
     } catch (err) {
-      showToast('Gagal memproses gambar logo.', 'error');
+      showToast(err.message, 'error');
     }
   };
 
   window.clearPortalLogo = () => {
-    document.getElementById('set-logo-data').value = '';
+    const input = document.getElementById('set-logo-data');
+    if (input) input.value = '';
+    state.portalSettings.logoDataUrl = '';
     const preview = document.getElementById('set-logo-preview');
-    preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
+    if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
+    renderNavigation();
     refreshIconsFast();
-    showChangeSuccessPopup('Logo Direset!', 'Logo dikembalikan ke ikon bawaan.');
+    showChangeSuccessPopup('Logo Direset!', 'Logo website dikembalikan ke ikon default.');
   };
 
   window.handleLoadingLogoUpload = async (input) => {
-    const file = input.files?.[0];
+    const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 320);
+      const dataUrl = await compressImageFile(file, 260, 0.86);
       document.getElementById('set-loading-logo-data').value = dataUrl;
       state.portalSettings.loadingLogoDataUrl = dataUrl;
       const preview = document.getElementById('set-loading-logo-preview');
-      if (preview) {
-        preview.innerHTML = `<img src="${dataUrl}" alt="Logo Loading Preview" class="w-full h-full object-cover" />`;
-      }
-      const loaderBox = document.getElementById('startup-loader-logo-box');
-      if (loaderBox) {
-        loaderBox.innerHTML = `<img src="${dataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
-      }
-      refreshIconsFast();
-      showChangeSuccessPopup('Logo Loading Diubah!', 'Logo layar loading awal berhasil diperbarui secara live.');
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
+      showChangeSuccessPopup('Logo Loading Diperbarui!', 'Logo layar loading awal berhasil diunggah. Klik Simpan Pengaturan untuk menyimpan permanen.');
     } catch (err) {
-      showToast('Gagal memproses logo loading.', 'error');
+      showToast(err.message, 'error');
     }
   };
 
   window.clearLoadingLogo = () => {
-    const hiddenInput = document.getElementById('set-loading-logo-data');
-    if (hiddenInput) hiddenInput.value = '';
+    const input = document.getElementById('set-loading-logo-data');
+    if (input) input.value = '';
     state.portalSettings.loadingLogoDataUrl = '';
     const preview = document.getElementById('set-loading-logo-preview');
-    if (preview) {
-      preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
-    }
-    const loaderBox = document.getElementById('startup-loader-logo-box');
-    if (loaderBox) {
-      loaderBox.innerHTML = `<i data-lucide="layers" class="w-8 h-8 text-white"></i>`;
-    }
+    if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
     refreshIconsFast();
-    showChangeSuccessPopup('Logo Loading Direset!', 'Logo loading dikembalikan ke ikon bawaan.');
-  };
-
-  window.clearSidebarBanner = () => {
-    const hiddenInput = document.getElementById('set-sidebar-banner-data');
-    if (hiddenInput) hiddenInput.value = '';
-    state.portalSettings.sidebarBannerDataUrl = '';
-    const preview = document.getElementById('set-sidebar-banner-preview');
-    if (preview) {
-      preview.innerHTML = `
-        <div class="flex flex-col items-center justify-center text-center p-3 theme-text-muted">
-          <i data-lucide="image" class="w-6 h-6 mb-1 opacity-70"></i>
-          <span class="text-[10px] font-semibold">Belum ada banner</span>
-        </div>
-      `;
-    }
-    renderSidebarBanner();
-    refreshIconsFast();
-    showChangeSuccessPopup('Banner Dihapus!', 'Foto banner portrait telah dihapus.');
-  };
-
-  window.handleProjectLogoUpload = async (input) => {
-    const file = input.files?.[0];
-    if (!file) return;
-    try {
-      const dataUrl = await compressImageFile(file, 240);
-      document.getElementById('proj-logo-data').value = dataUrl;
-      const preview = document.getElementById('proj-logo-preview');
-      preview.innerHTML = `<img src="${dataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`;
-      showChangeSuccessPopup('Gambar Diunggah!', 'Logo proyek berhasil dipilih dari komputer.');
-    } catch (err) {
-      showToast('Gagal mengunggah logo proyek.', 'error');
-    }
-  };
-
-  window.clearProjectLogo = () => {
-    document.getElementById('proj-logo-data').value = '';
-    const preview = document.getElementById('proj-logo-preview');
-    preview.innerHTML = `<span class="text-xs theme-text-muted">Belum ada</span>`;
-    showChangeSuccessPopup('Gambar Dihapus!', 'Kartu akan menggunakan ikon emoji cadangan.');
-  };
-
-  window.selectThemeMode = (mode) => {
-    state.portalSettings.themeMode = mode;
-    applyThemeAndColors();
-    if (state.activeMenu === 'portal') {
-      document.getElementById('view-container').innerHTML = renderPortalView();
-    }
-    refreshIconsFast();
-  };
-
-  window.selectAccentColor = (color) => {
-    state.portalSettings.accentColor = color;
-    applyThemeAndColors();
-    if (state.activeMenu === 'settings') {
-      document.getElementById('view-container').innerHTML = renderSettingsView();
-    }
-    refreshIconsFast();
-    showChangeSuccessPopup('Warna Tema Diubah!', 'Warna aksen portal berhasil disesuaikan.');
-  };
-
-  let changeSuccessTimer = null;
-  window.showChangeSuccessPopup = (title = 'Perubahan Disimpan!', desc = 'Data telah berhasil diperbarui.') => {
-    const modal = document.getElementById('change-success-modal');
-    if (!modal) return;
-    document.getElementById('change-success-title').textContent = title;
-    document.getElementById('change-success-desc').textContent = desc;
-    modal.classList.remove('hidden');
-    refreshIconsFast();
-    if (changeSuccessTimer) clearTimeout(changeSuccessTimer);
-    changeSuccessTimer = setTimeout(() => closeChangeSuccessPopup(), 1800);
-  };
-
-  window.closeChangeSuccessPopup = () => {
-    const modal = document.getElementById('change-success-modal');
-    if (modal) modal.classList.add('hidden');
-  };
-
-  window.clearPortalLogo = () => {
-    document.getElementById('set-logo-data').value = '';
-    const preview = document.getElementById('set-logo-preview');
-    preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
-    refreshIconsFast();
+    showChangeSuccessPopup('Logo Loading Direset!', 'Logo layar loading awal dikembalikan ke ikon default.');
   };
 
   window.handleSidebarBannerUpload = async (input) => {
-    const file = input.files?.[0];
+    const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 640);
-      document.getElementById('set-sidebar-banner-data').value = dataUrl;
+      const dataUrl = await compressImageFile(file, 640, 0.85);
+      const hiddenInput = document.getElementById('set-sidebar-banner-data');
+      if (hiddenInput) hiddenInput.value = dataUrl;
       state.portalSettings.sidebarBannerDataUrl = dataUrl;
       const preview = document.getElementById('set-sidebar-banner-preview');
-      if (preview) {
-        preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
-      }
-      renderSidebarBanner();
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
+      renderNavigation();
       refreshIconsFast();
-      showToast('Foto banner portrait terpasang live!', 'info');
+      showChangeSuccessPopup('Banner Portrait Diperbarui!', 'Foto banner tampil di bawah menu Beranda Portal.');
     } catch (err) {
-      showToast('Gagal memproses foto banner.', 'error');
+      showToast(err.message, 'error');
     }
   };
 
@@ -972,102 +958,288 @@ const firebaseConfig = {
         </div>
       `;
     }
-    renderSidebarBanner();
+    renderNavigation();
     refreshIconsFast();
-    showToast('Banner portrait dihapus.', 'info');
+    showChangeSuccessPopup('Banner Dihapus!', 'Foto banner portrait berhasil dihapus.');
   };
 
   window.handleProjectLogoUpload = async (input) => {
-    const file = input.files?.[0];
+    const file = input.files && input.files[0];
     if (!file) return;
     try {
-      const dataUrl = await compressImageFile(file, 240);
+      const dataUrl = await compressImageFile(file, 220, 0.84);
       document.getElementById('proj-logo-data').value = dataUrl;
       const preview = document.getElementById('proj-logo-preview');
-      preview.innerHTML = `<img src="${dataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`;
-      showToast('Logo proyek berhasil diunggah!', 'info');
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Proyek" class="w-full h-full object-cover" />`;
+      showToast('Gambar proyek siap disimpan!', 'success');
     } catch (err) {
-      showToast('Gagal mengunggah logo proyek.', 'error');
+      showToast(err.message, 'error');
     }
   };
 
   window.clearProjectLogo = () => {
-    document.getElementById('proj-logo-data').value = '';
+    const input = document.getElementById('proj-logo-data');
+    if (input) input.value = '';
     const preview = document.getElementById('proj-logo-preview');
-    preview.innerHTML = `<span class="text-xs theme-text-muted">Belum ada</span>`;
+    if (preview) preview.innerHTML = `<span class="text-[11px] theme-text-muted text-center px-1">Belum ada</span>`;
   };
 
-  window.selectThemeMode = (mode) => {
-    state.portalSettings.themeMode = mode;
-    applyThemeAndColors();
-    if (state.activeMenu === 'portal') {
-      document.getElementById('view-container').innerHTML = renderPortalView();
+  window.handleProjectFileUpload = async (input) => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/');
+
+    if (!isPdf && !isImage) {
+      showToast('Format berkas harus berupa PDF, JPG, PNG, atau WebP.', 'error');
+      input.value = '';
+      return;
     }
-    refreshIconsFast();
-  };
 
-  window.selectAccentColor = (color) => {
-    state.portalSettings.accentColor = color;
-    applyThemeAndColors();
-    if (state.activeMenu === 'settings') {
-      document.getElementById('view-container').innerHTML = renderSettingsView();
+    try {
+      let dataUrl = '';
+      if (isImage) {
+        dataUrl = await compressImageFile(file, 1280, 0.85);
+      } else {
+        if (file.size > 750 * 1024) {
+          showToast('Ukuran PDF maksimal 750 KB agar dapat tersimpan di database.', 'error');
+          input.value = '';
+          return;
+        }
+        dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve(ev.target.result);
+          reader.onerror = () => reject(new Error('Gagal membaca berkas PDF'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      document.getElementById('proj-file-data').value = dataUrl;
+      document.getElementById('proj-file-name').value = file.name;
+      document.getElementById('proj-file-type').value = isPdf ? 'pdf' : 'image';
+
+      const statusBox = document.getElementById('proj-file-status');
+      if (statusBox) {
+        statusBox.innerHTML = `
+          <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs">
+            <i data-lucide="${isPdf ? 'file-text' : 'image'}" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">${file.name}</span>
+          </div>
+        `;
+      }
+
+      const urlInput = document.getElementById('proj-url');
+      if (urlInput && !urlInput.value.trim()) {
+        urlInput.value = '#berkas';
+      }
+
+      refreshIconsFast();
+      showToast(`Berkas "${file.name}" siap disimpan!`, 'success');
+    } catch (err) {
+      showToast(err.message || 'Gagal memproses berkas.', 'error');
     }
-    refreshIconsFast();
   };
 
-  let authFeedbackTimer = null;
-  window.showAuthFeedbackPopup = (title, desc, isLogout = false) => {
-    const modal = document.getElementById('auth-feedback-modal');
-    const iconWrap = document.getElementById('auth-feedback-icon');
-    document.getElementById('auth-feedback-title').textContent = title;
-    document.getElementById('auth-feedback-desc').textContent = desc;
-    if (isLogout) {
-      iconWrap.className = 'w-16 h-16 rounded-3xl bg-slate-900 text-white flex items-center justify-center mx-auto mb-4 shadow-lg';
-      iconWrap.innerHTML = '<i data-lucide="log-out" class="w-8 h-8"></i>';
+  window.clearProjectFile = () => {
+    const fData = document.getElementById('proj-file-data');
+    const fName = document.getElementById('proj-file-name');
+    const fType = document.getElementById('proj-file-type');
+    if (fData) fData.value = '';
+    if (fName) fName.value = '';
+    if (fType) fType.value = '';
+    const statusBox = document.getElementById('proj-file-status');
+    if (statusBox) {
+      statusBox.innerHTML = `<span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>`;
+    }
+  };
+
+  window.openProjectFileViewer = (id) => {
+    const proj = state.projects.find(p => p.id === id);
+    if (!proj || !proj.fileDataUrl) {
+      showToast('Berkas tidak ditemukan.', 'error');
+      return;
+    }
+    const modal = document.getElementById('file-viewer-modal');
+    const titleEl = document.getElementById('file-viewer-title');
+    const subEl = document.getElementById('file-viewer-subtitle');
+    const dlEl = document.getElementById('file-viewer-download');
+    const bodyEl = document.getElementById('file-viewer-body');
+
+    const fileName = proj.fileName || `${proj.title}.${proj.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
+    titleEl.textContent = proj.title;
+    subEl.textContent = fileName;
+    dlEl.href = proj.fileDataUrl;
+    dlEl.setAttribute('download', fileName);
+
+    const isPdf = proj.fileType === 'pdf' || proj.fileDataUrl.startsWith('data:application/pdf');
+    if (isPdf) {
+      bodyEl.innerHTML = `<iframe src="${proj.fileDataUrl}" class="w-full h-full rounded-2xl border border-slate-200 bg-white"></iframe>`;
     } else {
-      iconWrap.className = 'w-16 h-16 rounded-3xl btn-accent flex items-center justify-center mx-auto mb-4 shadow-lg';
-      iconWrap.innerHTML = '<i data-lucide="check-circle-2" class="w-8 h-8"></i>';
+      bodyEl.innerHTML = `<img src="${proj.fileDataUrl}" alt="${fileName}" class="max-w-full max-h-full object-contain rounded-2xl shadow-lg" />`;
     }
+
     modal.classList.remove('hidden');
     refreshIconsFast();
-    if (authFeedbackTimer) clearTimeout(authFeedbackTimer);
-    authFeedbackTimer = setTimeout(() => closeAuthFeedbackModal(), 2000);
   };
 
-  window.closeAuthFeedbackModal = () => {
-    document.getElementById('auth-feedback-modal').classList.add('hidden');
+  window.closeFileViewerModal = () => {
+    const modal = document.getElementById('file-viewer-modal');
+    const bodyEl = document.getElementById('file-viewer-body');
+    if (modal) modal.classList.add('hidden');
+    if (bodyEl) bodyEl.innerHTML = '';
   };
 
-  window.showToast = (message, type = 'success') => {
+  function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
-    const bgClass = type === 'error' ? 'bg-red-600 text-white' : (type === 'info' ? 'bg-slate-900 text-white' : 'bg-emerald-600 text-white');
-    toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-2xl shadow-lg text-xs font-semibold flex items-center gap-2.5 ${bgClass}`;
+    const bgMap = {
+      success: 'bg-emerald-600 text-white',
+      error: 'bg-red-600 text-white',
+      info: 'bg-slate-900 text-white'
+    };
+    toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 max-w-xs ${bgMap[type] || bgMap.info}`;
     toast.innerHTML = `<span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transition = 'opacity 0.25s ease';
       setTimeout(() => toast.remove(), 250);
-    }, 2600);
+    }, 3000);
+  }
+
+  let successPopupTimer = null;
+  function showChangeSuccessPopup(title = 'Perubahan Disimpan!', desc = 'Data telah berhasil diperbarui.') {
+    const modal = document.getElementById('change-success-modal');
+    if (!modal) return;
+    document.getElementById('change-success-title').textContent = title;
+    document.getElementById('change-success-desc').textContent = desc;
+    modal.classList.remove('hidden');
+    refreshIconsFast();
+    if (successPopupTimer) clearTimeout(successPopupTimer);
+    successPopupTimer = setTimeout(() => {
+      closeChangeSuccessPopup();
+    }, 2200);
+  }
+
+  window.closeChangeSuccessPopup = () => {
+    const modal = document.getElementById('change-success-modal');
+    if (modal) modal.classList.add('hidden');
+    if (successPopupTimer) {
+      clearTimeout(successPopupTimer);
+      successPopupTimer = null;
+    }
   };
 
-  window.openLoginModal = () => {
-    switchLoginTab('admin');
-    const modal = document.getElementById('login-modal');
+  function openConfirmDialog({ title, text, confirmLabel = 'Ya', cancelLabel = 'Cancel', onConfirm }) {
+    const modal = document.getElementById('confirm-modal');
+    document.getElementById('confirm-modal-title').textContent = title;
+    document.getElementById('confirm-modal-text').textContent = text;
+    const confirmBtn = document.getElementById('confirm-modal-btn');
+    const cancelBtn = document.getElementById('confirm-modal-cancel');
+    confirmBtn.textContent = confirmLabel;
+    cancelBtn.textContent = cancelLabel;
+    confirmBtn.onclick = () => {
+      closeConfirmModal();
+      if (typeof onConfirm === 'function') onConfirm();
+    };
     modal.classList.remove('hidden');
-    if (IS_PREVIEW) {
-      const hint = document.getElementById('demo-login-hint');
-      hint.classList.remove('hidden');
-      hint.innerHTML = `
-        <div class="font-bold mb-1">💡 Akun Uji Coba (Mode Preview):</div>
-        <div>• <b>Admin:</b> admin@demo.com / 123456</div>
-        <div>• <b>User:</b> ID: <code>tim01</code> / Pass: <code>123</code></div>
-      `;
-    }
-    requestAnimationFrame(() => {
-      document.getElementById('admin-email')?.focus();
+    refreshIconsFast();
+  }
+
+  window.closeConfirmModal = () => {
+    document.getElementById('confirm-modal').classList.add('hidden');
+  };
+
+  function showAuthFeedbackModal(title, desc, iconName = 'check-circle-2') {
+    const modal = document.getElementById('auth-feedback-modal');
+    document.getElementById('auth-feedback-title').textContent = title;
+    document.getElementById('auth-feedback-desc').textContent = desc;
+    const iconBox = document.getElementById('auth-feedback-icon');
+    if (iconBox) iconBox.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8"></i>`;
+    modal.classList.remove('hidden');
+    refreshIconsFast();
+  }
+
+  window.closeAuthFeedbackModal = () => {
+    document.getElementById('auth-feedback-modal').classList.add('hidden');
+  };
+
+  // =========================================================================
+  // 5. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
+  // =========================================================================
+  function initProductionRealtimeSync() {
+    if (IS_PREVIEW || !db) return;
+
+    let settingsLoaded = false;
+    let projectsLoaded = false;
+    const markReady = () => {
+      if (settingsLoaded && projectsLoaded) initialFirebaseReady = true;
+    };
+
+    onSnapshot(doc(db, 'portal_settings', 'main'), (snap) => {
+      if (snap.exists()) {
+        state.portalSettings = { ...state.portalSettings, ...snap.data() };
+      }
+      settingsLoaded = true;
+      markReady();
+      renderAll();
+    }, () => {
+      settingsLoaded = true;
+      markReady();
     });
+
+    onSnapshot(query(collection(db, 'projects'), orderBy('order', 'asc')), (snapshot) => {
+      state.projects = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      projectsLoaded = true;
+      markReady();
+      renderAll();
+    }, () => {
+      projectsLoaded = true;
+      markReady();
+    });
+
+    onSnapshot(collection(db, 'users'), (snapshot) => {
+      state.users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (state.activeMenu === 'manage-users') renderAll();
+    }, () => {});
+
+    onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        state.currentUser = {
+          role: 'admin',
+          name: firebaseUser.email.split('@')[0],
+          identifier: firebaseUser.email
+        };
+      } else if (state.currentUser?.role === 'admin') {
+        state.currentUser = null;
+        state.activeMenu = 'portal';
+      }
+      renderAll();
+    });
+  }
+
+  // =========================================================================
+  // 6. AUTENTIKASI HYBRID (ADMIN VIA FIREBASE AUTH, USER VIA FIRESTORE)
+  // =========================================================================
+  window.openLoginModal = () => {
+    const modal = document.getElementById('login-modal');
+    const hintBox = document.getElementById('demo-login-hint');
+    if (IS_PREVIEW) {
+      hintBox.classList.remove('hidden');
+      hintBox.innerHTML = `
+        <div class="font-bold">Akun Demo Mode Preview:</div>
+        <div>• <b>Admin:</b> <code>admin@portal.id</code> / <code>admin123</code></div>
+        <div>• <b>User:</b> <code>tim01</code> / <code>123</code></div>
+      `;
+    } else {
+      hintBox.classList.add('hidden');
+      hintBox.innerHTML = '';
+    }
+    modal.classList.remove('hidden');
+    switchLoginTab('admin');
+    refreshIconsFast();
   };
 
   window.closeLoginModal = () => {
@@ -1075,86 +1247,50 @@ const firebaseConfig = {
   };
 
   window.switchLoginTab = (tab) => {
-    const btnAdmin = document.getElementById('tab-btn-admin');
-    const btnUser = document.getElementById('tab-btn-user');
-    const formAdmin = document.getElementById('form-login-admin');
-    const formUser = document.getElementById('form-login-user');
+    const isAdmin = tab === 'admin';
+    document.getElementById('tab-btn-admin').className = isAdmin
+      ? 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition'
+      : 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
+    document.getElementById('tab-btn-user').className = !isAdmin
+      ? 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition'
+      : 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
 
-    if (tab === 'admin') {
-      btnAdmin.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition';
-      btnUser.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
-      formAdmin.classList.remove('hidden');
-      formUser.classList.add('hidden');
-      requestAnimationFrame(() => document.getElementById('admin-email')?.focus());
-    } else {
-      btnUser.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-sm transition';
-      btnAdmin.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition';
-      formUser.classList.remove('hidden');
-      formAdmin.classList.add('hidden');
-      requestAnimationFrame(() => document.getElementById('user-username')?.focus());
-    }
+    document.getElementById('form-login-admin').classList.toggle('hidden', !isAdmin);
+    document.getElementById('form-login-user').classList.toggle('hidden', isAdmin);
+
+    requestAnimationFrame(() => {
+      const targetInput = document.getElementById(isAdmin ? 'admin-email' : 'user-username');
+      if (targetInput) targetInput.focus();
+    });
   };
 
-  let pendingConfirmCallback = null;
-  window.openConfirmModal = (text, onConfirm, options = {}) => {
-    document.getElementById('confirm-modal-title').textContent = options.title || 'Konfirmasi Hapus';
-    document.getElementById('confirm-modal-text').textContent = text;
-    document.getElementById('confirm-modal-btn').textContent = options.confirmText || 'Ya';
-    document.getElementById('confirm-modal-cancel').textContent = options.cancelText || 'Cancel';
-    const iconWrap = document.getElementById('confirm-modal-icon-wrap');
-    iconWrap.innerHTML = `<i data-lucide="${options.icon || 'trash-2'}" class="w-6 h-6"></i>`;
-    pendingConfirmCallback = onConfirm;
-    document.getElementById('confirm-modal').classList.remove('hidden');
-    refreshIconsFast();
-  };
-
-  window.closeConfirmModal = () => {
-    document.getElementById('confirm-modal').classList.add('hidden');
-    pendingConfirmCallback = null;
-  };
-
-  document.getElementById('confirm-modal-btn').addEventListener('click', () => {
-    if (pendingConfirmCallback) pendingConfirmCallback();
-    closeConfirmModal();
-  });
-
-  // =========================================================================
-  // 5. LOGIKA AUTENTIKASI HYBRID (ADMIN VIA FIREBASE AUTH, USER VIA FIRESTORE)
-  // =========================================================================
   window.handleAdminLogin = async (e) => {
     e.preventDefault();
     const email = document.getElementById('admin-email').value.trim();
     const password = document.getElementById('admin-password').value;
 
     if (IS_PREVIEW) {
-      if (email === 'admin@demo.com' && password === '123456') {
-        state.currentUser = { role: 'admin', name: 'Administrator Demo', identifier: email };
+      if (email === 'admin@portal.id' && password === 'admin123') {
+        state.currentUser = { role: 'admin', name: 'Administrator', identifier: email };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackPopup('Login Admin Berhasil!', 'Selamat datang kembali, Administrator Demo. Semua fitur kendali aktif.');
+        showAuthFeedbackModal('Selamat Datang, Admin!', 'Anda berhasil masuk ke Dashboard Pengelola Portal.', 'shield-check');
       } else {
-        showToast('Email atau password demo salah! Gunakan admin@demo.com / 123456', 'error');
+        showToast('Email atau password demo Admin salah.', 'error');
       }
       return;
     }
 
-    // Mode Produksi: Firebase Authentication
+    const btn = document.getElementById('btn-submit-admin');
+    btn.disabled = true;
     try {
-      const btn = document.getElementById('btn-submit-admin');
-      btn.disabled = true;
-      btn.innerHTML = '<span>Memverifikasi...</span>';
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      state.currentUser = { role: 'admin', name: 'Administrator', identifier: userCred.user.email };
+      await signInWithEmailAndPassword(auth, email, password);
       closeLoginModal();
-      renderAll();
-      showAuthFeedbackPopup('Login Admin Berhasil!', `Selamat datang kembali (${userCred.user.email}).`);
-    } catch (error) {
-      showToast('Login Admin gagal: Periksa email & password Anda.', 'error');
+      showAuthFeedbackModal('Selamat Datang, Admin!', 'Autentikasi Firebase berhasil. Anda memiliki akses penuh.', 'shield-check');
+    } catch (err) {
+      showToast('Login Admin gagal: ' + err.message, 'error');
     } finally {
-      const btn = document.getElementById('btn-submit-admin');
       btn.disabled = false;
-      btn.innerHTML = '<span>Masuk sebagai Admin</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-      refreshIconsFast();
     }
   };
 
@@ -1169,32 +1305,16 @@ const firebaseConfig = {
         state.currentUser = { role: found.role, name: found.name, identifier: found.username };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackPopup(`Halo, ${found.name}!`, 'Anda berhasil masuk dan dapat mengakses proyek privat.');
+        showAuthFeedbackModal(`Halo, ${found.name}!`, 'Anda berhasil masuk sebagai User/Kontributor.', 'user-check');
       } else {
-        showToast('Username atau Password User tidak ditemukan!', 'error');
+        showToast('ID/Username atau Password tidak cocok.', 'error');
       }
       return;
     }
 
-    // Mode Produksi: Validasi cepat ke cache lokal dulu, lalu fallback Firestore
+    const btn = document.getElementById('btn-submit-user');
+    btn.disabled = true;
     try {
-      const btn = document.getElementById('btn-submit-user');
-      btn.disabled = true;
-      btn.innerHTML = '<span>Memeriksa Akun...</span>';
-
-      const cachedUser = state.users.find(u => u.username === username && u.password === password);
-      if (cachedUser) {
-        state.currentUser = {
-          role: cachedUser.role || 'contributor',
-          name: cachedUser.name || username,
-          identifier: cachedUser.username
-        };
-        closeLoginModal();
-        renderAll();
-        showAuthFeedbackPopup(`Selamat Datang, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.');
-        return;
-      }
-
       const q = query(
         collection(db, 'users'),
         where('username', '==', username),
@@ -1204,169 +1324,110 @@ const firebaseConfig = {
       if (!snap.empty) {
         const userData = snap.docs[0].data();
         state.currentUser = {
-          role: userData.role || 'contributor',
+          role: userData.role || 'viewer',
           name: userData.name || username,
-          identifier: userData.username
+          identifier: username
         };
         closeLoginModal();
         renderAll();
-        showAuthFeedbackPopup(`Selamat Datang, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.');
+        showAuthFeedbackModal(`Halo, ${state.currentUser.name}!`, 'Akses proyek privat dan kontributor telah dibuka.', 'user-check');
       } else {
-        showToast('ID/Username atau Password tidak valid.', 'error');
+        showToast('ID/Username atau Password tidak ditemukan.', 'error');
       }
     } catch (err) {
-      showToast('Gagal memverifikasi akun ke server.', 'error');
+      showToast('Gagal memvalidasi akun: ' + err.message, 'error');
     } finally {
-      const btn = document.getElementById('btn-submit-user');
       btn.disabled = false;
-      btn.innerHTML = '<span>Masuk sebagai User</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-      refreshIconsFast();
     }
   };
 
-  window.handleLogout = () => {
-    openConfirmModal(
-      'Apakah Anda yakin ingin keluar dari sesi akun ini?',
-      async () => {
-        const prevName = state.currentUser?.name || 'Pengguna';
-        if (!IS_PREVIEW && auth?.currentUser) {
+  window.logoutUser = () => {
+    openConfirmDialog({
+      title: 'Konfirmasi Keluar Sesi',
+      text: 'Apakah Anda yakin ingin keluar dari akun saat ini?',
+      confirmLabel: 'Ya',
+      cancelLabel: 'Cancel',
+      onConfirm: async () => {
+        if (!IS_PREVIEW && state.currentUser?.role === 'admin' && auth) {
           await signOut(auth).catch(() => {});
         }
         state.currentUser = null;
         state.activeMenu = 'portal';
         state.editingProjectId = null;
         renderAll();
-        showAuthFeedbackPopup('Berhasil Keluar (Logout)', `Sesi ${prevName} telah diakhiri dengan aman.`, true);
-      },
-      {
-        title: 'Konfirmasi Keluar (Logout)',
-        confirmText: 'Ya',
-        cancelText: 'Cancel',
-        icon: 'log-out'
+        showAuthFeedbackModal('Berhasil Keluar!', 'Sesi Anda telah diakhiri dengan aman.', 'log-out');
       }
-    );
+    });
   };
 
   // =========================================================================
-  // 6. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
-  // =========================================================================
-  let initialFirebaseReady = IS_PREVIEW;
-
-  function initProductionRealtimeSync() {
-    if (IS_PREVIEW || !db) return;
-
-    let settingsLoaded = false;
-    let projectsLoaded = false;
-    const checkAllReady = () => {
-      if (settingsLoaded && projectsLoaded) {
-        initialFirebaseReady = true;
-      }
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        state.currentUser = { role: 'admin', name: 'Administrator', identifier: user.email };
-      } else if (state.currentUser?.role === 'admin') {
-        state.currentUser = null;
-      }
-      renderAll();
-    });
-
-    onSnapshot(doc(db, 'portal_settings', 'main'), (docSnap) => {
-      if (docSnap.exists()) {
-        const d = docSnap.data();
-        state.portalSettings = {
-          title: d.title || 'Portal Microsite Proyek',
-          tagline: d.tagline || 'Microsite Hub 1-Klik',
-          subtitle: d.subtitle || '',
-          footerText: d.footerText || '',
-          runningText: d.runningText || 'Selamat datang di Portal Microsite Proyek — Akses seluruh proyek dan aplikasi Anda dalam satu klik.',
-          accentColor: d.accentColor || 'aurora',
-          themeMode: d.themeMode || 'light',
-          logoDataUrl: d.logoDataUrl || '',
-          loadingLogoDataUrl: d.loadingLogoDataUrl || '',
-          sidebarBannerDataUrl: d.sidebarBannerDataUrl || ''
-        };
-        const loaderBox = document.getElementById('startup-loader-logo-box');
-        if (loaderBox && d.loadingLogoDataUrl) {
-          loaderBox.innerHTML = `<img src="${d.loadingLogoDataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
-        }
-        applyThemeAndColors();
-        renderAll();
-      }
-      settingsLoaded = true;
-      checkAllReady();
-    }, () => {
-      settingsLoaded = true;
-      checkAllReady();
-    });
-
-    const qProjects = query(collection(db, 'projects'), orderBy('order', 'asc'));
-    onSnapshot(qProjects, (snapshot) => {
-      state.projects = snapshot.docs.map(docItem => ({
-        id: docItem.id,
-        ...docItem.data()
-      }));
-      renderAll();
-      projectsLoaded = true;
-      checkAllReady();
-    }, () => {
-      projectsLoaded = true;
-      checkAllReady();
-    });
-
-    onSnapshot(collection(db, 'users'), (snapshot) => {
-      state.users = snapshot.docs.map(docItem => ({
-        id: docItem.id,
-        ...docItem.data()
-      }));
-      if (state.activeMenu === 'manage-users') renderAll();
-    });
-  }
-
-  // =========================================================================
-  // 7. OPERASI CRUD (DUAL-MODE: IN-MEMORY VS FIRESTORE)
+  // 7. OPERASI CRUD PROYEK, PENGATURAN PORTAL & USER
   // =========================================================================
   window.saveProject = async (e) => {
     e.preventDefault();
     const title = document.getElementById('proj-title').value.trim();
-    let url = document.getElementById('proj-url').value.trim();
-    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-    const description = document.getElementById('proj-desc').value.trim();
-    const category = document.getElementById('proj-category').value.trim() || 'Umum';
-    const subCategory = document.getElementById('proj-subcategory').value.trim();
-    const icon = document.getElementById('proj-icon').value.trim() || '🚀';
-    const logoDataUrl = document.getElementById('proj-logo-data').value || '';
-    const visibility = document.getElementById('proj-visibility').value;
-    const isPinned = document.getElementById('proj-pinned').checked;
-    const order = parseInt(document.getElementById('proj-order').value, 10) || (state.projects.length + 1);
+    const fileDataUrl = document.getElementById('proj-file-data')?.value || '';
+    const fileName = document.getElementById('proj-file-name')?.value || '';
+    const fileType = document.getElementById('proj-file-type')?.value || '';
 
-    const payload = { title, url, description, category, subCategory, icon, logoDataUrl, visibility, isPinned, order };
+    let url = document.getElementById('proj-url').value.trim();
+    if (!url && fileDataUrl) {
+      url = '#berkas';
+    } else if (url && url !== '#berkas' && !/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    if (!url && !fileDataUrl) {
+      showToast('Isi URL tujuan atau unggah berkas PDF/JPG terlebih dahulu.', 'error');
+      return;
+    }
+
+    const payload = {
+      title,
+      url,
+      description: document.getElementById('proj-desc').value.trim(),
+      category: document.getElementById('proj-category').value.trim() || 'Aplikasi Web',
+      subCategory: document.getElementById('proj-subcategory').value.trim(),
+      logoDataUrl: document.getElementById('proj-logo-data').value || '',
+      fileDataUrl,
+      fileName,
+      fileType,
+      icon: document.getElementById('proj-icon').value.trim() || '🚀',
+      order: Number(document.getElementById('proj-order').value) || 1,
+      visibility: document.getElementById('proj-visibility').value,
+      isPinned: document.getElementById('proj-pinned').checked
+    };
+
+    const isEditing = Boolean(state.editingProjectId);
 
     if (IS_PREVIEW) {
-      if (state.editingProjectId) {
+      if (isEditing) {
         const idx = state.projects.findIndex(p => p.id === state.editingProjectId);
         if (idx !== -1) state.projects[idx] = { ...state.projects[idx], ...payload };
-        showChangeSuccessPopup('Proyek Diperbarui!', 'Perubahan data proyek berhasil disimpan.');
+        state.editingProjectId = null;
       } else {
-        state.projects.push({ id: 'demo-' + Date.now(), ...payload });
-        showChangeSuccessPopup('Proyek Ditambahkan!', 'Proyek baru berhasil ditambahkan ke portal.');
+        state.projects.push({ id: 'proj-' + Date.now(), ...payload });
       }
-      state.editingProjectId = null;
       renderAll();
+      showChangeSuccessPopup(
+        isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
+        isEditing ? `Proyek "${title}" berhasil diperbarui.` : `Proyek "${title}" berhasil ditambahkan ke portal.`
+      );
       return;
     }
 
     try {
-      if (state.editingProjectId) {
+      if (isEditing) {
         await updateDoc(doc(db, 'projects', state.editingProjectId), payload);
-        showChangeSuccessPopup('Proyek Diperbarui!', 'Perubahan proyek berhasil disimpan ke Firestore.');
+        state.editingProjectId = null;
       } else {
         await addDoc(collection(db, 'projects'), { ...payload, createdAt: serverTimestamp() });
-        showChangeSuccessPopup('Proyek Ditambahkan!', 'Proyek baru berhasil disimpan ke Firestore.');
       }
-      state.editingProjectId = null;
       renderAll();
+      showChangeSuccessPopup(
+        isEditing ? 'Proyek Diperbarui!' : 'Proyek Ditambahkan!',
+        isEditing ? `Proyek "${title}" berhasil disimpan.` : `Proyek "${title}" berhasil ditambahkan.`
+      );
     } catch (err) {
       showToast('Gagal menyimpan proyek: ' + err.message, 'error');
     }
@@ -1376,7 +1437,8 @@ const firebaseConfig = {
     state.editingProjectId = id;
     state.activeMenu = 'manage-projects';
     renderAll();
-    document.getElementById('app-wrapper').scrollTo({ top: 0, behavior: 'smooth' });
+    const mainArea = document.getElementById('app-wrapper');
+    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   window.cancelEditProject = () => {
@@ -1385,48 +1447,57 @@ const firebaseConfig = {
   };
 
   window.deleteProject = (id) => {
-    openConfirmModal('Proyek yang dihapus tidak dapat dikembalikan. Lanjutkan?', async () => {
-      if (IS_PREVIEW) {
-        state.projects = state.projects.filter(p => p.id !== id);
-        renderAll();
-        showChangeSuccessPopup('Proyek Dihapus!', 'Proyek telah berhasil dihapus dari daftar.');
-        return;
-      }
-      try {
-        await deleteDoc(doc(db, 'projects', id));
-        showChangeSuccessPopup('Proyek Dihapus!', 'Proyek berhasil dihapus dari Firestore.');
-      } catch (err) {
-        showToast('Gagal menghapus proyek.', 'error');
+    const target = state.projects.find(p => p.id === id);
+    openConfirmDialog({
+      title: 'Hapus Proyek?',
+      text: `Proyek "${target?.title || 'ini'}" akan dihapus secara permanen dari daftar portal.`,
+      confirmLabel: 'Ya, Hapus',
+      cancelLabel: 'Cancel',
+      onConfirm: async () => {
+        if (IS_PREVIEW) {
+          state.projects = state.projects.filter(p => p.id !== id);
+          if (state.editingProjectId === id) state.editingProjectId = null;
+          renderAll();
+          showChangeSuccessPopup('Proyek Dihapus!', 'Data proyek berhasil dihapus dari portal.');
+          return;
+        }
+        try {
+          await deleteDoc(doc(db, 'projects', id));
+          if (state.editingProjectId === id) state.editingProjectId = null;
+          showChangeSuccessPopup('Proyek Dihapus!', 'Data proyek berhasil dihapus dari Firestore.');
+        } catch (err) {
+          showToast('Gagal menghapus proyek: ' + err.message, 'error');
+        }
       }
     });
   };
 
   window.savePortalSettings = async (e) => {
     e.preventDefault();
-    const title = document.getElementById('set-title').value.trim();
-    const tagline = document.getElementById('set-tagline')?.value.trim() || 'Microsite Hub 1-Klik';
-    const subtitle = document.getElementById('set-subtitle').value.trim();
-    const footerText = document.getElementById('set-footer').value.trim();
-    const runningText = document.getElementById('set-running-text')?.value.trim() || 'Selamat datang di Portal Microsite Proyek!';
-    const logoDataUrl = document.getElementById('set-logo-data').value || '';
-    const loadingLogoDataUrl = document.getElementById('set-loading-logo-data')?.value || '';
-    const sidebarBannerDataUrl = document.getElementById('set-sidebar-banner-data')?.value || '';
-    const accentColor = state.portalSettings.accentColor || 'aurora';
-    const themeMode = state.portalSettings.themeMode || 'light';
+    const updated = {
+      ...state.portalSettings,
+      title: document.getElementById('set-title').value.trim(),
+      tagline: document.getElementById('set-tagline').value.trim() || 'Microsite Hub 1-Klik',
+      runningText: document.getElementById('set-running-text').value.trim(),
+      subtitle: document.getElementById('set-subtitle').value.trim(),
+      footerText: document.getElementById('set-footer').value.trim(),
+      logoDataUrl: document.getElementById('set-logo-data').value || '',
+      loadingLogoDataUrl: document.getElementById('set-loading-logo-data').value || '',
+      sidebarBannerDataUrl: document.getElementById('set-sidebar-banner-data').value || ''
+    };
 
     if (IS_PREVIEW) {
-      state.portalSettings = { title, tagline, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl };
-      applyThemeAndColors();
+      state.portalSettings = updated;
       renderAll();
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, tulisan tagline, logo loading, teks berjalan, banner & tema portal telah diperbarui.');
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, logo, dan warna portal berhasil diperbarui.');
       return;
     }
 
     try {
-      await setDoc(doc(db, 'portal_settings', 'main'), {
-        title, tagline, subtitle, footerText, runningText, accentColor, themeMode, logoDataUrl, loadingLogoDataUrl, sidebarBannerDataUrl, updatedAt: serverTimestamp()
-      }, { merge: true });
-      showChangeSuccessPopup('Pengaturan Disimpan!', 'Identitas, tulisan tagline, logo loading, teks berjalan, banner & tema portal berhasil disimpan.');
+      await setDoc(doc(db, 'portal_settings', 'main'), updated, { merge: true });
+      state.portalSettings = updated;
+      renderAll();
+      showChangeSuccessPopup('Pengaturan Disimpan!', 'Seluruh pengaturan portal berhasil tersimpan ke Firestore.');
     } catch (err) {
       showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
     }
@@ -1436,84 +1507,78 @@ const firebaseConfig = {
     e.preventDefault();
     const name = document.getElementById('new-user-name').value.trim();
     const username = document.getElementById('new-user-username').value.trim();
-    const password = document.getElementById('new-user-password').value.trim();
+    const password = document.getElementById('new-user-password').value;
     const role = document.getElementById('new-user-role').value;
 
-    if (state.users.some(u => u.username === username)) {
-      showToast('ID/Username sudah digunakan!', 'error');
+    if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+      showToast('ID / Username sudah digunakan.', 'error');
       return;
     }
 
+    const newUser = { name, username, password, role };
     if (IS_PREVIEW) {
-      state.users.push({ id: 'u-' + Date.now(), name, username, password, role });
+      state.users.push({ id: 'user-' + Date.now(), ...newUser });
       renderAll();
-      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun untuk ${name} berhasil dibuat.`);
+      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" (${username}) siap digunakan.`);
       return;
     }
 
     try {
-      await addDoc(collection(db, 'users'), { name, username, password, role, createdAt: serverTimestamp() });
-      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun untuk ${name} berhasil disimpan ke Firestore.`);
-      e.target.reset();
+      await addDoc(collection(db, 'users'), newUser);
+      showChangeSuccessPopup('Akun User Ditambahkan!', `Akun "${name}" berhasil disimpan ke Firestore.`);
     } catch (err) {
-      showToast('Gagal menambah akun user.', 'error');
+      showToast('Gagal menambah akun user: ' + err.message, 'error');
     }
   };
 
   window.deleteUserAccount = (id) => {
-    openConfirmModal('Hapus akun user ini dari sistem?', async () => {
-      if (IS_PREVIEW) {
-        state.users = state.users.filter(u => u.id !== id);
-        renderAll();
-        showChangeSuccessPopup('Akun User Dihapus!', 'Akun pengguna telah berhasil dihapus.');
-        return;
-      }
-      try {
-        await deleteDoc(doc(db, 'users', id));
-        showChangeSuccessPopup('Akun User Dihapus!', 'Akun pengguna berhasil dihapus dari Firestore.');
-      } catch (err) {
-        showToast('Gagal menghapus akun user.', 'error');
+    const target = state.users.find(u => u.id === id);
+    openConfirmDialog({
+      title: 'Hapus Akun User?',
+      text: `Akun "${target?.name || 'ini'}" tidak akan bisa lagi login ke portal.`,
+      confirmLabel: 'Ya, Hapus',
+      cancelLabel: 'Cancel',
+      onConfirm: async () => {
+        if (IS_PREVIEW) {
+          state.users = state.users.filter(u => u.id !== id);
+          renderAll();
+          showChangeSuccessPopup('Akun User Dihapus!', 'Akun user telah dihapus.');
+          return;
+        }
+        try {
+          await deleteDoc(doc(db, 'users', id));
+          showChangeSuccessPopup('Akun User Dihapus!', 'Akun user berhasil dihapus dari Firestore.');
+        } catch (err) {
+          showToast('Gagal menghapus akun: ' + err.message, 'error');
+        }
       }
     });
   };
 
-  window.copyProjectLink = (url) => {
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('Tautan berhasil disalin ke clipboard!', 'info');
-    }).catch(() => {
-      showToast('Gagal menyalin tautan.', 'error');
-    });
+  window.copyProjectLink = (url, title) => {
+    const tempInput = document.createElement('input');
+    tempInput.value = url;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    showToast(`Tautan "${title}" berhasil disalin!`, 'success');
   };
 
   // =========================================================================
-  // 8. RENDER NAVIGATION & VIEWS (RESPONSIVE UI)
+  // 8. NAVIGASI & RENDER TAMPILAN KOMPONEN
   // =========================================================================
-  window.setMenu = (menu) => {
-    if (state.activeMenu === menu) return;
+  window.navigateTo = (menu) => {
     state.activeMenu = menu;
-    renderNavigation();
-    const container = document.getElementById('view-container');
-    if (state.activeMenu === 'manage-projects' && state.currentUser) {
-      container.innerHTML = renderManageProjectsView();
-    } else if (state.activeMenu === 'manage-users' && state.currentUser?.role === 'admin') {
-      container.innerHTML = renderManageUsersView();
-    } else if (state.activeMenu === 'settings' && state.currentUser?.role === 'admin') {
-      container.innerHTML = renderSettingsView();
-    } else {
-      state.activeMenu = 'portal';
-      container.innerHTML = renderPortalView();
-    }
-    refreshIconsFast();
+    renderAll();
   };
 
   window.setCategory = (cat) => {
-    if (state.selectedCategory === cat) return;
     state.selectedCategory = cat;
-    document.getElementById('view-container').innerHTML = renderPortalView();
-    refreshIconsFast();
+    renderAll();
   };
 
-  window.toggleCategoryGroup = (catKey) => {
+  window.toggleCategoryGroup = (catKey, catName = '') => {
     const content = document.getElementById(`cat-group-body-${catKey}`);
     const chevron = document.getElementById(`cat-group-chevron-${catKey}`);
     if (!content) return;
@@ -1521,15 +1586,23 @@ const firebaseConfig = {
     if (chevron) {
       chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
     }
+    if (catName) {
+      state.dropdownMemory.collapsedCats[catName] = isHidden;
+      saveDropdownMemory();
+    }
   };
 
-  window.toggleSubCategoryGroup = (subKey) => {
+  window.toggleSubCategoryGroup = (subKey, catName = '', subName = '') => {
     const content = document.getElementById(`subcat-group-body-${subKey}`);
     const chevron = document.getElementById(`subcat-group-chevron-${subKey}`);
     if (!content) return;
     const isHidden = content.classList.toggle('hidden');
     if (chevron) {
       chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+    }
+    if (catName && subName) {
+      state.dropdownMemory.collapsedSubs[`${catName}::${subName}`] = isHidden;
+      saveDropdownMemory();
     }
   };
 
@@ -1538,229 +1611,244 @@ const firebaseConfig = {
     renderPortalProjectsGrid();
   };
 
-  function getMenuItems() {
-    const items = [
-      { id: 'portal', label: 'Beranda Portal', icon: 'compass', visible: true }
-    ];
-    if (state.currentUser) {
-      items.push({ id: 'manage-projects', label: 'Kelola Proyek', icon: 'folder-kanban', visible: true });
-    }
-    if (state.currentUser?.role === 'admin') {
-      items.push({ id: 'manage-users', label: 'Akun User', icon: 'users', visible: true });
-      items.push({ id: 'settings', label: 'Pengaturan Portal', icon: 'settings', visible: true });
-    }
-    return items.filter(i => i.visible);
-  }
-
   function renderNavigation() {
-    const menus = getMenuItems();
-    const sidebarNav = document.getElementById('sidebar-nav-links');
-    const mobileNav = document.getElementById('mobile-bottom-nav');
+    const title = state.portalSettings.title || 'Portal Proyek';
+    const tagline = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+    const logoHtml = state.portalSettings.logoDataUrl
+      ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
+      : `<i data-lucide="layers" class="w-6 h-6"></i>`;
 
-    sidebarNav.innerHTML = menus.map(m => {
-      const active = state.activeMenu === m.id;
+    document.getElementById('sidebar-portal-title').textContent = title;
+    document.getElementById('sidebar-portal-tagline').textContent = tagline;
+    document.getElementById('sidebar-brand-icon').innerHTML = logoHtml;
+    document.getElementById('mobile-portal-title').textContent = title;
+    document.getElementById('mobile-portal-tagline').textContent = tagline;
+    document.getElementById('mobile-brand-icon').innerHTML = logoHtml;
+
+    const menuItems = [
+      { id: 'portal', label: 'Beranda Portal', shortLabel: 'Beranda', icon: 'compass', show: true },
+      {
+        id: 'manage-projects',
+        label: 'Kelola Proyek',
+        shortLabel: 'Proyek',
+        icon: 'folder-plus',
+        show: state.currentUser && (state.currentUser.role === 'admin' || state.currentUser.role === 'contributor')
+      },
+      {
+        id: 'manage-users',
+        label: 'Akun User',
+        shortLabel: 'User',
+        icon: 'users',
+        show: state.currentUser?.role === 'admin'
+      },
+      {
+        id: 'settings',
+        label: 'Pengaturan Portal',
+        shortLabel: 'Setelan',
+        icon: 'settings',
+        show: state.currentUser?.role === 'admin'
+      }
+    ].filter(m => m.show);
+
+    // Render Desktop Sidebar Links
+    const sidebarNav = document.getElementById('sidebar-nav-links');
+    sidebarNav.innerHTML = menuItems.map(m => {
+      const isActive = state.activeMenu === m.id;
       return `
-        <button onclick="setMenu('${m.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition ${
-          active
+        <button type="button" onclick="navigateTo('${m.id}')" class="w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 transition ${
+          isActive
             ? 'btn-accent text-white shadow-md'
-            : 'theme-text-secondary hover:bg-slate-200/50'
+            : 'theme-text-secondary hover:theme-surface-subtle hover:theme-text-primary'
         }">
-          <i data-lucide="${m.icon}" class="w-4 h-4"></i>
+          <i data-lucide="${m.icon}" class="w-4 h-4 shrink-0"></i>
           <span>${m.label}</span>
         </button>
       `;
     }).join('');
 
-    mobileNav.innerHTML = menus.map(m => {
-      const active = state.activeMenu === m.id;
-      return `
-        <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 ${
-          active ? 'badge-accent font-extrabold' : 'theme-text-muted font-semibold'
-        }">
-          <i data-lucide="${m.icon}" class="w-5 h-5 mb-1"></i>
-          <span class="text-xs leading-tight text-center">${m.label.split(' ')[0]}</span>
+    // Render Sidebar & Mobile Banner Portrait
+    const bannerData = state.portalSettings.sidebarBannerDataUrl;
+    const isAdmin = state.currentUser?.role === 'admin';
+    const sidebarBannerSlot = document.getElementById('sidebar-banner-slot');
+    const mobileBannerSlot = document.getElementById('mobile-banner-slot');
+
+    if (bannerData) {
+      sidebarBannerSlot.innerHTML = `
+        <div class="sidebar-portrait-banner w-full aspect-[3/4] rounded-3xl border border-slate-200/70 shadow-md relative group">
+          <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
+          ${isAdmin ? `
+            <button type="button" onclick="navigateTo('settings')" class="absolute bottom-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 text-white text-[11px] font-bold backdrop-blur-md opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>Ganti</span>
+            </button>
+          ` : ''}
+        </div>
+      `;
+      mobileBannerSlot.innerHTML = `
+        <div class="sidebar-portrait-banner w-full aspect-[16/9] rounded-3xl border border-slate-200/70 shadow-md relative">
+          <img src="${bannerData}" alt="Banner Portal" class="w-full h-full object-cover" />
+        </div>
+      `;
+    } else if (isAdmin) {
+      sidebarBannerSlot.innerHTML = `
+        <button type="button" onclick="navigateTo('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-500 theme-surface-subtle flex flex-col items-center justify-center text-center p-4 transition group">
+          <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2 group-hover:scale-105 transition">
+            <i data-lucide="image-plus" class="w-5 h-5"></i>
+          </div>
+          <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
+          <span class="text-[11px] theme-text-muted mt-1">Klik untuk upload foto dari desktop</span>
         </button>
       `;
-    }).join('');
+      mobileBannerSlot.innerHTML = '';
+    } else {
+      sidebarBannerSlot.innerHTML = '';
+      mobileBannerSlot.innerHTML = '';
+    }
 
-    const sidebarAuth = document.getElementById('sidebar-auth-box');
-
-    mobileNav.innerHTML = [
-      ...menus.map(m => {
-        const active = state.activeMenu === m.id;
-        return `
-          <button onclick="setMenu('${m.id}')" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 ${
-            active ? 'badge-accent font-extrabold' : 'theme-text-muted font-semibold'
-          }">
-            <i data-lucide="${m.icon}" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs leading-tight text-center">${m.label.split(' ')[0]}</span>
-          </button>
-        `;
-      }),
-      state.currentUser
-        ? `
-          <button onclick="handleLogout()" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 text-red-500 font-bold hover:bg-red-500/10">
-            <i data-lucide="log-out" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs leading-tight text-center">Keluar</span>
-          </button>
-        `
-        : `
-          <button onclick="openLoginModal()" class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition flex-1 theme-text-primary font-bold hover:bg-slate-200/50">
-            <i data-lucide="log-in" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs leading-tight text-center">Login</span>
-          </button>
-        `
-    ].join('');
-
+    // Render Desktop Auth Box
+    const authBox = document.getElementById('sidebar-auth-box');
     if (state.currentUser) {
-      const roleBadge = state.currentUser.role === 'admin' ? 'Admin' : 'User';
-      sidebarAuth.innerHTML = `
-        <div class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 mb-2.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold theme-text-primary truncate">${state.currentUser.name}</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-accent">${roleBadge}</span>
+      authBox.innerHTML = `
+        <div class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 space-y-2.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl btn-accent text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+              ${(state.currentUser.name || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-extrabold theme-text-primary truncate">${state.currentUser.name}</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider theme-text-muted">${state.currentUser.role}</div>
+            </div>
           </div>
-          <p class="text-[11px] theme-text-muted truncate mt-0.5">${state.currentUser.identifier}</p>
+          <button type="button" onclick="logoutUser()" class="w-full py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Keluar Sesi</span>
+          </button>
         </div>
-        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold transition">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-          <span>Keluar (Logout)</span>
-        </button>
       `;
     } else {
-      sidebarAuth.innerHTML = `
-        <button onclick="openLoginModal()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs font-bold transition shadow-md">
+      authBox.innerHTML = `
+        <button type="button" onclick="openLoginModal()" class="w-full py-2.5 px-4 rounded-2xl btn-accent text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Masuk Admin / User</span>
         </button>
       `;
     }
 
-    document.getElementById('sidebar-portal-title').textContent = state.portalSettings.title;
-    document.getElementById('mobile-portal-title').textContent = state.portalSettings.title;
-    const sidebarTaglineEl = document.getElementById('sidebar-portal-tagline');
-    if (sidebarTaglineEl) sidebarTaglineEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
-    const mobileTaglineEl = document.getElementById('mobile-portal-tagline');
-    if (mobileTaglineEl) mobileTaglineEl.textContent = state.portalSettings.tagline || 'Microsite Hub 1-Klik';
+    // Render Mobile Bottom Nav (Tombol Login sejajar langsung dengan Beranda)
+    const mobileNav = document.getElementById('mobile-bottom-nav');
+    const navButtons = menuItems.map(m => {
+      const isActive = state.activeMenu === m.id;
+      return `
+        <button type="button" onclick="navigateTo('${m.id}')" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold transition ${
+          isActive ? 'btn-accent text-white shadow-sm' : 'theme-text-secondary hover:theme-text-primary'
+        }">
+          <i data-lucide="${m.icon}" class="w-4 h-4"></i>
+          <span class="truncate max-w-[72px]">${m.shortLabel}</span>
+        </button>
+      `;
+    }).join('');
 
-    const runningEl = document.getElementById('dashboard-running-text');
-    if (runningEl) {
-      runningEl.textContent = state.portalSettings.runningText || 'Selamat datang di Portal Microsite Proyek — Akses seluruh proyek dan aplikasi Anda dalam satu klik.';
-    }
+    const mobileAuthBtn = state.currentUser
+      ? `
+        <button type="button" onclick="logoutUser()" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Keluar</span>
+        </button>
+      `
+      : `
+        <button type="button" onclick="openLoginModal()" class="flex-1 py-2 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-[11px] font-bold theme-text-secondary hover:theme-text-primary transition">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Login</span>
+        </button>
+      `;
 
-    const logoHtml = state.portalSettings.logoDataUrl
-      ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
-      : `<i data-lucide="layers" class="w-5 h-5"></i>`;
-    document.getElementById('sidebar-brand-icon').innerHTML = logoHtml;
-    document.getElementById('mobile-brand-icon').innerHTML = logoHtml;
-
-    renderSidebarBanner();
-  }
-
-  function renderSidebarBanner() {
-    const slot = document.getElementById('sidebar-banner-slot');
-    const mobileSlot = document.getElementById('mobile-banner-slot');
-    const bannerUrl = state.portalSettings.sidebarBannerDataUrl;
-    const isAdmin = state.currentUser?.role === 'admin';
-
-    if (slot) {
-      if (bannerUrl) {
-        slot.innerHTML = `
-          <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[3/4] w-full group">
-            <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none"></div>
-            ${isAdmin ? `
-              <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-2.5 right-2.5 px-2.5 py-1.5 rounded-xl bg-slate-900/75 hover:bg-slate-900 text-white backdrop-blur-md text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-md">
-                <i data-lucide="camera" class="w-3 h-3"></i>
-                <span>Ganti</span>
-              </button>
-            ` : ''}
-          </div>
-        `;
-      } else if (isAdmin) {
-        slot.innerHTML = `
-          <button type="button" onclick="setMenu('settings')" class="w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex flex-col items-center justify-center p-4 text-center transition group">
-            <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center mb-2.5 group-hover:scale-110 transition">
-              <i data-lucide="image-plus" class="w-5 h-5"></i>
-            </div>
-            <span class="text-xs font-bold theme-text-primary">Pasang Banner Portrait</span>
-            <span class="text-[10px] theme-text-muted mt-1 leading-relaxed">Klik untuk upload foto ukuran besar di bawah menu Beranda Portal</span>
-          </button>
-        `;
-      } else {
-        slot.innerHTML = '';
-      }
-    }
-
-    if (mobileSlot) {
-      if (bannerUrl) {
-        mobileSlot.innerHTML = `
-          <div class="sidebar-portrait-banner rounded-3xl border border-slate-200/70 shadow-lg bg-slate-900/5 aspect-[4/3] sm:aspect-[16/9] w-full group">
-            <img src="${bannerUrl}" alt="Banner Portal" class="w-full h-full object-cover block" />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-75 pointer-events-none"></div>
-            ${isAdmin ? `
-              <button type="button" onclick="setMenu('settings')" title="Ganti Foto Banner" class="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-md">
-                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-                <span>Ganti Banner</span>
-              </button>
-            ` : ''}
-          </div>
-        `;
-      } else if (isAdmin) {
-        mobileSlot.innerHTML = `
-          <button type="button" onclick="setMenu('settings')" class="w-full rounded-3xl border-2 border-dashed border-slate-300/80 hover:border-sky-400 theme-surface-subtle flex items-center gap-3.5 p-4 text-left transition">
-            <div class="w-12 h-12 rounded-2xl badge-accent flex items-center justify-center shrink-0">
-              <i data-lucide="image-plus" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <span class="text-sm font-extrabold theme-text-primary block">Pasang Banner Portal</span>
-              <span class="text-xs theme-text-muted mt-0.5 block">Tap untuk upload foto banner dari perangkat</span>
-            </div>
-          </button>
-        `;
-      } else {
-        mobileSlot.innerHTML = '';
-      }
-    }
+    mobileNav.innerHTML = navButtons + mobileAuthBtn;
   }
 
   function renderProjectCard(p) {
-    const isPrivate = p.visibility === 'private';
-    const mediaHtml = p.logoDataUrl
+    const iconContent = p.logoDataUrl
       ? `<img src="${p.logoDataUrl}" alt="${p.title}" class="w-full h-full object-cover" />`
-      : `<span class="text-3xl sm:text-3xl">${p.icon || '🚀'}</span>`;
+      : `<span class="text-2xl">${p.icon || '🚀'}</span>`;
+
+    const hasFile = Boolean(p.fileDataUrl);
+    const hasExternalUrl = p.url && p.url !== '#berkas';
+    const safeUrl = (p.url || '#').replace(/'/g, "\\'");
+    const safeTitle = (p.title || '').replace(/'/g, "\\'");
+
+    const primaryActionHtml = hasFile
+      ? `
+        <button type="button" onclick="openProjectFileViewer('${p.id}')" class="flex-1 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+          <span>Buka Berkas (${(p.fileType || 'FILE').toUpperCase()})</span>
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+        </button>
+      `
+      : `
+        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-4 rounded-2xl btn-accent text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+          <span>Buka Proyek</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      `;
+
+    const secondaryActionHtml = hasFile && hasExternalUrl
+      ? `
+        <a href="${p.url}" target="_blank" rel="noopener noreferrer" title="Buka Tautan Web" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      `
+      : hasFile
+      ? `
+        <a href="${p.fileDataUrl}" download="${p.fileName || p.title}" title="Unduh Berkas" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
+          <i data-lucide="download" class="w-4 h-4"></i>
+        </a>
+      `
+      : `
+        <button type="button" onclick="copyProjectLink('${safeUrl}', '${safeTitle}')" title="Salin Tautan" class="p-2.5 rounded-2xl theme-surface-subtle hover:opacity-80 theme-text-secondary border border-slate-200/60 transition shrink-0">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+        </button>
+      `;
 
     return `
-      <div class="glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between relative group">
+      <article class="glass-card rounded-3xl p-5 flex flex-col justify-between gap-4 relative group">
         <div>
-          <div class="flex items-start justify-between gap-3 mb-4">
-            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl theme-surface-subtle border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-              ${mediaHtml}
+          <div class="flex items-start justify-between gap-3 mb-3.5">
+            <div class="w-13 h-13 w-14 h-14 rounded-2xl theme-surface-subtle border border-slate-200/60 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+              ${iconContent}
             </div>
             <div class="flex items-center gap-1.5 flex-wrap justify-end">
-              ${p.isPinned ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 flex items-center gap-1"><i data-lucide="pin" class="w-3.5 h-3.5"></i>Pinned</span>` : ''}
-              ${isPrivate ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-400 flex items-center gap-1"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Privat</span>` : ''}
+              ${hasFile ? `
+                <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-extrabold inline-flex items-center gap-1">
+                  <i data-lucide="paperclip" class="w-3 h-3"></i>
+                  <span>${(p.fileType || 'Berkas').toUpperCase()}</span>
+                </span>
+              ` : ''}
+              ${p.isPinned ? `
+                <span class="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 text-[10px] font-extrabold inline-flex items-center gap-1">
+                  <i data-lucide="pin" class="w-3 h-3"></i>
+                  <span>Utama</span>
+                </span>
+              ` : ''}
+              ${p.visibility === 'private' ? `
+                <span class="px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-500 text-[10px] font-extrabold inline-flex items-center gap-1">
+                  <i data-lucide="lock" class="w-3 h-3"></i>
+                  <span>Privat</span>
+                </span>
+              ` : ''}
             </div>
           </div>
 
-          <h3 class="font-extrabold text-base sm:text-lg theme-text-primary leading-snug mb-2 group-hover:text-sky-500 transition-colors">
+          <h3 class="text-base sm:text-lg font-extrabold theme-text-primary leading-snug group-hover:text-sky-500 transition">
             ${p.title}
           </h3>
-          <p class="text-sm theme-text-secondary leading-relaxed line-clamp-3 mb-5">
+          <p class="text-xs sm:text-sm theme-text-secondary mt-1.5 line-clamp-2 leading-relaxed">
             ${p.description}
           </p>
         </div>
 
-        <div class="pt-3.5 border-t border-slate-200/50 flex items-center gap-2.5">
-          <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 rounded-2xl btn-accent text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
-            <span>Buka Proyek</span>
-            <i data-lucide="external-link" class="w-4 h-4"></i>
-          </a>
-          <button type="button" onclick="copyProjectLink('${p.url}')" title="Salin Tautan" class="p-3 rounded-2xl theme-surface-subtle border border-slate-200/60 theme-text-secondary hover:theme-text-primary transition">
-            <i data-lucide="copy" class="w-4 h-4"></i>
-          </button>
+        <div class="pt-3 border-t border-slate-200/50 flex items-center gap-2">
+          ${primaryActionHtml}
+          ${secondaryActionHtml}
         </div>
-      </div>
+      </article>
     `;
   }
 
@@ -1768,12 +1856,12 @@ const firebaseConfig = {
     const gridContainer = document.getElementById('portal-projects-grid');
     if (!gridContainer) return;
 
-    const visibleProjects = state.projects
+    const q = state.searchQuery.trim().toLowerCase();
+    const filtered = state.projects
       .filter(p => p.visibility === 'public' || Boolean(state.currentUser))
       .filter(p => state.selectedCategory === 'Semua' || (p.category || 'Umum') === state.selectedCategory)
       .filter(p => {
-        if (!state.searchQuery.trim()) return true;
-        const q = state.searchQuery.toLowerCase();
+        if (!q) return true;
         return (
           (p.title || '').toLowerCase().includes(q) ||
           (p.description || '').toLowerCase().includes(q) ||
@@ -1782,27 +1870,26 @@ const firebaseConfig = {
         );
       })
       .sort((a, b) => {
-        if (Boolean(a.isPinned) !== Boolean(b.isPinned)) return a.isPinned ? -1 : 1;
+        if (Boolean(b.isPinned) !== Boolean(a.isPinned)) return b.isPinned ? 1 : -1;
         return (a.order || 999) - (b.order || 999);
       });
 
-    if (visibleProjects.length === 0) {
+    if (filtered.length === 0) {
       gridContainer.innerHTML = `
         <div class="glass-panel rounded-3xl p-10 text-center">
-          <div class="w-14 h-14 rounded-2xl theme-surface-subtle flex items-center justify-center mx-auto mb-3 theme-text-muted">
-            <i data-lucide="folder-open" class="w-7 h-7"></i>
+          <div class="w-14 h-14 rounded-2xl badge-accent flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="folder-search" class="w-7 h-7"></i>
           </div>
-          <h3 class="text-sm font-bold theme-text-primary">Belum ada proyek ditemukan</h3>
-          <p class="text-xs theme-text-muted mt-1">Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
+          <h3 class="text-base font-extrabold theme-text-primary">Belum Ada Proyek Ditemukan</h3>
+          <p class="text-xs sm:text-sm theme-text-muted mt-1">Coba ubah kata kunci pencarian atau pilih kategori lainnya.</p>
         </div>
       `;
       refreshIconsFast();
       return;
     }
 
-    // Kelompokkan berdasarkan Kategori Utama -> Sub-Judul (Dropdown Bertingkat Modern)
     const categoryGroups = {};
-    visibleProjects.forEach(p => {
+    filtered.forEach(p => {
       const cat = (p.category || 'Umum').trim();
       if (!categoryGroups[cat]) categoryGroups[cat] = [];
       categoryGroups[cat].push(p);
@@ -1810,6 +1897,8 @@ const firebaseConfig = {
 
     gridContainer.innerHTML = Object.entries(categoryGroups).map(([catName, items], catIdx) => {
       const catKey = `cat-${catIdx}`;
+      const isCatCollapsed = Boolean(state.dropdownMemory?.collapsedCats?.[catName]);
+      const escapedCatName = catName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       const directItems = items.filter(i => !(i.subCategory || '').trim());
       const subGroups = {};
       items.forEach(i => {
@@ -1825,24 +1914,24 @@ const firebaseConfig = {
       return `
         <div class="glass-panel rounded-3xl overflow-hidden border border-slate-200/70">
           <!-- Baris Judul Kategori Dropdown -->
-          <button type="button" onclick="toggleCategoryGroup('${catKey}')" class="w-full px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
+          <button type="button" onclick="toggleCategoryGroup('${catKey}', '${escapedCatName}')" class="w-full px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
             <div class="flex items-center gap-3.5">
               <div class="w-11 h-11 rounded-2xl badge-accent flex items-center justify-center shrink-0">
                 <i data-lucide="folder-kanban" class="w-5 h-5"></i>
               </div>
               <div>
-                <h2 class="text-base sm:text-lg font-extrabold theme-text-primary">${catName}</h2>
-                <p class="text-xs sm:text-sm theme-text-muted">${items.length} proyek tersedia</p>
+                <h3 class="text-base sm:text-lg font-extrabold theme-text-primary leading-tight">${catName}</h3>
+                <p class="text-xs sm:text-sm theme-text-muted mt-0.5">${items.length} proyek tersedia</p>
               </div>
             </div>
             <div class="flex items-center gap-2.5">
               <span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full badge-accent">${items.length}</span>
-              <i id="cat-group-chevron-${catKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200"></i>
+              <i id="cat-group-chevron-${catKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200" style="transform: ${isCatCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};"></i>
             </div>
           </button>
 
           <!-- Isi Kategori -->
-          <div id="cat-group-body-${catKey}" class="px-5 sm:px-6 pb-6 pt-3 space-y-5 border-t border-slate-200/50">
+          <div id="cat-group-body-${catKey}" class="${isCatCollapsed ? 'hidden ' : ''}px-5 sm:px-6 pb-6 pt-3 space-y-5 border-t border-slate-200/50">
             ${directItems.length > 0 ? `
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                 ${directItems.map(p => renderProjectCard(p)).join('')}
@@ -1851,17 +1940,19 @@ const firebaseConfig = {
 
             ${subGroupEntries.map(([subName, subItems], subIdx) => {
               const subKey = `${catKey}-sub-${subIdx}`;
+              const isSubCollapsed = Boolean(state.dropdownMemory?.collapsedSubs?.[`${catName}::${subName}`]);
+              const escapedSubName = subName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
               return `
                 <div class="rounded-2xl theme-surface-subtle border border-slate-200/60 overflow-hidden">
-                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}')" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
+                  <button type="button" onclick="toggleSubCategoryGroup('${subKey}', '${escapedCatName}', '${escapedSubName}')" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-slate-500/5 transition">
                     <div class="flex items-center gap-2.5">
                       <span class="w-2.5 h-2.5 rounded-full btn-accent"></span>
                       <span class="text-sm sm:text-base font-extrabold theme-text-primary">${subName}</span>
                       <span class="text-xs font-bold px-2.5 py-0.5 rounded-full badge-accent">${subItems.length}</span>
                     </div>
-                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200"></i>
+                    <i id="subcat-group-chevron-${subKey}" data-lucide="chevron-down" class="w-5 h-5 theme-text-secondary transition-transform duration-200" style="transform: ${isSubCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};"></i>
                   </button>
-                  <div id="subcat-group-body-${subKey}" class="p-4 sm:p-5 pt-2.5 border-t border-slate-200/40">
+                  <div id="subcat-group-body-${subKey}" class="${isSubCollapsed ? 'hidden ' : ''}p-4 sm:p-5 pt-2.5 border-t border-slate-200/40">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                       ${subItems.map(p => renderProjectCard(p)).join('')}
                     </div>
@@ -1886,7 +1977,6 @@ const firebaseConfig = {
       ? `<img src="${state.portalSettings.logoDataUrl}" alt="Logo" class="w-full h-full object-cover" />`
       : `<i data-lucide="sparkles" class="w-7 h-7"></i>`;
 
-    // Jadwalkan pengisian grid setelah container terpasang di DOM
     requestAnimationFrame(() => renderPortalProjectsGrid());
 
     return `
@@ -1991,13 +2081,13 @@ const firebaseConfig = {
             </div>
 
             <div>
-              <label class="block text-xs font-bold theme-text-secondary mb-1.5">URL / Tautan Tujuan *</label>
-              <input type="text" id="proj-url" required value="${editing ? editing.url : ''}" placeholder="https://aplikasi-anda.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+              <label class="block text-xs font-bold theme-text-secondary mb-1.5">URL / Tautan Tujuan (Opsional jika unggah berkas)</label>
+              <input type="text" id="proj-url" value="${editing ? editing.url : ''}" placeholder="https://aplikasi-anda.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
             </div>
 
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold theme-text-secondary mb-1.5">Deskripsi Singkat *</label>
-              <input type="text" id="proj-desc" required value="${editing ? editing.description : ''}" placeholder="Jelaskan kegunaan proyek dalam 1-2 kalimat..." class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
+              <input type="text" id="proj-desc" required value="${editing ? editing.description : ''}" placeholder="Jelaskan kegunaan proyek atau isi berkas dalam 1-2 kalimat..." class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500" />
             </div>
 
             <div>
@@ -2047,10 +2137,39 @@ const firebaseConfig = {
               </div>
             </div>
 
+            <!-- Upload Berkas Dokumen (PDF / JPG / PNG) untuk Berkas Pribadi atau Lampiran -->
+            <div class="sm:col-span-2 p-4 rounded-2xl theme-surface-subtle border border-slate-200/70">
+              <label class="block text-xs font-bold theme-text-primary mb-2">Upload Berkas / Dokumen (PDF, JPG, PNG — Opsional)</label>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div id="proj-file-status" class="min-w-0">
+                  ${editing?.fileDataUrl ? `
+                    <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs">
+                      <i data-lucide="${editing.fileType === 'pdf' ? 'file-text' : 'image'}" class="w-4 h-4 shrink-0"></i>
+                      <span class="truncate">${editing.fileName || 'Berkas Terlampir'}</span>
+                    </div>
+                  ` : `<span class="text-[11px] theme-text-muted">Belum ada berkas PDF/JPG terlampir</span>`}
+                </div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                  <input type="hidden" id="proj-file-data" value="${editing?.fileDataUrl || ''}" />
+                  <input type="hidden" id="proj-file-name" value="${editing?.fileName || ''}" />
+                  <input type="hidden" id="proj-file-type" value="${editing?.fileType || ''}" />
+                  <label class="cursor-pointer px-3.5 py-2 rounded-xl btn-accent text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                    <span>Pilih Berkas PDF / JPG</span>
+                    <input type="file" accept=".pdf,application/pdf,image/jpeg,image/jpg,image/png,image/webp" onchange="handleProjectFileUpload(this)" class="hidden" />
+                  </label>
+                  <button type="button" onclick="clearProjectFile()" class="px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-300/70 text-slate-700 text-xs font-bold">
+                    Hapus Berkas
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] theme-text-muted mt-2">Cocok untuk menyimpan berkas pribadi (KTP, SK, Sertifikat, PDF). Pilih Visibilitas <b>Privat</b> jika hanya boleh dibuka setelah login.</p>
+            </div>
+
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold theme-text-secondary mb-1.5">Ikon Cadangan (Emoji)</label>
-                <input type="text" id="proj-icon" value="${editing ? editing.icon : '🚀'}" placeholder="🚀" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500 text-center" />
+                <label class="block text-xs font-bold theme-text-secondary mb-1.5">Ikon Emoji</label>
+                <input type="text" id="proj-icon" value="${editing ? editing.icon : '🚀'}" maxlength="4" class="w-full px-3.5 py-2.5 text-sm rounded-xl theme-input border focus:outline-none focus:border-sky-500 text-center" />
               </div>
               <div>
                 <label class="block text-xs font-bold theme-text-secondary mb-1.5">Urutan</label>
@@ -2099,9 +2218,17 @@ const firebaseConfig = {
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-bold text-sm theme-text-primary">${p.title}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full theme-surface-subtle theme-text-secondary">${p.category}${p.subCategory ? ` › ${p.subCategory}` : ''}</span>
+                        ${p.fileDataUrl ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600">Berkas ${(p.fileType || 'File').toUpperCase()}</span>` : ''}
                         ${p.visibility === 'private' ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400">Privat</span>` : ''}
                       </div>
-                      <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
+                      ${p.fileDataUrl ? `
+                        <button type="button" onclick="openProjectFileViewer('${p.id}')" class="text-xs text-emerald-600 hover:underline font-semibold mt-0.5 inline-flex items-center gap-1">
+                          <i data-lucide="eye" class="w-3 h-3"></i>
+                          <span>Lihat Berkas: ${p.fileName || 'Dokumen'}</span>
+                        </button>
+                      ` : `
+                        <a href="${p.url}" target="_blank" class="text-xs text-sky-500 hover:underline truncate block max-w-md mt-0.5">${p.url}</a>
+                      `}
                     </div>
                   </div>
                   <div class="flex items-center gap-2 self-end sm:self-center">
@@ -2365,7 +2492,6 @@ const firebaseConfig = {
       container.innerHTML = renderPortalView();
     }
 
-    // Re-initialize Lucide Icons asynchronously for instant UI response
     refreshIconsFast();
   }
 
@@ -2386,7 +2512,6 @@ const firebaseConfig = {
       loaderBox.innerHTML = `<img src="${state.portalSettings.loadingLogoDataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
     }
 
-    // Blokir seluruh keyboard & klik selama proses loading berlangsung
     const blockInputHandler = (e) => {
       if (!overlay.classList.contains('loader-done')) {
         e.preventDefault();
