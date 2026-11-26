@@ -756,11 +756,31 @@ const firebaseConfig = {
 
   function saveSettingsBackup(settingsObj) {
     try {
-      const base = window.name && window.name.startsWith('__microsite_ui__:')
-        ? window.name.split('__portal_settings_backup__:')[0]
-        : '';
-      window.name = base + '__portal_settings_backup__:' + JSON.stringify(settingsObj);
-    } catch (e) {}
+      const uiPart = '__microsite_ui__:' + JSON.stringify(state.dropdownMemory || { collapsedCats: {}, collapsedSubs: {} });
+      const cleanObj = { ...settingsObj };
+      const settingsPart = '__portal_settings_backup__:' + JSON.stringify(cleanObj);
+      window.name = uiPart + settingsPart;
+    } catch (e) {
+      try {
+        const lightweightObj = {
+          title: settingsObj.title,
+          tagline: settingsObj.tagline,
+          runningText: settingsObj.runningText,
+          subtitle: settingsObj.subtitle,
+          footerText: settingsObj.footerText,
+          themeMode: settingsObj.themeMode,
+          accentColor: settingsObj.accentColor
+        };
+        window.name = '__portal_settings_backup__:' + JSON.stringify(lightweightObj);
+      } catch (_) {}
+    }
+  }
+
+  function applySavedSettingsOnBoot() {
+    const backup = loadSavedSettingsBackup();
+    if (backup && typeof backup === 'object') {
+      state.portalSettings = { ...state.portalSettings, ...backup };
+    }
   }
 
   const state = {
@@ -879,6 +899,7 @@ const firebaseConfig = {
 
   window.selectThemeMode = (mode) => {
     state.portalSettings.themeMode = mode;
+    saveSettingsBackup(state.portalSettings);
     applyThemeAndColors();
     if (state.activeMenu === 'portal') {
       document.getElementById('view-container').innerHTML = renderPortalView();
@@ -888,6 +909,7 @@ const firebaseConfig = {
 
   window.selectAccentColor = (accent) => {
     state.portalSettings.accentColor = accent;
+    saveSettingsBackup(state.portalSettings);
     applyThemeAndColors();
     renderAll();
     showChangeSuccessPopup('Warna Diubah!', 'Palet warna tema portal berhasil diperbarui.');
@@ -936,6 +958,7 @@ const firebaseConfig = {
       const dataUrl = await compressImageFile(file, 260, 0.86);
       document.getElementById('set-logo-data').value = dataUrl;
       state.portalSettings.logoDataUrl = dataUrl;
+      saveSettingsBackup(state.portalSettings);
       const preview = document.getElementById('set-logo-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo" class="w-full h-full object-cover" />`;
       renderNavigation();
@@ -950,6 +973,7 @@ const firebaseConfig = {
     const input = document.getElementById('set-logo-data');
     if (input) input.value = '';
     state.portalSettings.logoDataUrl = '';
+    saveSettingsBackup(state.portalSettings);
     const preview = document.getElementById('set-logo-preview');
     if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
     renderNavigation();
@@ -964,6 +988,7 @@ const firebaseConfig = {
       const dataUrl = await compressImageFile(file, 260, 0.86);
       document.getElementById('set-loading-logo-data').value = dataUrl;
       state.portalSettings.loadingLogoDataUrl = dataUrl;
+      saveSettingsBackup(state.portalSettings);
       const preview = document.getElementById('set-loading-logo-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Logo Loading" class="w-full h-full object-cover" />`;
       showChangeSuccessPopup('Logo Loading Diperbarui!', 'Logo layar loading awal berhasil diunggah. Klik Simpan Pengaturan untuk menyimpan permanen.');
@@ -976,6 +1001,7 @@ const firebaseConfig = {
     const input = document.getElementById('set-loading-logo-data');
     if (input) input.value = '';
     state.portalSettings.loadingLogoDataUrl = '';
+    saveSettingsBackup(state.portalSettings);
     const preview = document.getElementById('set-loading-logo-preview');
     if (preview) preview.innerHTML = `<i data-lucide="layers" class="w-7 h-7"></i>`;
     refreshIconsFast();
@@ -990,6 +1016,7 @@ const firebaseConfig = {
       const hiddenInput = document.getElementById('set-sidebar-banner-data');
       if (hiddenInput) hiddenInput.value = dataUrl;
       state.portalSettings.sidebarBannerDataUrl = dataUrl;
+      saveSettingsBackup(state.portalSettings);
       const preview = document.getElementById('set-sidebar-banner-preview');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="Banner Portrait Preview" class="w-full h-full object-cover" />`;
       renderNavigation();
@@ -1004,6 +1031,7 @@ const firebaseConfig = {
     const hiddenInput = document.getElementById('set-sidebar-banner-data');
     if (hiddenInput) hiddenInput.value = '';
     state.portalSettings.sidebarBannerDataUrl = '';
+    saveSettingsBackup(state.portalSettings);
     const preview = document.getElementById('set-sidebar-banner-preview');
     if (preview) {
       preview.innerHTML = `
@@ -2965,6 +2993,7 @@ const firebaseConfig = {
   }
 
   // Jalankan Aplikasi
+  applySavedSettingsOnBoot();
   if (!IS_PREVIEW) {
     initProductionRealtimeSync();
   }
